@@ -6,15 +6,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
+import com.example.recipebook.model.Recipe
 
 class RecipeAdapter(
-    private val recipes: List<RecipeItem>
+    private val recipes: List<Recipe>,
+    private val onItemClick: (Recipe) -> Unit
 ) : RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder>() {
-
-    data class RecipeItem(
-        val name: String,
-        val description: String
-    )
 
     class RecipeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.tvRecipeName)
@@ -31,6 +28,10 @@ class RecipeAdapter(
         val item = recipes[position]
         holder.tvName.text = item.name
         holder.tvDescription.text = item.description
+
+        holder.itemView.setOnClickListener {
+            onItemClick(item)
+        }
     }
 
     override fun getItemCount(): Int = recipes.size
