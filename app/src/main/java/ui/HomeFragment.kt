@@ -26,6 +26,12 @@ class HomeFragment : Fragment() {
         val rvRecipes = view.findViewById<RecyclerView>(R.id.rvRecipes)
         rvRecipes.layoutManager = LinearLayoutManager(requireContext())
 
+        val btnAddRecipe = view.findViewById<android.widget.Button>(R.id.btnAddRecipe)
+
+        btnAddRecipe.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_addRecipeFragment)
+        }
+
         viewModel.getRecipes { recipes ->
 
             rvRecipes.post {

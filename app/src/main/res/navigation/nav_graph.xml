@@ -26,6 +26,9 @@
         <action
             android:id="@+id/action_homeFragment_to_recipeDetailsFragment"
             app:destination="@id/recipeDetailsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_addRecipeFragment"
+            app:destination="@id/addRecipeFragment" />
 
     </fragment>
 
@@ -40,5 +43,11 @@
             app:argType="com.example.recipebook.model.Recipe" />
 
     </fragment>
+
+    <fragment
+        android:id="@+id/addRecipeFragment"
+        android:name="com.example.recipebook.ui.AddRecipeFragment"
+        android:label="Add Recipe"
+        tools:layout="@layout/fragment_add_recipe" />
 
 </navigation>

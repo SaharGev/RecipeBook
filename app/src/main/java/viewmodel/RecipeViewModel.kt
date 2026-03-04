@@ -88,4 +88,24 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             callback(recipes)
         }
     }
+
+    fun addRecipe(
+        bookId: Int,
+        name: String,
+        description: String,
+        ingredients: String,
+        instructions: String
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.insertRecipe(
+                RecipeEntity(
+                    bookId = bookId,
+                    name = name,
+                    description = description,
+                    ingredients = ingredients,
+                    instructions = instructions
+                )
+            )
+        }
+    }
 }
