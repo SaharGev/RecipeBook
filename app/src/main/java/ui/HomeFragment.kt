@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,7 +27,12 @@ class HomeFragment : Fragment() {
         val rvRecipes = view.findViewById<RecyclerView>(R.id.rvRecipes)
         rvRecipes.layoutManager = LinearLayoutManager(requireContext())
 
-        val btnAddRecipe = view.findViewById<android.widget.Button>(R.id.btnAddRecipe)
+        val btnAddRecipe = view.findViewById<Button>(R.id.btnAddRecipe)
+        val btnBack = view.findViewById<Button>(R.id.btnBack)
+
+        btnBack.setOnClickListener {
+            findNavController().navigate(R.id.loginFragment)
+        }
 
         btnAddRecipe.setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_addRecipeFragment)
@@ -42,7 +48,8 @@ class HomeFragment : Fragment() {
                         name = it.name,
                         description = it.description,
                         ingredients = it.ingredients,
-                        instructions = it.instructions
+                        instructions = it.instructions,
+                        imageUri = it.imageUri
                     )
                 }
 

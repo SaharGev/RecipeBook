@@ -9,5 +9,6 @@ data class Recipe(
     val name: String,
     val description: String,
     val ingredients: String,
-    val instructions: String
+    val instructions: String,
+    val imageUri: String?
 ) : Parcelable

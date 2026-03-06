@@ -14,7 +14,9 @@ object DatabaseProvider {
                 context.applicationContext,
                 AppDatabase::class.java,
                 "recipe_database"
-            ).build()
+            )
+                .fallbackToDestructiveMigration()
+                .build()
         }
 
         return instance!!
