@@ -9,6 +9,7 @@ import com.example.recipebook.model.Recipe
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import androidx.navigation.fragment.findNavController
 
 class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
 
@@ -25,6 +26,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         val tvInstructions = view.findViewById<TextView>(R.id.tvInstructions)
         val imgRecipe = view.findViewById<android.widget.ImageView>(R.id.imgRecipe)
         val btnBack = view.findViewById<android.widget.Button>(R.id.btnBack)
+        val btnEdit = view.findViewById<android.widget.Button>(R.id.btnEdit)
 
         if (recipe != null) {
             tvTitle.text = "${recipe.name} (ID: ${recipe.id})"
@@ -43,11 +45,23 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         } else {
             tvTitle.text = "No recipe received"
         }
+
         btnBack.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
+
+        btnEdit.setOnClickListener {
+            if (recipe != null) {
+                val bundle = Bundle()
+                bundle.putParcelable("recipe", recipe)
+
+                findNavController().navigate(R.id.addRecipeFragment, bundle)
+            }
+        }
+
         (requireActivity() as androidx.appcompat.app.AppCompatActivity)
             .supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
     }
     override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {

@@ -18,6 +18,7 @@ import com.example.recipebook.viewmodel.RecipeViewModel
 import java.io.File
 import java.io.FileOutputStream
 import android.Manifest
+import com.example.recipebook.model.Recipe
 
 class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
 
@@ -64,6 +65,8 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val recipeToEdit = arguments?.getParcelable<Recipe>("recipe")
+
         val etName = view.findViewById<EditText>(R.id.etName)
         val etDescription = view.findViewById<EditText>(R.id.etDescription)
         val etIngredients = view.findViewById<EditText>(R.id.etIngredients)
@@ -73,6 +76,25 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
         val btnSelectImage = view.findViewById<Button>(R.id.btnSelectImage)
         val btnTakePhoto = view.findViewById<Button>(R.id.btnTakePhoto)
         val btnSave = view.findViewById<Button>(R.id.btnSave)
+
+        if (recipeToEdit != null) {
+            etName.setText(recipeToEdit.name)
+            etDescription.setText(recipeToEdit.description)
+            etIngredients.setText(recipeToEdit.ingredients)
+            etInstructions.setText(recipeToEdit.instructions)
+
+            selectedImageUri = recipeToEdit.imageUri?.let { Uri.parse(it) }
+
+            selectedImageUri?.let {
+                Glide.with(this)
+                    .load(it)
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .error(R.drawable.ic_launcher_foreground)
+                    .into(view.findViewById(R.id.imgRecipe))
+            }
+
+            btnSave.text = "Update Recipe"
+        }
 
         btnBack.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
@@ -87,17 +109,54 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
         }
 
         btnSave.setOnClickListener {
-            viewModel.addRecipe(
-                bookId = 1,
-                name = etName.text.toString(),
-                description = etDescription.text.toString(),
-                ingredients = etIngredients.text.toString(),
-                instructions = etInstructions.text.toString(),
-                imageUri = selectedImageUri?.toString()
-            )
+            if (etName.text.toString().trim().isEmpty()) {
+                etName.error = "Recipe name is required"
+                etName.requestFocus()
+                return@setOnClickListener
+            }
 
-            findNavController().popBackStack()
-        }
+            if (etIngredients.text.toString().trim().isEmpty()) {
+                etIngredients.error = "Ingredients are required"
+                etIngredients.requestFocus()
+                return@setOnClickListener
+            }
+
+            if (etInstructions.text.toString().trim().isEmpty()) {
+                etInstructions.error = "Instructions are required"
+                etInstructions.requestFocus()
+                return@setOnClickListener
+            }
+
+            if (recipeToEdit != null) {
+                viewModel.updateRecipe(
+                    com.example.recipebook.db.RecipeEntity(
+                        id = recipeToEdit.id,
+                        bookId = 1,
+                        name = etName.text.toString(),
+                        description = etDescription.text.toString(),
+                        ingredients = etIngredients.text.toString(),
+                        instructions = etInstructions.text.toString(),
+                        imageUri = selectedImageUri?.toString()
+                    )
+                )
+            } else {
+                viewModel.addRecipe(
+                    bookId = 1,
+                    name = etName.text.toString(),
+                    description = etDescription.text.toString(),
+                    ingredients = etIngredients.text.toString(),
+                    instructions = etInstructions.text.toString(),
+                    imageUri = selectedImageUri?.toString()
+                )
+            }
+
+            android.widget.Toast.makeText(
+                requireContext(),
+                "Recipe saved successfully",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+
+            findNavController().navigate(R.id.homeFragment)        }
     }
 
     private fun saveBitmapToCache(bitmap: Bitmap): Uri {
