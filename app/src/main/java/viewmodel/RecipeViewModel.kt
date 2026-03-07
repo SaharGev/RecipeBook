@@ -56,42 +56,11 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     fun getRecipes(callback: (List<RecipeEntity>) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
 
-            // Seed first time if DB is empty
-            val current = repository.getAllRecipes()
-            if (current.isEmpty()) {
-                repository.insertRecipe(
-                    RecipeEntity(
-                        bookId = 1,
-                        name = "Pasta",
-                        description = "Quick and tasty",
-                        ingredients = "Pasta, tomato sauce",
-                        instructions = "Boil pasta and mix with sauce",
-                        imageUri = null
-
-                    )
-                )
-                repository.insertRecipe(
-                    RecipeEntity(
-                        bookId = 1,
-                        name = "Salad",
-                        description = "Fresh and healthy",
-                        ingredients = "Lettuce, tomato, cucumber",
-                        instructions = "Chop everything and mix",
-                        imageUri = null
-
-                    )
-                )
-                repository.insertRecipe(
-                    RecipeEntity(
-                        bookId = 1,
-                        name = "Soup",
-                        description = "Warm and comforting",
-                        ingredients = "Vegetables, water, salt",
-                        instructions = "Boil vegetables for 30 minutes",
-                        imageUri = null
-
-                    )
-                )
+            fun getRecipes(callback: (List<RecipeEntity>) -> Unit) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    val recipes = repository.getAllRecipes()
+                    callback(recipes)
+                }
             }
 
             // Fetch again after seeding (or if already existed)
@@ -119,6 +88,18 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                     imageUri = imageUri
                 )
             )
+        }
+    }
+
+    fun deleteRecipe(recipe: RecipeEntity) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteRecipe(recipe)
+        }
+    }
+
+    fun updateRecipe(recipe: RecipeEntity) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateRecipe(recipe)
         }
     }
 }

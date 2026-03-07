@@ -15,4 +15,12 @@ class RecipeRepository(context: Context) {
     suspend fun insertRecipe(recipe: RecipeEntity) {
         recipeDao.insertRecipe(recipe)
     }
+
+    suspend fun deleteRecipe(recipe: RecipeEntity) {
+        recipeDao.deleteRecipe(recipe)
+    }
+
+    suspend fun updateRecipe(recipe: RecipeEntity) {
+        recipeDao.updateRecipe(recipe)
+    }
 }

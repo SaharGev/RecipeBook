@@ -1,21 +1,24 @@
 package com.example.recipebook.ui
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.navigation.fragment.findNavController
 import com.example.recipebook.R
-import androidx.fragment.app.viewModels
+import com.example.recipebook.db.RecipeEntity
 import com.example.recipebook.viewmodel.RecipeViewModel
 
 class HomeFragment : Fragment() {
 
     private val viewModel: RecipeViewModel by viewModels()
+    private lateinit var tvEmptyState: android.widget.TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,6 +29,8 @@ class HomeFragment : Fragment() {
 
         val rvRecipes = view.findViewById<RecyclerView>(R.id.rvRecipes)
         rvRecipes.layoutManager = LinearLayoutManager(requireContext())
+
+        tvEmptyState = view.findViewById(R.id.tvEmptyState)
 
         val btnAddRecipe = view.findViewById<Button>(R.id.btnAddRecipe)
         val btnBack = view.findViewById<Button>(R.id.btnBack)
@@ -38,9 +43,30 @@ class HomeFragment : Fragment() {
             findNavController().navigate(R.id.action_homeFragment_to_addRecipeFragment)
         }
 
+        loadRecipes(rvRecipes)
+
+        return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        view?.findViewById<RecyclerView>(R.id.rvRecipes)?.let {
+            loadRecipes(it)
+        }
+    }
+
+    private fun loadRecipes(rvRecipes: RecyclerView) {
         viewModel.getRecipes { recipes ->
 
             rvRecipes.post {
+
+                if (recipes.isEmpty()) {
+                    tvEmptyState.visibility = View.VISIBLE
+                    rvRecipes.visibility = View.GONE
+                } else {
+                    tvEmptyState.visibility = View.GONE
+                    rvRecipes.visibility = View.VISIBLE
+                }
 
                 val uiRecipes = recipes.map {
                     com.example.recipebook.model.Recipe(
@@ -53,19 +79,47 @@ class HomeFragment : Fragment() {
                     )
                 }
 
-                rvRecipes.adapter = RecipeAdapter(uiRecipes) { clickedRecipe ->
+                rvRecipes.adapter = RecipeAdapter(
+                    uiRecipes,
+                    onItemClick = { clickedRecipe ->
+                        val bundle = Bundle()
+                        bundle.putParcelable("recipe", clickedRecipe)
 
-                    val bundle = Bundle()
-                    bundle.putParcelable("recipe", clickedRecipe)
+                        findNavController().navigate(
+                            R.id.action_homeFragment_to_recipeDetailsFragment,
+                            bundle
+                        )
+                    },
+                    onDeleteClick  = { clickedRecipe ->
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("Delete Recipe")
+                            .setMessage("Are you sure you want to delete ${clickedRecipe.name}?")
+                            .setPositiveButton("Yes") { _, _ ->
+                                val recipeToDelete = RecipeEntity(
+                                    id = clickedRecipe.id,
+                                    bookId = 1,
+                                    name = clickedRecipe.name,
+                                    description = clickedRecipe.description,
+                                    ingredients = clickedRecipe.ingredients,
+                                    instructions = clickedRecipe.instructions,
+                                    imageUri = clickedRecipe.imageUri
+                                )
 
-                    findNavController().navigate(
-                        R.id.action_homeFragment_to_recipeDetailsFragment,
-                        bundle
-                    )
-                }
+                                viewModel.deleteRecipe(recipeToDelete)
+
+                                android.widget.Toast.makeText(
+                                    requireContext(),
+                                    "Recipe deleted successfully",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+
+                                loadRecipes(rvRecipes)
+                            }
+                            .setNegativeButton("No", null)
+                            .show()
+                    }
+                )
             }
         }
-
-        return view
     }
 }

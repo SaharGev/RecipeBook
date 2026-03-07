@@ -38,6 +38,19 @@
         app:layout_constraintTop_toBottomOf="@id/tvTitle"
         app:layout_constraintVertical_bias="1.0" />
 
+    <TextView
+        android:id="@+id/tvEmptyState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No recipes yet"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintBottom_toTopOf="@id/btnAddRecipe"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <Button
         android:id="@+id/btnAddRecipe"
         android:layout_width="wrap_content"
