@@ -69,6 +69,13 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    fun getRecipesByBookId(bookId: Int, callback: (List<RecipeEntity>) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val recipes = repository.getRecipesByBookId(bookId)
+            callback(recipes)
+        }
+    }
+
     fun addRecipe(
         bookId: Int,
         name: String,

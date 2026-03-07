@@ -19,13 +19,14 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.recipebook.ui.HomeFragment"
-        android:label="Home"
-        tools:layout="@layout/fragment_home" >
+        android:name="com.example.recipebook.ui.RecipeBooksFragment"
+        android:label="Recipe Books"
+        tools:layout="@layout/fragment_recipe_books" >
 
         <action
             android:id="@+id/action_homeFragment_to_recipeDetailsFragment"
             app:destination="@id/recipeDetailsFragment" />
+
         <action
             android:id="@+id/action_homeFragment_to_addRecipeFragment"
             app:destination="@id/addRecipeFragment" />
@@ -54,5 +55,11 @@
         android:id="@+id/profileFragment"
         android:name="com.example.recipebook.ui.ProfileFragment"
         android:label="Profile" />
+
+    <fragment
+        android:id="@+id/bookRecipesFragment"
+        android:name="com.example.recipebook.ui.BookRecipesFragment"
+        android:label="Book Recipes"
+        tools:layout="@layout/fragment_book_recipes" />
 
 </navigation>

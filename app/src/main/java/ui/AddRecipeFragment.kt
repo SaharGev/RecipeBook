@@ -66,6 +66,7 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
         super.onViewCreated(view, savedInstanceState)
 
         val recipeToEdit = arguments?.getParcelable<Recipe>("recipe")
+        val selectedBookId = arguments?.getInt("bookId", 1) ?: 1
 
         val etName = view.findViewById<EditText>(R.id.etName)
         val etDescription = view.findViewById<EditText>(R.id.etDescription)
@@ -141,7 +142,7 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
                 )
             } else {
                 viewModel.addRecipe(
-                    bookId = 1,
+                    bookId = selectedBookId,
                     name = etName.text.toString(),
                     description = etDescription.text.toString(),
                     ingredients = etIngredients.text.toString(),
@@ -156,7 +157,14 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
                 android.widget.Toast.LENGTH_SHORT
             ).show()
 
-            findNavController().navigate(R.id.homeFragment)        }
+            if (recipeToEdit != null) {
+                findNavController().navigate(R.id.homeFragment)
+            } else {
+                val bundle = Bundle()
+                bundle.putInt("bookId", selectedBookId)
+                findNavController().navigate(R.id.bookRecipesFragment, bundle)
+            }
+        }
     }
 
     private fun saveBitmapToCache(bitmap: Bitmap): Uri {

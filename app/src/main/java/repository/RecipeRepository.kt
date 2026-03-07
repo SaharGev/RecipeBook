@@ -12,6 +12,10 @@ class RecipeRepository(context: Context) {
         return recipeDao.getAllRecipes()
     }
 
+    suspend fun getRecipesByBookId(bookId: Int): List<RecipeEntity> {
+        return recipeDao.getRecipesByBookId(bookId)
+    }
+
     suspend fun insertRecipe(recipe: RecipeEntity) {
         recipeDao.insertRecipe(recipe)
     }
