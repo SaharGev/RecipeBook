@@ -3,13 +3,20 @@ package com.example.recipebook.db
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 
 @Dao
 interface BookDao {
 
     @Query("SELECT * FROM books")
-    fun getAllBooks(): List<BookEntity>
+    suspend fun getAllBooks(): List<BookEntity>
 
     @Insert
-    fun insertBook(book: BookEntity)
+    suspend fun insertBook(book: BookEntity)
+
+    @Query("DELETE FROM books WHERE id = :bookId")
+    suspend fun deleteBook(bookId: Int)
+
+    @Update
+    suspend fun updateBook(book: BookEntity)
 }

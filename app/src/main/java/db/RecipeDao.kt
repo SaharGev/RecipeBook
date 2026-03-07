@@ -12,6 +12,9 @@ interface RecipeDao {
     @Query("SELECT * FROM recipes")
     suspend fun getAllRecipes(): List<RecipeEntity>
 
+    @Query("SELECT * FROM recipes WHERE bookId = :bookId")
+    suspend fun getRecipesByBookId(bookId: Int): List<RecipeEntity>
+
     @Insert
     suspend fun insertRecipe(recipe: RecipeEntity)
 
@@ -20,5 +23,4 @@ interface RecipeDao {
 
     @Update
     suspend fun updateRecipe(recipe: RecipeEntity)
-
 }
