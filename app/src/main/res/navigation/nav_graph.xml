@@ -50,4 +50,9 @@
         android:label="Add Recipe"
         tools:layout="@layout/fragment_add_recipe" />
 
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.recipebook.ui.ProfileFragment"
+        android:label="Profile" />
+
 </navigation>
