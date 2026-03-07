@@ -23,7 +23,8 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                     name = "Pasta",
                     description = "Quick and tasty",
                     ingredients = "Pasta, tomato sauce",
-                    instructions = "Boil pasta and mix with sauce"
+                    instructions = "Boil pasta and mix with sauce",
+                    imageUri = null
                 )
             )
 
@@ -33,7 +34,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                     name = "Salad",
                     description = "Fresh and healthy",
                     ingredients = "Lettuce, tomato, cucumber",
-                    instructions = "Chop everything and mix"
+                    instructions = "Chop everything and mix",
+                    imageUri = null
+
                 )
             )
 
@@ -43,7 +46,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                     name = "Soup",
                     description = "Warm and comforting",
                     ingredients = "Vegetables, water, salt",
-                    instructions = "Boil vegetables for 30 minutes"
+                    instructions = "Boil vegetables for 30 minutes",
+                    imageUri = null
+
                 )
             )
         }
@@ -60,7 +65,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                         name = "Pasta",
                         description = "Quick and tasty",
                         ingredients = "Pasta, tomato sauce",
-                        instructions = "Boil pasta and mix with sauce"
+                        instructions = "Boil pasta and mix with sauce",
+                        imageUri = null
+
                     )
                 )
                 repository.insertRecipe(
@@ -69,7 +76,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                         name = "Salad",
                         description = "Fresh and healthy",
                         ingredients = "Lettuce, tomato, cucumber",
-                        instructions = "Chop everything and mix"
+                        instructions = "Chop everything and mix",
+                        imageUri = null
+
                     )
                 )
                 repository.insertRecipe(
@@ -78,7 +87,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                         name = "Soup",
                         description = "Warm and comforting",
                         ingredients = "Vegetables, water, salt",
-                        instructions = "Boil vegetables for 30 minutes"
+                        instructions = "Boil vegetables for 30 minutes",
+                        imageUri = null
+
                     )
                 )
             }
@@ -94,7 +105,8 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         name: String,
         description: String,
         ingredients: String,
-        instructions: String
+        instructions: String,
+        imageUri: String?
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.insertRecipe(
@@ -103,7 +115,8 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                     name = name,
                     description = description,
                     ingredients = ingredients,
-                    instructions = instructions
+                    instructions = instructions,
+                    imageUri = imageUri
                 )
             )
         }
