@@ -19,6 +19,13 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun getBooksCount(callback: (Int) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val books = repository.getAllBooks()
+            callback(books.size)
+        }
+    }
+
     fun addBook(title: String) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.insertBook(
