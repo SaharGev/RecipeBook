@@ -98,7 +98,7 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
         }
 
         btnBack.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            findNavController().popBackStack()
         }
 
         btnSelectImage.setOnClickListener {
@@ -157,13 +157,7 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
                 android.widget.Toast.LENGTH_SHORT
             ).show()
 
-            if (recipeToEdit != null) {
-                findNavController().navigate(R.id.homeFragment)
-            } else {
-                val bundle = Bundle()
-                bundle.putInt("bookId", selectedBookId)
-                findNavController().navigate(R.id.bookRecipesFragment, bundle)
-            }
+            findNavController().popBackStack()
         }
     }
 

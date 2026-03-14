@@ -38,15 +38,19 @@ class BookRecipesFragment : Fragment() {
         val btnBack = view.findViewById<Button>(R.id.btnBack)
 
         btnBack.setOnClickListener {
-            findNavController().navigate(R.id.homeFragment)
+            findNavController().popBackStack()
         }
+
         tvBookTitle.text = bookTitle
         rvRecipes.layoutManager = LinearLayoutManager(requireContext())
 
         btnAddRecipe.setOnClickListener {
             val bundle = Bundle()
             bundle.putInt("bookId", bookId)
-            findNavController().navigate(R.id.addRecipeFragment, bundle)
+            findNavController().navigate(
+                R.id.action_bookRecipesFragment_to_addRecipeFragment,
+                bundle
+            )
         }
 
         loadRecipes(bookId, rvRecipes)
@@ -90,7 +94,7 @@ class BookRecipesFragment : Fragment() {
                         val bundle = Bundle()
                         bundle.putParcelable("recipe", clickedRecipe)
                         findNavController().navigate(
-                            R.id.recipeDetailsFragment,
+                            R.id.action_bookRecipesFragment_to_recipeDetailsFragment,
                             bundle
                         )
                     },

@@ -47,7 +47,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         }
 
         btnBack.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+            findNavController().popBackStack()
         }
 
         btnEdit.setOnClickListener {
@@ -55,7 +55,10 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
                 val bundle = Bundle()
                 bundle.putParcelable("recipe", recipe)
 
-                findNavController().navigate(R.id.addRecipeFragment, bundle)
+                findNavController().navigate(
+                    R.id.action_recipeDetailsFragment_to_addRecipeFragment,
+                    bundle
+                )
             }
         }
 
