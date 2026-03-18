@@ -12,47 +12,6 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
     private val repository = RecipeRepository(application.applicationContext)
 
-    fun seedIfEmpty() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val current = repository.getAllRecipes()
-            if (current.isNotEmpty()) return@launch
-
-            repository.insertRecipe(
-                RecipeEntity(
-                    bookId = 1,
-                    name = "Pasta",
-                    description = "Quick and tasty",
-                    ingredients = "Pasta, tomato sauce",
-                    instructions = "Boil pasta and mix with sauce",
-                    imageUri = null
-                )
-            )
-
-            repository.insertRecipe(
-                RecipeEntity(
-                    bookId = 1,
-                    name = "Salad",
-                    description = "Fresh and healthy",
-                    ingredients = "Lettuce, tomato, cucumber",
-                    instructions = "Chop everything and mix",
-                    imageUri = null
-
-                )
-            )
-
-            repository.insertRecipe(
-                RecipeEntity(
-                    bookId = 1,
-                    name = "Soup",
-                    description = "Warm and comforting",
-                    ingredients = "Vegetables, water, salt",
-                    instructions = "Boil vegetables for 30 minutes",
-                    imageUri = null
-
-                )
-            )
-        }
-    }
     fun getRecipes(callback: (List<RecipeEntity>) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
 
@@ -73,6 +32,20 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch(Dispatchers.IO) {
             val recipes = repository.getRecipesByBookId(bookId)
             callback(recipes)
+        }
+    }
+
+    fun getRecipesCount(callback: (Int) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val recipes = repository.getAllRecipes()
+            callback(recipes.size)
+        }
+    }
+
+    fun getRecipesCountByBookId(bookId: Int, callback: (Int) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val recipes = repository.getRecipesByBookId(bookId)
+            callback(recipes.size)
         }
     }
 
