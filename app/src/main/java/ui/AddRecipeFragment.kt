@@ -1,3 +1,4 @@
+//ui/AddRecipeFragment
 package com.example.recipebook.ui
 
 import android.graphics.Bitmap
@@ -72,6 +73,9 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
         val etDescription = view.findViewById<EditText>(R.id.etDescription)
         val etIngredients = view.findViewById<EditText>(R.id.etIngredients)
         val etInstructions = view.findViewById<EditText>(R.id.etInstructions)
+//        val etCookTime = view.findViewById<EditText>(R.id.etCookTime)
+//        val etDifficulty = view.findViewById<EditText>(R.id.etDifficulty)
+//        val etIsPublic = view.findViewById<EditText>(R.id.etIsPublic)
 
         val btnBack = view.findViewById<Button>(R.id.btnBack)
         val btnSelectImage = view.findViewById<Button>(R.id.btnSelectImage)

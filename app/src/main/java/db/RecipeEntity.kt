@@ -1,3 +1,4 @@
+//db/RecipeEntity
 package com.example.recipebook.db
 
 import androidx.room.Entity
@@ -14,5 +15,9 @@ data class RecipeEntity(
     val description: String,
     val ingredients: String,
     val instructions: String,
-    val imageUri: String?
+    val imageUri: String?,
+    val cookTime: Int,
+    val difficulty: String,
+    val isPublic: Boolean
+
 )
