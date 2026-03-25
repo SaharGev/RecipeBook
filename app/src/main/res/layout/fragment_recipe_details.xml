@@ -2,73 +2,85 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="#F5F5F5"
+    android:padding="16dp">
 
+    <!-- תמונה עליונה -->
     <ImageView
         android:id="@+id/imgRecipe"
         android:layout_width="0dp"
         android:layout_height="250dp"
         android:scaleType="centerCrop"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="#D9D9D9" />
 
-    <ImageButton
+    <!-- כפתור חזור -->
+    <Button
         android:id="@+id/btnBack"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_margin="16dp"
-        android:background="@android:color/white"
-        android:src="@android:drawable/ic_media_previous"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:text="<"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#89abf6"
+        android:textSize="16sp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="16dp" />
 
-    <ImageButton
+    <!-- כפתור עריכה -->
+    <Button
         android:id="@+id/btnEdit"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_margin="16dp"
-        android:background="@android:color/white"
-        android:src="@android:drawable/ic_menu_edit"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:text="✎"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#89abf6"
+        android:textSize="16sp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp" />
 
+    <!-- כרטיס מידע מרכזי -->
     <LinearLayout
         android:id="@+id/card"
         android:layout_width="0dp"
-        android:layout_height="479dp"
-        android:layout_marginTop="-40dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/bg_chip"
+        android:layout_height="0dp"
         android:orientation="vertical"
         android:padding="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/imgRecipe"
+        android:layout_marginTop="-40dp"
+        android:background="@drawable/bg_chip"
+        app:layout_constraintTop_toBottomOf="@id/imgRecipe"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
+        <!-- כותרת מתכון -->
         <TextView
             android:id="@+id/tvRecipeTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:text="Recipe Title"
-            android:textSize="20sp"
+            android:textSize="22sp"
+            android:textStyle="bold"
             android:gravity="center"
-            android:textAlignment="center"
-            android:textStyle="bold" />
+            android:textColor="#2D2D2D"
+            android:layout_marginTop="16dp"/>
 
+        <!-- תיאור קצר -->
         <TextView
             android:id="@+id/tvDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Description from DB"
+            android:textSize="16sp"
             android:layout_marginTop="8dp"
-            android:text="description"
-            android:textSize="16sp" />
+            android:textColor="#555555"/>
 
+        <!-- שדות מידע: זמן, קושי, פרטיות -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -76,79 +88,78 @@
             android:gravity="center"
             android:layout_marginTop="12dp">
 
+            <TextView
+                android:id="@+id/tvCookTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⏱ 30 דק"
+                android:textSize="13sp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp"
+                android:background="@drawable/bg_chip_small"
+                android:layout_marginEnd="6dp"/>
 
-                <TextView
-                    android:id="@+id/tvCookTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="⏱ 30 דק"
-                    android:textSize="13sp"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="6dp"
-                    android:background="@drawable/bg_chip_small"
-                    android:layout_marginEnd="6dp"/>
+            <TextView
+                android:id="@+id/tvDifficulty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="קל"
+                android:textSize="13sp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp"
+                android:background="@drawable/bg_chip_small"
+                android:layout_marginEnd="6dp"/>
 
-                <TextView
-                    android:id="@+id/tvDifficulty"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="קל"
-                    android:textSize="13sp"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="6dp"
-                    android:background="@drawable/bg_chip_small"
-                    android:layout_marginEnd="6dp"/>
+            <TextView
+                android:id="@+id/tvPrivacy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Public"
+                android:textSize="13sp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp"
+                android:background="@drawable/bg_chip_small"/>
+        </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tvPrivacy"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Public"
-                    android:textSize="13sp"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="6dp"
-                    android:background="@drawable/bg_chip_small"/>
-
-            </LinearLayout>
-
-
-
+        <!-- מרכיבים -->
         <TextView
             android:id="@+id/tvIngredientsTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:text="Ingredients"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:textColor="#2D2D2D"/>
 
         <TextView
             android:id="@+id/tvIngredientsContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:text="Ingredients from DB"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:layout_marginTop="4dp"
+            android:textColor="#555555"/>
 
+        <!-- הוראות הכנה -->
         <TextView
             android:id="@+id/tvInstructionsTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:text="Instructions"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:textColor="#2D2D2D"/>
 
         <TextView
             android:id="@+id/tvInstructionsContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:text="Instructions from DB"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:layout_marginTop="4dp"
+            android:textColor="#555555"/>
 
     </LinearLayout>
-
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
