@@ -7,7 +7,6 @@
     android:background="#F5F5F5"
     android:padding="16dp">
 
-    <!-- תמונה עליונה -->
     <ImageView
         android:id="@+id/imgRecipe"
         android:layout_width="0dp"
@@ -18,7 +17,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:background="#D9D9D9" />
 
-    <!-- כפתור חזור -->
     <Button
         android:id="@+id/btnBack"
         android:layout_width="60dp"
@@ -31,7 +29,6 @@
         app:layout_constraintStart_toStartOf="parent"
         android:layout_margin="16dp" />
 
-    <!-- כפתור עריכה -->
     <Button
         android:id="@+id/btnEdit"
         android:layout_width="60dp"
@@ -44,7 +41,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp" />
 
-    <!-- כרטיס מידע מרכזי -->
     <LinearLayout
         android:id="@+id/card"
         android:layout_width="0dp"
@@ -58,7 +54,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- כותרת מתכון -->
         <TextView
             android:id="@+id/tvRecipeTitle"
             android:layout_width="match_parent"
@@ -70,7 +65,6 @@
             android:textColor="#2D2D2D"
             android:layout_marginTop="16dp"/>
 
-        <!-- תיאור קצר -->
         <TextView
             android:id="@+id/tvDescription"
             android:layout_width="match_parent"
@@ -80,7 +74,6 @@
             android:layout_marginTop="8dp"
             android:textColor="#555555"/>
 
-        <!-- שדות מידע: זמן, קושי, פרטיות -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -121,7 +114,6 @@
                 android:background="@drawable/bg_chip_small"/>
         </LinearLayout>
 
-        <!-- מרכיבים -->
         <TextView
             android:id="@+id/tvIngredientsTitle"
             android:layout_width="match_parent"
@@ -141,7 +133,6 @@
             android:layout_marginTop="4dp"
             android:textColor="#555555"/>
 
-        <!-- הוראות הכנה -->
         <TextView
             android:id="@+id/tvInstructionsTitle"
             android:layout_width="match_parent"
