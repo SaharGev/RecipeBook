@@ -1,3 +1,4 @@
+//db/BookEntity
 package com.example.recipebook.db
 
 import androidx.room.Entity

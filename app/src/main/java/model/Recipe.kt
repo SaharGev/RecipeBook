@@ -1,3 +1,4 @@
+//model/Recipe
 package com.example.recipebook.model
 
 import android.os.Parcelable
@@ -10,5 +11,8 @@ data class Recipe(
     val description: String,
     val ingredients: String,
     val instructions: String,
-    val imageUri: String?
+    val imageUri: String?,
+    val cookTime: Int,
+    val difficulty: String,
+    val isPublic: Boolean
 ) : Parcelable

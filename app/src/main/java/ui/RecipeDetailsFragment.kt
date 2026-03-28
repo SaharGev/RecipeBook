@@ -1,3 +1,4 @@
+//ui/RecipeDetailsFragment
 package com.example.recipebook.ui
 
 import android.os.Bundle
@@ -22,17 +23,28 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
 
         val tvTitle = view.findViewById<TextView>(R.id.tvRecipeTitle)
         val tvDescription = view.findViewById<TextView>(R.id.tvRecipeDescription)
-        val tvIngredients = view.findViewById<TextView>(R.id.tvIngredients)
-        val tvInstructions = view.findViewById<TextView>(R.id.tvInstructions)
+        val tvIngredients = view.findViewById<TextView>(R.id.tvIngredientsContent)
+        val tvInstructions = view.findViewById<TextView>(R.id.tvInstructionsContent)
         val imgRecipe = view.findViewById<android.widget.ImageView>(R.id.imgRecipe)
-        val btnBack = view.findViewById<android.widget.Button>(R.id.btnBack)
-        val btnEdit = view.findViewById<android.widget.Button>(R.id.btnEdit)
+        val tvCookTime = view.findViewById<TextView>(R.id.tvCookTime)
+        val tvDifficulty = view.findViewById<TextView>(R.id.tvDifficulty)
+        val tvPrivacy = view.findViewById<TextView>(R.id.tvPrivacy)
+        val btnBack = view.findViewById<android.widget.ImageView>(R.id.btnBack)
+        val btnEdit = view.findViewById<android.widget.ImageView>(R.id.btnEdit)
 
         if (recipe != null) {
             tvTitle.text = "${recipe.name} (ID: ${recipe.id})"
             tvDescription.text = recipe.description
             tvIngredients.text = "Ingredients: ${recipe.ingredients}"
             tvInstructions.text = "Instructions: ${recipe.instructions}"
+            tvCookTime.text = "⏱ ${recipe.cookTime} min"
+            tvDifficulty.text = "🔥 ${recipe.difficulty}"
+
+            tvPrivacy.text = if (recipe.isPublic) {
+                "🌍 Public"
+            } else {
+                "🔒 Private"
+            }
 
             recipe.imageUri?.let {
                 Glide.with(this)

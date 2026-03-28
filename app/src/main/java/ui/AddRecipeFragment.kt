@@ -1,3 +1,4 @@
+//ui/AddRecipeFragment
 package com.example.recipebook.ui
 
 import android.graphics.Bitmap
@@ -18,7 +19,9 @@ import com.example.recipebook.viewmodel.RecipeViewModel
 import java.io.File
 import java.io.FileOutputStream
 import android.Manifest
+import android.widget.TextView
 import com.example.recipebook.model.Recipe
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
 
@@ -65,6 +68,30 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Difficulty chip
+        val difficultyChip = view.findViewById<TextView>(R.id.tvDifficulty)
+        difficultyChip.setOnClickListener {
+            val options = arrayOf("Easy", "Medium", "High")
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Difficulty")
+                .setItems(options) { _, which ->
+                    difficultyChip.text = options[which]
+                }
+                .show()
+        }
+
+        // Privacy chip
+        val privacyChip = view.findViewById<TextView>(R.id.tvPrivacy)
+        privacyChip.setOnClickListener {
+            val options = arrayOf("Public", "Private")
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Privacy")
+                .setItems(options) { _, which ->
+                    privacyChip.text = options[which]
+                }
+                .show()
+        }
+
         val recipeToEdit = arguments?.getParcelable<Recipe>("recipe")
         val selectedBookId = arguments?.getInt("bookId", 1) ?: 1
 
@@ -72,6 +99,9 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
         val etDescription = view.findViewById<EditText>(R.id.etDescription)
         val etIngredients = view.findViewById<EditText>(R.id.etIngredients)
         val etInstructions = view.findViewById<EditText>(R.id.etInstructions)
+        val etTime = view.findViewById<EditText>(R.id.etTime)
+        val tvDifficulty = view.findViewById<TextView>(R.id.tvDifficulty)
+        val tvPrivacy = view.findViewById<TextView>(R.id.tvPrivacy)
 
         val btnBack = view.findViewById<Button>(R.id.btnBack)
         val btnSelectImage = view.findViewById<Button>(R.id.btnSelectImage)
@@ -83,6 +113,9 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
             etDescription.setText(recipeToEdit.description)
             etIngredients.setText(recipeToEdit.ingredients)
             etInstructions.setText(recipeToEdit.instructions)
+            etTime.setText(recipeToEdit.cookTime.toString())
+            tvDifficulty.text = recipeToEdit.difficulty
+            tvPrivacy.text = if (recipeToEdit.isPublic) "Public" else "Private"
 
             selectedImageUri = recipeToEdit.imageUri?.let { Uri.parse(it) }
 
@@ -110,21 +143,50 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
         }
 
         btnSave.setOnClickListener {
-            if (etName.text.toString().trim().isEmpty()) {
+
+            val name = etName.text.toString().trim()
+            val description = etDescription.text.toString().trim()
+            val ingredients = etIngredients.text.toString().trim()
+            val instructions = etInstructions.text.toString().trim()
+
+            val time = etTime.text.toString().toIntOrNull() ?: 0
+
+            val difficulty = tvDifficulty.text.toString()
+                .takeIf { it != "Difficulty" } ?: "Easy"
+
+            val isPublic = tvPrivacy.text.toString() != "Private"
+
+            //Validation
+            if (name.isEmpty()) {
                 etName.error = "Recipe name is required"
                 etName.requestFocus()
                 return@setOnClickListener
             }
 
-            if (etIngredients.text.toString().trim().isEmpty()) {
+            if (ingredients.isEmpty()) {
                 etIngredients.error = "Ingredients are required"
                 etIngredients.requestFocus()
                 return@setOnClickListener
             }
 
-            if (etInstructions.text.toString().trim().isEmpty()) {
+            if (instructions.isEmpty()) {
                 etInstructions.error = "Instructions are required"
                 etInstructions.requestFocus()
+                return@setOnClickListener
+            }
+
+            if (time == 0) {
+                etTime.error = "Please enter cooking time"
+                etTime.requestFocus()
+                return@setOnClickListener
+            }
+
+            if (tvDifficulty.text.toString() == "Difficulty") {
+                android.widget.Toast.makeText(
+                    requireContext(),
+                    "Please select difficulty",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
@@ -132,22 +194,28 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
                 viewModel.updateRecipe(
                     com.example.recipebook.db.RecipeEntity(
                         id = recipeToEdit.id,
-                        bookId = 1,
-                        name = etName.text.toString(),
-                        description = etDescription.text.toString(),
-                        ingredients = etIngredients.text.toString(),
-                        instructions = etInstructions.text.toString(),
-                        imageUri = selectedImageUri?.toString()
+                        bookId = 1, //recipeToEdit.bookId
+                        name = name,
+                        description = description,
+                        ingredients = ingredients,
+                        instructions = instructions,
+                        imageUri = selectedImageUri?.toString(),
+                        cookTime = time,
+                        difficulty = difficulty,
+                        isPublic = isPublic
                     )
                 )
             } else {
                 viewModel.addRecipe(
                     bookId = selectedBookId,
-                    name = etName.text.toString(),
-                    description = etDescription.text.toString(),
-                    ingredients = etIngredients.text.toString(),
-                    instructions = etInstructions.text.toString(),
-                    imageUri = selectedImageUri?.toString()
+                    name = name,
+                    description = description,
+                    ingredients = ingredients,
+                    instructions = instructions,
+                    imageUri = selectedImageUri?.toString(),
+                    cookTime = time,
+                    difficulty = difficulty,
+                    isPublic = isPublic
                 )
             }
 

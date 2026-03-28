@@ -1,3 +1,4 @@
+//viewmodel/RecipeViewModel
 package com.example.recipebook.viewmodel
 
 import android.app.Application
@@ -55,7 +56,10 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         description: String,
         ingredients: String,
         instructions: String,
-        imageUri: String?
+        imageUri: String?,
+        cookTime: Int,
+        difficulty: String,
+        isPublic: Boolean
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.insertRecipe(
@@ -65,7 +69,10 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                     description = description,
                     ingredients = ingredients,
                     instructions = instructions,
-                    imageUri = imageUri
+                    imageUri = imageUri,
+                    cookTime = cookTime,
+                    difficulty = difficulty,
+                    isPublic = isPublic
                 )
             )
         }
