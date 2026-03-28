@@ -18,6 +18,7 @@ import com.example.recipebook.R
 import com.google.android.material.imageview.ShapeableImageView
 import java.io.File
 import java.io.FileOutputStream
+import com.google.firebase.auth.FirebaseAuth
 
 class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
@@ -32,6 +33,21 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                 view?.findViewById<ShapeableImageView>(R.id.imgSettingsProfile)?.let { imageView ->
                     Glide.with(this)
                         .load(savedUri)
+                        .placeholder(R.drawable.ic_launcher_foreground)
+                        .error(R.drawable.ic_launcher_foreground)
+                        .into(imageView)
+                }
+            }
+        }
+
+    private val pickImageLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            if (uri != null) {
+                selectedImageUri = uri
+
+                view?.findViewById<ShapeableImageView>(R.id.imgSettingsProfile)?.let { imageView ->
+                    Glide.with(this)
+                        .load(uri)
                         .placeholder(R.drawable.ic_launcher_foreground)
                         .error(R.drawable.ic_launcher_foreground)
                         .into(imageView)
@@ -62,12 +78,24 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         val btnSaveChanges = view.findViewById<Button>(R.id.btnSaveChanges)
         val btnLogout = view.findViewById<Button>(R.id.btnLogout)
 
-        tvSettingsUserName.text = "User Name"
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        tvSettingsUserName.text = currentUser?.displayName ?: "User Name"
 
         loadSavedProfileImage(imgSettingsProfile)
 
         btnChangePhoto.setOnClickListener {
-            requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+            val options = arrayOf("Camera", "Gallery")
+
+            android.app.AlertDialog.Builder(requireContext())
+                .setTitle("Select Image")
+                .setItems(options) { _, which ->
+                    if (which == 0) {
+                        requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    } else {
+                        pickImageLauncher.launch("image/*")
+                    }
+                }
+                .show()
         }
 
         btnEditProfile.setOnClickListener {
@@ -88,20 +116,24 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
 
         btnLogout.setOnClickListener {
-            findNavController().navigate(R.id.loginFragment)
+            com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+            findNavController().popBackStack(R.id.loginFragment, false)
         }
     }
 
     private fun saveProfileImage() {
         val prefs = requireContext().getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
         prefs.edit()
-            .putString("profile_image_uri", selectedImageUri?.toString())
+            .putString("profile_image_uri_$uid", selectedImageUri?.toString())
             .apply()
     }
 
     private fun loadSavedProfileImage(imageView: ShapeableImageView) {
         val prefs = requireContext().getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
-        val savedImageUri = prefs.getString("profile_image_uri", null)
+        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        val savedImageUri = prefs.getString("profile_image_uri_$uid", null)
 
         if (!savedImageUri.isNullOrEmpty()) {
             selectedImageUri = Uri.parse(savedImageUri)

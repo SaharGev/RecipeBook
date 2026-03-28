@@ -19,6 +19,10 @@
             android:id="@+id/action_loginFragment_to_registerFragment"
             app:destination="@id/registerFragment" />
 
+        <action
+            android:id="@+id/action_loginFragment_to_completeProfileFragment"
+            app:destination="@id/completeProfileFragment" />
+
     </fragment>
 
     <fragment
@@ -38,6 +42,11 @@
         android:name="com.example.recipebook.ui.CompleteProfileFragment"
         android:label="Complete Profile"
         tools:layout="@layout/fragment_complete_profile">
+
+        <argument
+            android:name="fullName"
+            app:argType="string"
+            android:defaultValue="" />
 
         <action
             android:id="@+id/action_completeProfileFragment_to_profileFragment"
