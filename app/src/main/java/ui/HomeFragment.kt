@@ -76,7 +76,10 @@ class HomeFragment : Fragment() {
                         description = it.description,
                         ingredients = it.ingredients,
                         instructions = it.instructions,
-                        imageUri = it.imageUri
+                        imageUri = it.imageUri,
+                        cookTime = it.cookTime,
+                        isPublic = it.isPublic,
+                        difficulty = it.difficulty
                     )
                 }
 
@@ -103,7 +106,10 @@ class HomeFragment : Fragment() {
                                     description = clickedRecipe.description,
                                     ingredients = clickedRecipe.ingredients,
                                     instructions = clickedRecipe.instructions,
-                                    imageUri = clickedRecipe.imageUri
+                                    imageUri = clickedRecipe.imageUri,
+                                    cookTime = clickedRecipe.cookTime,
+                                    isPublic = clickedRecipe.isPublic,
+                                    difficulty = clickedRecipe.difficulty
                                 )
 
                                 viewModel.deleteRecipe(recipeToDelete)
