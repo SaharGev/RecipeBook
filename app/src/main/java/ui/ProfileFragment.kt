@@ -18,6 +18,7 @@ import com.example.recipebook.R
 import com.example.recipebook.viewmodel.BookViewModel
 import com.example.recipebook.viewmodel.RecipeViewModel
 import com.google.android.material.imageview.ShapeableImageView
+import com.google.firebase.auth.FirebaseAuth
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
@@ -60,8 +61,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         rvProfileBooks.layoutManager = GridLayoutManager(requireContext(), 2)
         rvProfileBooks.isNestedScrollingEnabled = false
 
-        tvUserName.text = "User Name"
-        tvEmail.text = "user@example.com"
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        tvUserName.text = currentUser?.displayName ?: "User Name"
+        tvEmail.text = currentUser?.email ?: ""
         tvFriendsCount.text = "0"
 
         statBooks.setOnClickListener {
@@ -116,7 +118,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private fun loadSavedProfileImage(imageView: ShapeableImageView) {
         val prefs = requireContext().getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
-        val savedImageUri = prefs.getString("profile_image_uri", null)
+        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        val savedImageUri = prefs.getString("profile_image_uri_$uid", null)
 
         if (!savedImageUri.isNullOrEmpty()) {
             Glide.with(this)
