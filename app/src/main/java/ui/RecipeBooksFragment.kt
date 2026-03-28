@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -25,28 +26,38 @@ class RecipeBooksFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         val view = inflater.inflate(R.layout.fragment_recipe_books, container, false)
 
         val rvBooks = view.findViewById<RecyclerView>(R.id.rvBooks)
         rvBooks.layoutManager = GridLayoutManager(requireContext(), 2)
 
         val btnAddBook = view.findViewById<Button>(R.id.btnAddBook)
+        val btnBack = view.findViewById<Button>(R.id.btnBack)
+        val tvEmptyBooks = view.findViewById<TextView>(R.id.tvEmptyBooks)
+
+        btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
 
         btnAddBook.setOnClickListener {
             viewModel.addBook("My Recipe Book")
-            loadBooks(rvBooks)
+            loadBooks(rvBooks, tvEmptyBooks)
         }
 
-        loadBooks(rvBooks)
+        loadBooks(rvBooks, tvEmptyBooks)
 
         return view
     }
 
-    private fun loadBooks(rvBooks: RecyclerView) {
+    private fun loadBooks(rvBooks: RecyclerView, tvEmptyBooks: TextView) {
         viewModel.getBooks { books ->
             val countsMap = mutableMapOf<Int, Int>()
 
             if (books.isEmpty()) {
+                rvBooks.visibility = View.GONE
+                tvEmptyBooks.visibility = View.VISIBLE
+
                 rvBooks.post {
                     rvBooks.adapter = RecipeBooksAdapter(
                         books = books,
@@ -75,6 +86,8 @@ class RecipeBooksFragment : Fragment() {
 
                     if (remaining == 0) {
                         rvBooks.post {
+                            rvBooks.visibility = View.VISIBLE
+                            tvEmptyBooks.visibility = View.GONE
                             rvBooks.adapter = RecipeBooksAdapter(
                                 books = books,
                                 onItemClick = { clickedBook ->
