@@ -44,6 +44,7 @@ class BookRecipesFragment : Fragment() {
 
         tvBookTitle.text = bookTitle
         rvRecipes.layoutManager = LinearLayoutManager(requireContext())
+        //rvRecipes.setHasFixedSize(true)
 
         btnAddRecipe.setOnClickListener {
             val bundle = Bundle()
@@ -85,7 +86,10 @@ class BookRecipesFragment : Fragment() {
                         description = it.description,
                         ingredients = it.ingredients,
                         instructions = it.instructions,
-                        imageUri = it.imageUri
+                        imageUri = it.imageUri,
+                        cookTime = it.cookTime,
+                        difficulty = it.difficulty,
+                        isPublic = it.isPublic
                     )
                 }
 
@@ -107,10 +111,17 @@ class BookRecipesFragment : Fragment() {
                             description = clickedRecipe.description,
                             ingredients = clickedRecipe.ingredients,
                             instructions = clickedRecipe.instructions,
-                            imageUri = clickedRecipe.imageUri
+                            imageUri = clickedRecipe.imageUri,
+                            cookTime = clickedRecipe.cookTime,
+                            difficulty = clickedRecipe.difficulty,
+                            isPublic = clickedRecipe.isPublic
                         )
+
                         viewModel.deleteRecipe(recipeToDelete)
-                        loadRecipes(bookId, rvRecipes)
+
+                        rvRecipes.postDelayed({
+                            loadRecipes(bookId, rvRecipes)
+                        }, 100)
                     }
                 )
             }
