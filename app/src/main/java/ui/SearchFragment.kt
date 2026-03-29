@@ -22,13 +22,13 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val rvCategories = view.findViewById<RecyclerView>(R.id.rvCategories)
         val etSearch = view.findViewById<TextInputEditText>(R.id.etSearch)
 
-        var allItems = listOf<String>()
+        var allItems = listOf<SearchItem>()
         val adapter = SearchRecipeAdapter(allItems)
 
         val categories = listOf("Breakfast", "Lunch", "Dinner", "Dessert")
         val categoryAdapter = CategoryAdapter(categories) { selectedCategory ->
             val filtered = allItems.filter {
-                it.lowercase().contains(selectedCategory.lowercase())
+                it.title.lowercase().contains(selectedCategory.lowercase())
             }
             adapter.updateData(filtered)
         }
@@ -41,10 +41,10 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             val recipes = recipeDao.getAllRecipes()
             val books = bookDao.getAllBooks()
 
-            val recipeNames = recipes.map { it.name }
-            val bookNames = books.map { it.title }
+            val recipeItems = recipes.map { SearchItem(it.name, SearchItemType.RECIPE) }
+            val bookItems = books.map { SearchItem(it.title, SearchItemType.BOOK) }
 
-            allItems = recipeNames + bookNames
+            allItems = recipeItems + bookItems
 
             adapter.updateData(allItems)
         }
@@ -67,7 +67,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 val query = s.toString().lowercase()
 
                 val filtered = allItems.filter {
-                    it.lowercase().contains(query)
+                    it.title.lowercase().contains(query)
                 }
 
                 adapter.updateData(filtered)

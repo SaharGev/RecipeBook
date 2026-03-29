@@ -7,11 +7,21 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
 
+enum class SearchItemType {
+    RECIPE,
+    BOOK
+}
+
+data class SearchItem(
+    val title: String,
+    val type: SearchItemType
+)
+
 class SearchRecipeAdapter(
-    private var items: List<String>
+    private var items: List<SearchItem>
 ) : RecyclerView.Adapter<SearchRecipeAdapter.ViewHolder>() {
 
-    fun updateData(newItems: List<String>) {
+    fun updateData(newItems: List<SearchItem>) {
         items = newItems
         notifyDataSetChanged()
     }
@@ -27,7 +37,7 @@ class SearchRecipeAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.name.text = items[position]
+        holder.name.text = items[position].title
     }
 
     override fun getItemCount(): Int = items.size
