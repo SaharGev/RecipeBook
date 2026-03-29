@@ -21,9 +21,11 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val rvRecentSearch = view.findViewById<RecyclerView>(R.id.rvRecentSearch)
         val rvCategories = view.findViewById<RecyclerView>(R.id.rvCategories)
         val etSearch = view.findViewById<TextInputEditText>(R.id.etSearch)
+        val rvBooks = view.findViewById<RecyclerView>(R.id.rvBooks)
 
         var allItems = listOf<SearchItem>()
         val adapter = SearchRecipeAdapter(allItems)
+        val booksAdapter = SearchRecipeAdapter(emptyList<SearchItem>())
 
         val categories = listOf("Breakfast", "Lunch", "Dinner", "Dessert")
         val categoryAdapter = CategoryAdapter(categories) { selectedCategory ->
@@ -44,9 +46,10 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             val recipeItems = recipes.map { SearchItem(it.name, SearchItemType.RECIPE) }
             val bookItems = books.map { SearchItem(it.title, SearchItemType.BOOK) }
 
-            allItems = recipeItems + bookItems
+            allItems = recipeItems
 
-            adapter.updateData(allItems)
+            adapter.updateData(recipeItems)
+            booksAdapter.updateData(bookItems)
         }
 
         rvCategories.layoutManager =
@@ -57,6 +60,9 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         rvRecentSearch.adapter = adapter
 
+        rvBooks.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        rvBooks.adapter = booksAdapter
 
         etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
