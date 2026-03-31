@@ -7,7 +7,7 @@
         android:title="Search" />
 
     <item
-        android:id="@+id/addRecipeFragment"
+        android:id="@+id/addNavbarFragment"
         android:icon="@android:drawable/ic_input_add"
         android:title="Add" />
 

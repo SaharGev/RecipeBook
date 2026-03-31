@@ -146,8 +146,13 @@
             app:destination="@id/bookRecipesFragment" />
 
         <action
+            android:id="@+id/action_profileFragment_to_myRecipesFragment"
+            app:destination="@id/myRecipesFragment" />
+
+        <action
             android:id="@+id/action_profileFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+
 
     </fragment>
 
@@ -162,5 +167,46 @@
         android:name="com.example.recipebook.ui.SearchFragment"
         android:label="Search"
         tools:layout="@layout/fragment_search" />
+
+    <fragment
+        android:id="@+id/addNavbarFragment"
+        android:name="com.example.recipebook.ui.AddNavbarFragment"
+        android:label="AddNavbar"
+        tools:layout="@layout/fragment_add_navbar">
+
+        <action
+            android:id="@+id/action_addNavbarFragment_to_addRecipeFragment"
+            app:destination="@id/addRecipeFragment" />
+
+        <action
+            android:id="@+id/action_addNavbarFragment_to_addRecipeBookFragment"
+            app:destination="@id/addRecipeBookFragment" />
+
+        <action
+            android:id="@+id/action_profileFragment_to_addNavbarFragment"
+            app:destination="@id/addNavbarFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/addRecipeBookFragment"
+        android:name="com.example.recipebook.ui.AddRecipeBookFragment"
+        android:label="Add Recipe Book"
+        tools:layout="@layout/fragment_add_recipe_book" />
+
+    <fragment
+        android:id="@+id/myRecipesFragment"
+        android:name="com.example.recipebook.ui.MyRecipesFragment"
+        android:label="My Recipes"
+        tools:layout="@layout/fragment_my_recipes">
+
+        <action
+            android:id="@+id/action_myRecipesFragment_to_addRecipeFragment"
+            app:destination="@id/addRecipeFragment" />
+
+        <action
+            android:id="@+id/action_myRecipesFragment_to_recipeDetailsFragment"
+            app:destination="@id/recipeDetailsFragment" />
+    </fragment>
 
 </navigation>
