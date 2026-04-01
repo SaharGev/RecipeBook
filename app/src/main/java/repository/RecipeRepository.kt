@@ -17,6 +17,7 @@ class RecipeRepository(context: Context) {
         return recipeDao.getRecipesByBookId(bookId)
     }
 
+
     suspend fun insertRecipe(recipe: RecipeEntity) {
         recipeDao.insertRecipe(recipe)
     }

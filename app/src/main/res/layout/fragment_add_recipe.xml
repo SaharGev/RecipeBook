@@ -98,7 +98,7 @@
                     android:id="@+id/etTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:hint="⏱ time"
+                    android:hint="⏱ time (min)"
                     android:textColorHint="#FFFFFF"
                     android:inputType="number"
                     android:textSize="13sp"

@@ -1,5 +1,108 @@
-//ui/MyRecipesFragment
+// ui/MyRecipesFragment.kt
 package com.example.recipebook.ui
 
-class MyRecipesFragment {
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.recipebook.R
+import com.example.recipebook.model.Recipe
+import com.example.recipebook.viewmodel.RecipeViewModel
+import kotlinx.coroutines.launch
+
+class MyRecipesFragment : Fragment() {
+
+    private val recipeViewModel: RecipeViewModel by viewModels()
+
+    private lateinit var rvRecipes: RecyclerView
+    private lateinit var tvEmptyRecipes: TextView
+    private lateinit var btnBack: Button
+    private lateinit var btnAddRecipe: Button
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val view = inflater.inflate(R.layout.fragment_my_recipes, container, false)
+
+        rvRecipes = view.findViewById(R.id.rvRecipes)
+        tvEmptyRecipes = view.findViewById(R.id.tvEmptyRecipes)
+        btnBack = view.findViewById(R.id.btnBack)
+        btnAddRecipe = view.findViewById(R.id.btnAddRecipe)
+
+        rvRecipes.layoutManager = LinearLayoutManager(requireContext())
+        rvRecipes.isNestedScrollingEnabled = false
+
+        btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
+        btnAddRecipe.setOnClickListener {
+            findNavController().navigate(R.id.action_myRecipesFragment_to_addRecipeFragment)
+        }
+
+        loadMyRecipes()
+
+        return view
+    }
+
+    private fun loadMyRecipes() {
+        recipeViewModel.getRecipes { recipeEntities ->
+            activity?.runOnUiThread {
+                if (recipeEntities.isEmpty()) {
+                    rvRecipes.visibility = View.GONE
+                    tvEmptyRecipes.visibility = View.VISIBLE
+                } else {
+                    rvRecipes.visibility = View.VISIBLE
+                    tvEmptyRecipes.visibility = View.GONE
+
+                    // convert to recipe before the sent to the adapter
+                    val recipes = recipeEntities.map { entity ->
+                        Recipe(
+                            id = entity.id,
+                            name = entity.name,
+                            description = entity.description,
+                            ingredients = entity.ingredients,
+                            instructions = entity.instructions,
+                            imageUri = entity.imageUri,
+                            cookTime = entity.cookTime,
+                            difficulty = entity.difficulty,
+                            isPublic = entity.isPublic
+                        )
+                    }
+
+                    rvRecipes.adapter = RecipeAdapter(
+                        recipes = recipes,
+                        onItemClick = { recipe -> navigateToRecipeDetails(recipe) },
+                        onDeleteClick = { recipe ->
+                            lifecycleScope.launch {
+                                // convert ot RecipeEntity
+                                val entityToDelete = recipeEntities.find { it.id == recipe.id }
+                                entityToDelete?.let {
+                                    recipeViewModel.deleteRecipe(it)
+                                    loadMyRecipes()
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    private fun navigateToRecipeDetails(recipe: Recipe) {
+        val bundle = Bundle().apply {
+            putParcelable("recipe", recipe)
+        }
+        findNavController().navigate(R.id.action_myRecipesFragment_to_recipeDetailsFragment, bundle)
+    }
 }

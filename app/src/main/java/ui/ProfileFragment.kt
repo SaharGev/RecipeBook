@@ -71,11 +71,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
 
         statRecipes.setOnClickListener {
-            Toast.makeText(
-                requireContext(),
-                "My Recipes screen coming soon",
-                Toast.LENGTH_SHORT
-            ).show()
+            findNavController().navigate(R.id.action_profileFragment_to_myRecipesFragment)
         }
 
         statFriends.setOnClickListener {
