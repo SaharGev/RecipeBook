@@ -29,4 +29,9 @@ class RecipeRepository(context: Context) {
     suspend fun updateRecipe(recipe: RecipeEntity) {
         recipeDao.updateRecipe(recipe)
     }
+
+    suspend fun removeBookFromRecipes(bookId: Int) {
+        recipeDao.removeBookFromRecipes(bookId)
+    }
+
 }

@@ -24,4 +24,8 @@ interface RecipeDao {
 
     @Update
     suspend fun updateRecipe(recipe: RecipeEntity)
+
+    @Query("UPDATE recipes SET bookId = NULL WHERE bookId = :bookId")
+    suspend fun removeBookFromRecipes(bookId: Int)
 }
+
