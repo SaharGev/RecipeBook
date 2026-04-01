@@ -16,6 +16,10 @@ import kotlinx.coroutines.launch
 class AddRecipeBookFragment : Fragment() {
 
     private lateinit var repository: BookRepository
+    private lateinit var recipeRepository: com.example.recipebook.repository.RecipeRepository
+
+    private lateinit var booksList: List<BookEntity>
+    private lateinit var recipesList: List<com.example.recipebook.db.RecipeEntity>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,6 +30,7 @@ class AddRecipeBookFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_add_recipe_book, container, false)
 
         repository = BookRepository(requireContext())
+        recipeRepository = com.example.recipebook.repository.RecipeRepository(requireContext())
 
         view.findViewById<Button>(R.id.btnBack).setOnClickListener {
             findNavController().popBackStack()
@@ -63,6 +68,51 @@ class AddRecipeBookFragment : Fragment() {
         val etBookDescription = view.findViewById<EditText>(R.id.etBookDescription)
         val spinnerPrivacy = view.findViewById<Spinner>(R.id.spinnerPrivacy)
         val btnCreateBook = view.findViewById<Button>(R.id.btnCreateBook)
+
+        val spinnerBooks = view.findViewById<Spinner>(R.id.spinnerBooks)
+        val spinnerRecipes = view.findViewById<Spinner>(R.id.spinnerRecipes)
+        spinnerBooks.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+
+                if (position == 0) {
+                    val recipeNames = listOf("Select Recipe")
+
+                    val adapter = ArrayAdapter(
+                        requireContext(),
+                        android.R.layout.simple_spinner_item,
+                        recipeNames
+                    )
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    spinnerRecipes.adapter = adapter
+
+                    return
+                }
+
+                val selectedBook = booksList[position - 1]
+
+                lifecycleScope.launch {
+                    val allRecipes = recipeRepository.getAllRecipes()
+
+                    recipesList = allRecipes.filter { it.bookId != selectedBook.id }
+
+                    val recipeNames = mutableListOf("Select Recipe")
+                    recipeNames.addAll(recipesList.map { it.name })
+
+                    val adapter = ArrayAdapter(
+                        requireContext(),
+                        android.R.layout.simple_spinner_item,
+                        recipeNames
+                    )
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    spinnerRecipes.adapter = adapter
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        val btnAddRecipe = view.findViewById<Button>(R.id.btnAddRecipe)
+
 
         val privacyOptions = listOf("Select Privacy", "Private","Public")
         val adapter = ArrayAdapter(
@@ -103,11 +153,79 @@ class AddRecipeBookFragment : Fragment() {
                 )
 
                 Toast.makeText(requireContext(), "Book created successfully", Toast.LENGTH_SHORT).show()
-                
+
                 etBookName.text.clear()
                 etBookDescription.text.clear()
                 spinnerPrivacy.setSelection(0)
             }
+        }
+
+        btnAddRecipe.setOnClickListener {
+            val selectedBookIndex = spinnerBooks.selectedItemPosition
+            val selectedRecipeIndex = spinnerRecipes.selectedItemPosition
+
+            if (selectedBookIndex == 0) {
+                Toast.makeText(requireContext(), "Please select a book", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (selectedRecipeIndex == 0) {
+                Toast.makeText(requireContext(), "Please select a recipe", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            lifecycleScope.launch {
+
+                val selectedBook = booksList[selectedBookIndex - 1]
+                val selectedRecipe = recipesList[selectedRecipeIndex - 1]
+
+                val updatedRecipe = selectedRecipe.copy(bookId = selectedBook.id)
+
+                recipeRepository.updateRecipe(updatedRecipe)
+
+                recipesList = recipesList.filter { it.id != updatedRecipe.id }
+
+                val recipeNames = mutableListOf("Select Recipe")
+                recipeNames.addAll(recipesList.map { it.name })
+
+                val recipesAdapter = ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_item,
+                    recipeNames
+                )
+                recipesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                spinnerRecipes.adapter = recipesAdapter
+
+                Toast.makeText(requireContext(), "Recipe added to book!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        lifecycleScope.launch {
+
+            booksList = repository.getAllBooks()
+            val bookTitles = mutableListOf("Select Book")
+            bookTitles.addAll(booksList.map { it.title })
+
+            val booksAdapter = ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                bookTitles
+            )
+            booksAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerBooks.adapter = booksAdapter
+
+
+            recipesList = recipeRepository.getAllRecipes()
+            val recipeNames = mutableListOf("Select Recipe")
+            recipeNames.addAll(recipesList.map { it.name })
+
+            val recipesAdapter = ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                recipeNames
+            )
+            recipesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerRecipes.adapter = recipesAdapter
         }
 
         return view

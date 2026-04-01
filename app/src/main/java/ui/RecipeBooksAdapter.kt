@@ -4,6 +4,7 @@ package com.example.recipebook.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
@@ -12,12 +13,14 @@ import com.example.recipebook.db.BookEntity
 class RecipeBooksAdapter(
     private val books: List<BookEntity>,
     private val onItemClick: (BookEntity) -> Unit,
+    private val onDeleteClick: (BookEntity) -> Unit,
     private val countsMap: Map<Int, Int> = emptyMap()
 ) : RecyclerView.Adapter<RecipeBooksAdapter.BookViewHolder>() {
 
     class BookViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvBookTitle: TextView = itemView.findViewById(R.id.tvBookTitle)
         val tvBookRecipesCount: TextView = itemView.findViewById(R.id.tvBookRecipesCount)
+        val btnDelete: ImageButton = itemView.findViewById(R.id.btnDeleteBook)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookViewHolder {
@@ -37,6 +40,10 @@ class RecipeBooksAdapter(
 
         holder.itemView.setOnClickListener {
             onItemClick(book)
+        }
+
+        holder.btnDelete.setOnClickListener {
+            onDeleteClick(book)
         }
     }
 
