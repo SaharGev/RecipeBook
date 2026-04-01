@@ -14,13 +14,15 @@ enum class SearchItemType {
 }
 
 data class SearchItem(
+    val id: Int,
     val title: String,
     val type: SearchItemType,
     val imageUri: String? = null
 )
 
 class SearchRecipeAdapter(
-    private var items: List<SearchItem>
+    private var items: List<SearchItem>,
+    private val onItemClick: (SearchItem) -> Unit
 ) : RecyclerView.Adapter<SearchRecipeAdapter.ViewHolder>() {
 
     fun updateData(newItems: List<SearchItem>) {
@@ -51,6 +53,10 @@ class SearchRecipeAdapter(
             }
         } catch (e: SecurityException) {
             holder.image.setImageResource(R.drawable.ic_launcher_foreground)
+        }
+
+        holder.itemView.setOnClickListener {
+            onItemClick(items[position])
         }
     }
 

@@ -12,6 +12,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.example.recipebook.db.DatabaseProvider
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import android.widget.Toast
 
 class SearchFragment : Fragment(R.layout.fragment_search) {
 
@@ -25,8 +26,13 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         var allItems = listOf<SearchItem>()
         var allBooks = listOf<SearchItem>()
-        val adapter = SearchRecipeAdapter(allItems)
-        val booksAdapter = SearchRecipeAdapter(emptyList<SearchItem>())
+        val adapter = SearchRecipeAdapter(allItems) { item ->
+            Toast.makeText(requireContext(), item.title, Toast.LENGTH_SHORT).show()
+        }
+
+        val booksAdapter = SearchRecipeAdapter(emptyList<SearchItem>()) { item ->
+            Toast.makeText(requireContext(), item.title, Toast.LENGTH_SHORT).show()
+        }
 
         val categories = listOf("Breakfast", "Lunch", "Dinner", "Dessert")
         val categoryAdapter = CategoryAdapter(categories) { selectedCategory ->
@@ -46,12 +52,20 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
             val recipeItems = recipes.map {
                 SearchItem(
+                    id = it.id,
                     title = it.name,
                     type = SearchItemType.RECIPE,
                     imageUri = it.imageUri
                 )
             }
-            val bookItems = books.map { SearchItem(it.title, SearchItemType.BOOK) }
+
+            val bookItems = books.map {
+                SearchItem(
+                    id = it.id,
+                    title = it.title,
+                    type = SearchItemType.BOOK
+                )
+            }
 
             allItems = recipeItems
             allBooks = bookItems
