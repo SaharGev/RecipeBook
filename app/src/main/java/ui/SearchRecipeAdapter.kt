@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
+import android.widget.ImageView
 
 enum class SearchItemType {
     RECIPE,
@@ -14,7 +15,8 @@ enum class SearchItemType {
 
 data class SearchItem(
     val title: String,
-    val type: SearchItemType
+    val type: SearchItemType,
+    val imageUri: String? = null
 )
 
 class SearchRecipeAdapter(
@@ -28,6 +30,7 @@ class SearchRecipeAdapter(
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val name: TextView = itemView.findViewById(R.id.tvRecipeName)
+        val image: ImageView = itemView.findViewById(R.id.imgRecipe)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -38,6 +41,17 @@ class SearchRecipeAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.name.text = items[position].title
+
+        val imageUri = items[position].imageUri
+        try {
+            if (imageUri != null) {
+                holder.image.setImageURI(android.net.Uri.parse(imageUri))
+            } else {
+                holder.image.setImageResource(R.drawable.ic_launcher_foreground)
+            }
+        } catch (e: SecurityException) {
+            holder.image.setImageResource(R.drawable.ic_launcher_foreground)
+        }
     }
 
     override fun getItemCount(): Int = items.size

@@ -93,8 +93,7 @@
             android:textStyle="bold"
             android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/rvRecentSearch"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvBooks"
