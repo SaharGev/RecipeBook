@@ -89,4 +89,10 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             repository.updateRecipe(recipe)
         }
     }
+
+    fun removeBookFromRecipes(bookId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.removeBookFromRecipes(bookId)
+        }
+    }
 }

@@ -19,6 +19,8 @@ import com.example.recipebook.viewmodel.BookViewModel
 import com.example.recipebook.viewmodel.RecipeViewModel
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.firebase.auth.FirebaseAuth
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
@@ -71,11 +73,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
 
         statRecipes.setOnClickListener {
-            Toast.makeText(
-                requireContext(),
-                "My Recipes screen coming soon",
-                Toast.LENGTH_SHORT
-            ).show()
+            findNavController().navigate(R.id.action_profileFragment_to_myRecipesFragment)
         }
 
         statFriends.setOnClickListener {
@@ -169,6 +167,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                                         R.id.action_profileFragment_to_bookRecipesFragment,
                                         bundle
                                     )
+                                },
+                                onDeleteClick = { book ->
+                                    viewLifecycleOwner.lifecycleScope.launch {
+                                        bookViewModel.deleteBook(book.id) // לפי הקוד שלך
+                                        refreshProfileData()
+                                    }
                                 },
                                 countsMap = countsMap
                             )

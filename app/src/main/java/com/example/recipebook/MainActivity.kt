@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -19,7 +20,47 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
-        bottomNavigation.setupWithNavController(navController)
+        //bottomNavigation.setupWithNavController(navController)
+        bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+
+                R.id.searchFragment -> {
+                    navController.navigate(
+                        R.id.searchFragment,
+                        null,
+                        androidx.navigation.NavOptions.Builder()
+                            .setLaunchSingleTop(true)
+                            .setPopUpTo(R.id.searchFragment, false)
+                            .build()
+                    )
+                    true
+                }
+
+                R.id.profileFragment -> {
+                    navController.navigate(
+                        R.id.profileFragment,
+                        null,
+                        androidx.navigation.NavOptions.Builder()
+                            .setLaunchSingleTop(true)
+                            .build()
+                    )
+                    true
+                }
+
+                R.id.addNavbarFragment -> {
+                    navController.navigate(
+                        R.id.addNavbarFragment,
+                        null,
+                        androidx.navigation.NavOptions.Builder()
+                            .setPopUpTo(R.id.addNavbarFragment, true)
+                            .build()
+                    )
+                    true
+                }
+
+                else -> false
+            }
+        }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {

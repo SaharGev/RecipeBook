@@ -154,7 +154,17 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
             val difficulty = tvDifficulty.text.toString()
                 .takeIf { it != "Difficulty" } ?: "Easy"
 
-            val isPublic = tvPrivacy.text.toString() != "Private"
+            val privacyText = tvPrivacy.text.toString()
+            if (privacyText == "Privacy") { // "Privacy" זה הטקסט ההתחלתי של השדה
+                android.widget.Toast.makeText(
+                    requireContext(),
+                    "Please select privacy",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            val isPublic = privacyText == "Public"
 
             //Validation
             if (name.isEmpty()) {
