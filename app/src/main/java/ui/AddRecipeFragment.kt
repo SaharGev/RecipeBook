@@ -32,6 +32,10 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             if (uri != null) {
                 selectedImageUri = uri
+                requireContext().contentResolver.takePersistableUriPermission(
+                    uri,
+                    android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
                 view?.findViewById<ImageView>(R.id.imgRecipe)?.let { imageView ->
                     Glide.with(this)
                         .load(uri)

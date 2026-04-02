@@ -12,6 +12,10 @@ import com.google.android.material.textfield.TextInputEditText
 import com.example.recipebook.db.DatabaseProvider
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import android.widget.Toast
+import androidx.navigation.fragment.findNavController
+import androidx.core.os.bundleOf
+import androidx.recyclerview.widget.GridLayoutManager
 
 class SearchFragment : Fragment(R.layout.fragment_search) {
 
@@ -21,14 +25,33 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val rvRecentSearch = view.findViewById<RecyclerView>(R.id.rvRecentSearch)
         val rvCategories = view.findViewById<RecyclerView>(R.id.rvCategories)
         val etSearch = view.findViewById<TextInputEditText>(R.id.etSearch)
+        val rvBooks = view.findViewById<RecyclerView>(R.id.rvBooks)
 
-        var allItems = listOf<String>()
-        val adapter = SearchRecipeAdapter(allItems)
+        var allItems = listOf<SearchItem>()
+        var allBooks = listOf<SearchItem>()
+        val adapter = SearchRecipeAdapter(allItems) { item ->
+            item.recipe?.let { recipe ->
+                findNavController().navigate(
+                    R.id.action_searchFragment_to_recipeDetailsFragment,
+                    bundleOf("recipe" to recipe)
+                )
+            }
+        }
+
+        val booksAdapter = SearchRecipeAdapter(emptyList<SearchItem>()) { item ->
+            findNavController().navigate(
+                R.id.action_searchFragment_to_bookRecipesFragment,
+                bundleOf(
+                    "bookId" to item.id,
+                    "bookTitle" to item.title
+                )
+            )
+        }
 
         val categories = listOf("Breakfast", "Lunch", "Dinner", "Dessert")
         val categoryAdapter = CategoryAdapter(categories) { selectedCategory ->
             val filtered = allItems.filter {
-                it.lowercase().contains(selectedCategory.lowercase())
+                it.title.lowercase().contains(selectedCategory.lowercase())
             }
             adapter.updateData(filtered)
         }
@@ -41,12 +64,42 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             val recipes = recipeDao.getAllRecipes()
             val books = bookDao.getAllBooks()
 
-            val recipeNames = recipes.map { it.name }
-            val bookNames = books.map { it.title }
+            val recipeItems = recipes.map {
+                SearchItem(
+                    id = it.id,
+                    title = it.name,
+                    type = SearchItemType.RECIPE,
+                    imageUri = it.imageUri,
+                    recipe = com.example.recipebook.model.Recipe(
+                        id = it.id,
+                        name = it.name,
+                        description = it.description,
+                        ingredients = it.ingredients,
+                        instructions = it.instructions,
+                        imageUri = it.imageUri,
+                        cookTime = it.cookTime,
+                        difficulty = it.difficulty,
+                        isPublic = it.isPublic
+                    )
+                )
+            }
 
-            allItems = recipeNames + bookNames
+            val bookItems = books.map { book ->
+                val count = recipeDao.getRecipesByBookId(book.id).size
+
+                SearchItem(
+                    id = book.id,
+                    title = book.title,
+                    type = SearchItemType.BOOK,
+                    imageUri = count.toString() // זמנית נשתמש בזה להעביר את הכמות
+                )
+            }
+
+            allItems = recipeItems
+            allBooks = bookItems
 
             adapter.updateData(allItems)
+            booksAdapter.updateData(allBooks)
         }
 
         rvCategories.layoutManager =
@@ -57,6 +110,9 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         rvRecentSearch.adapter = adapter
 
+        rvBooks.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        rvBooks.adapter = booksAdapter
 
         etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
@@ -66,11 +122,16 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val query = s.toString().lowercase()
 
-                val filtered = allItems.filter {
-                    it.lowercase().contains(query)
+                val filteredRecipes = allItems.filter {
+                    it.title.lowercase().contains(query)
                 }
 
-                adapter.updateData(filtered)
+                val filteredBooks = allBooks.filter {
+                    it.title.lowercase().contains(query)
+                }
+
+                adapter.updateData(filteredRecipes)
+                booksAdapter.updateData(filteredBooks)
             }
         })
     }
