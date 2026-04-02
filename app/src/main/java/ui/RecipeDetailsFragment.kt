@@ -22,15 +22,15 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         val recipe = arguments?.getParcelable<com.example.recipebook.model.Recipe>("recipe")
 
         val tvTitle = view.findViewById<TextView>(R.id.tvRecipeTitle)
-        val tvDescription = view.findViewById<TextView>(R.id.tvRecipeDescription)
+        val tvDescription = view.findViewById<TextView>(R.id.tvDescription)
         val tvIngredients = view.findViewById<TextView>(R.id.tvIngredientsContent)
         val tvInstructions = view.findViewById<TextView>(R.id.tvInstructionsContent)
         val imgRecipe = view.findViewById<android.widget.ImageView>(R.id.imgRecipe)
         val tvCookTime = view.findViewById<TextView>(R.id.tvCookTime)
         val tvDifficulty = view.findViewById<TextView>(R.id.tvDifficulty)
         val tvPrivacy = view.findViewById<TextView>(R.id.tvPrivacy)
-        val btnBack = view.findViewById<android.widget.ImageView>(R.id.btnBack)
-        val btnEdit = view.findViewById<android.widget.ImageView>(R.id.btnEdit)
+        val btnBack = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnBack)
+        val btnEdit = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnEdit)
 
         if (recipe != null) {
             tvTitle.text = "${recipe.name} (ID: ${recipe.id})"

@@ -13,6 +13,9 @@ import com.example.recipebook.db.DatabaseProvider
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import android.widget.Toast
+import androidx.navigation.fragment.findNavController
+import androidx.core.os.bundleOf
+import androidx.recyclerview.widget.GridLayoutManager
 
 class SearchFragment : Fragment(R.layout.fragment_search) {
 
@@ -27,11 +30,22 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         var allItems = listOf<SearchItem>()
         var allBooks = listOf<SearchItem>()
         val adapter = SearchRecipeAdapter(allItems) { item ->
-            Toast.makeText(requireContext(), item.title, Toast.LENGTH_SHORT).show()
+            item.recipe?.let { recipe ->
+                findNavController().navigate(
+                    R.id.action_searchFragment_to_recipeDetailsFragment,
+                    bundleOf("recipe" to recipe)
+                )
+            }
         }
 
         val booksAdapter = SearchRecipeAdapter(emptyList<SearchItem>()) { item ->
-            Toast.makeText(requireContext(), item.title, Toast.LENGTH_SHORT).show()
+            findNavController().navigate(
+                R.id.action_searchFragment_to_bookRecipesFragment,
+                bundleOf(
+                    "bookId" to item.id,
+                    "bookTitle" to item.title
+                )
+            )
         }
 
         val categories = listOf("Breakfast", "Lunch", "Dinner", "Dessert")
@@ -55,15 +69,29 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                     id = it.id,
                     title = it.name,
                     type = SearchItemType.RECIPE,
-                    imageUri = it.imageUri
+                    imageUri = it.imageUri,
+                    recipe = com.example.recipebook.model.Recipe(
+                        id = it.id,
+                        name = it.name,
+                        description = it.description,
+                        ingredients = it.ingredients,
+                        instructions = it.instructions,
+                        imageUri = it.imageUri,
+                        cookTime = it.cookTime,
+                        difficulty = it.difficulty,
+                        isPublic = it.isPublic
+                    )
                 )
             }
 
-            val bookItems = books.map {
+            val bookItems = books.map { book ->
+                val count = recipeDao.getRecipesByBookId(book.id).size
+
                 SearchItem(
-                    id = it.id,
-                    title = it.title,
-                    type = SearchItemType.BOOK
+                    id = book.id,
+                    title = book.title,
+                    type = SearchItemType.BOOK,
+                    imageUri = count.toString() // זמנית נשתמש בזה להעביר את הכמות
                 )
             }
 

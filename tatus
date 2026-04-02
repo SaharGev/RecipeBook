@@ -1,0 +1,9 @@
+  app-shell-profile[m
+  feature/auth-ui-firebase[m
+  feature/navigation-flow[m
+  feature/navigation-setup[m
+  feature/recipe-books[m
+  feature/recipe-crud[m
+  feature/recipe-images[m
+  master[m
+* [32msearch-screen[m
