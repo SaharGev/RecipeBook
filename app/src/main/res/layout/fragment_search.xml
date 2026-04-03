@@ -58,13 +58,48 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Recent title -->
+        <TextView
+            android:id="@+id/tvResultsTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Recipes Results"
+            android:textColor="#2D2D2D"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/rvRecentSearch"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvResults"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:nestedScrollingEnabled="false"
+            android:paddingStart="8dp"
+            android:paddingBottom="8dp"
+            android:clipToPadding="false"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/tvResultsTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/searchContentBarrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:barrierAllowsGoneWidgets="false"
+            app:constraint_referenced_ids="rvRecentSearch,rvResults" />
+
+        <!-- Recent Recipes title -->
         <TextView
             android:id="@+id/tvRecentSearch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Recent Search"
+            android:text="Recent Recipes Search"
             android:textColor="#2D2D2D"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -85,15 +120,30 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
+        <!-- Books -->
         <TextView
-            android:id="@+id/tvBooksTitle"
+            android:id="@+id/tvBooksResultsTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Books"
+            android:text="Books Results"
+            android:textColor="#2D2D2D"
+            android:textSize="18sp"
             android:textStyle="bold"
-            android:textSize="16sp"
-            app:layout_constraintTop_toBottomOf="@id/rvRecentSearch"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/rvResults"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Recent Books title -->
+        <TextView
+            android:id="@+id/tvRecentBooksTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Recent Books Search"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/searchContentBarrier"
             app:layout_constraintStart_toStartOf="parent"/>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -104,9 +154,18 @@
             android:nestedScrollingEnabled="false"
             android:paddingStart="4dp"
             android:clipToPadding="false"
-            app:layout_constraintTop_toBottomOf="@id/tvBooksTitle"
+            app:layout_constraintTop_toBottomOf="@id/booksTitleBarrier"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/booksTitleBarrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:barrierAllowsGoneWidgets="false"
+            app:constraint_referenced_ids="tvRecentBooksTitle,tvBooksResultsTitle" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
