@@ -166,6 +166,101 @@
             app:barrierAllowsGoneWidgets="false"
             app:constraint_referenced_ids="tvRecentBooksTitle,tvBooksResultsTitle" />
 
+        <!-- Favorites Recipes -->
+        <TextView
+            android:id="@+id/tvFavoriteRecipesTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Favorite Recipes"
+            android:textColor="#2D2D2D"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/rvBooks"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvFavoriteRecipesEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Not available yet"
+            android:textColor="#7A7A7A"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/tvFavoriteRecipesTitle"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Favorites Books -->
+        <TextView
+            android:id="@+id/tvFavoriteBooksTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Favorite Books"
+            android:textColor="#2D2D2D"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/tvFavoriteRecipesEmpty"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvFavoriteBooksEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Not available yet"
+            android:textColor="#7A7A7A"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/tvFavoriteBooksTitle"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Shared Recipes -->
+        <TextView
+            android:id="@+id/tvSharedRecipesTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Shared Recipes"
+            android:textColor="#2D2D2D"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/tvFavoriteBooksEmpty"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvSharedRecipesEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Not available yet"
+            android:textColor="#7A7A7A"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/tvSharedRecipesTitle"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Shared Books -->
+        <TextView
+            android:id="@+id/tvSharedBooksTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Shared Books"
+            android:textColor="#2D2D2D"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/tvSharedRecipesEmpty"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvSharedBooksEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Not available yet"
+            android:textColor="#7A7A7A"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/tvSharedBooksTitle"
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

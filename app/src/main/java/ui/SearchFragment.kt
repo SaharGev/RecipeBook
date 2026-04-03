@@ -35,6 +35,15 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val tvRecentBooksTitle = view.findViewById<TextView>(R.id.tvRecentBooksTitle)
         val tvBooksResultsTitle = view.findViewById<TextView>(R.id.tvBooksResultsTitle)
 
+        val tvFavoriteRecipesTitle = view.findViewById<TextView>(R.id.tvFavoriteRecipesTitle)
+        val tvFavoriteRecipesEmpty = view.findViewById<TextView>(R.id.tvFavoriteRecipesEmpty)
+        val tvFavoriteBooksTitle = view.findViewById<TextView>(R.id.tvFavoriteBooksTitle)
+        val tvFavoriteBooksEmpty = view.findViewById<TextView>(R.id.tvFavoriteBooksEmpty)
+        val tvSharedRecipesTitle = view.findViewById<TextView>(R.id.tvSharedRecipesTitle)
+        val tvSharedRecipesEmpty = view.findViewById<TextView>(R.id.tvSharedRecipesEmpty)
+        val tvSharedBooksTitle = view.findViewById<TextView>(R.id.tvSharedBooksTitle)
+        val tvSharedBooksEmpty = view.findViewById<TextView>(R.id.tvSharedBooksEmpty)
+
         var allItems = listOf<SearchItem>()
         var allBooks = listOf<SearchItem>()
 
@@ -191,6 +200,15 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
                     booksAdapter.updateData(recentBookItems)
 
+                    tvFavoriteRecipesTitle.visibility = View.VISIBLE
+                    tvFavoriteRecipesEmpty.visibility = View.VISIBLE
+                    tvFavoriteBooksTitle.visibility = View.VISIBLE
+                    tvFavoriteBooksEmpty.visibility = View.VISIBLE
+                    tvSharedRecipesTitle.visibility = View.VISIBLE
+                    tvSharedRecipesEmpty.visibility = View.VISIBLE
+                    tvSharedBooksTitle.visibility = View.VISIBLE
+                    tvSharedBooksEmpty.visibility = View.VISIBLE
+
                 } else {
                     val filteredRecipes = allItems.filter {
                         it.title.lowercase().contains(query)
@@ -227,6 +245,16 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
                     resultsAdapter.updateData(sortedRecipes)
                     booksAdapter.updateData(sortedBooks)
+
+                    tvFavoriteRecipesTitle.visibility = View.GONE
+                    tvFavoriteRecipesEmpty.visibility = View.GONE
+                    tvFavoriteBooksTitle.visibility = View.GONE
+                    tvFavoriteBooksEmpty.visibility = View.GONE
+                    tvSharedRecipesTitle.visibility = View.GONE
+                    tvSharedRecipesEmpty.visibility = View.GONE
+                    tvSharedBooksTitle.visibility = View.GONE
+                    tvSharedBooksEmpty.visibility = View.GONE
+
                 }
             }
         })
