@@ -132,7 +132,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:barrierAllowsGoneWidgets="false"
+            app:barrierAllowsGoneWidgets="true"
             app:constraint_referenced_ids="rvRecentSearch,rvResults" />
 
         <TextView
@@ -198,17 +198,35 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <TextView
-            android:id="@+id/tvFavoriteRecipesTitle"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/layoutFavoriteRecipesHeader"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Favorite Recipes"
-            android:textColor="#2D2D2D"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
             app:layout_constraintTop_toBottomOf="@id/rvBooks"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/tvFavoriteRecipesTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Favorite Recipes"
+                android:textColor="#2D2D2D"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvSeeAllFavoriteRecipes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All"
+                android:textColor="#8B5E3C"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvFavoriteRecipesEmpty"
@@ -218,20 +236,38 @@
             android:text="Not available yet"
             android:textColor="#7A7A7A"
             android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@id/tvFavoriteRecipesTitle"
+            app:layout_constraintTop_toBottomOf="@id/layoutFavoriteRecipesHeader"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <TextView
-            android:id="@+id/tvFavoriteBooksTitle"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/layoutFavoriteBooksHeader"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Favorite Books"
-            android:textColor="#2D2D2D"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
             app:layout_constraintTop_toBottomOf="@id/tvFavoriteRecipesEmpty"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/tvFavoriteBooksTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Favorite Books"
+                android:textColor="#2D2D2D"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvSeeAllFavoriteBooks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All"
+                android:textColor="#8B5E3C"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvFavoriteBooksEmpty"
@@ -241,20 +277,38 @@
             android:text="Not available yet"
             android:textColor="#7A7A7A"
             android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@id/tvFavoriteBooksTitle"
+            app:layout_constraintTop_toBottomOf="@id/layoutFavoriteBooksHeader"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <TextView
-            android:id="@+id/tvSharedRecipesTitle"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/layoutSharedRecipesHeader"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Shared Recipes"
-            android:textColor="#2D2D2D"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
             app:layout_constraintTop_toBottomOf="@id/tvFavoriteBooksEmpty"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/tvSharedRecipesTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Shared Recipes"
+                android:textColor="#2D2D2D"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvSeeAllSharedRecipes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All"
+                android:textColor="#8B5E3C"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvSharedRecipesEmpty"
@@ -264,20 +318,38 @@
             android:text="Not available yet"
             android:textColor="#7A7A7A"
             android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@id/tvSharedRecipesTitle"
+            app:layout_constraintTop_toBottomOf="@id/layoutSharedRecipesHeader"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <TextView
-            android:id="@+id/tvSharedBooksTitle"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/layoutSharedBooksHeader"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Shared Books"
-            android:textColor="#2D2D2D"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
             app:layout_constraintTop_toBottomOf="@id/tvSharedRecipesEmpty"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/tvSharedBooksTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Shared Books"
+                android:textColor="#2D2D2D"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvSeeAllSharedBooks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All"
+                android:textColor="#8B5E3C"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvSharedBooksEmpty"
@@ -287,7 +359,7 @@
             android:text="Not available yet"
             android:textColor="#7A7A7A"
             android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@id/tvSharedBooksTitle"
+            app:layout_constraintTop_toBottomOf="@id/layoutSharedBooksHeader"
             app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

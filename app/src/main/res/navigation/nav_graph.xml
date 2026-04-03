@@ -176,6 +176,15 @@
             android:id="@+id/action_searchFragment_to_recipeDetailsFragment"
             app:destination="@id/recipeDetailsFragment" />
 
+        <action
+            android:id="@+id/action_searchFragment_to_myRecipesFragment"
+            app:destination="@id/myRecipesFragment" />
+
+        <action
+            android:id="@+id/action_searchFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+
+
     </fragment>
 
     <fragment

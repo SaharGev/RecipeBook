@@ -30,29 +30,24 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         val etSearch = view.findViewById<TextInputEditText>(R.id.etSearch)
 
-        val tvRecentRecipesTitle  = view.findViewById<TextView>(R.id.tvRecentSearch)
         val tvResultsTitle = view.findViewById<TextView>(R.id.tvResultsTitle)
-        val tvRecentBooksTitle = view.findViewById<TextView>(R.id.tvRecentBooksTitle)
         val tvBooksResultsTitle = view.findViewById<TextView>(R.id.tvBooksResultsTitle)
 
-        val tvFavoriteRecipesTitle = view.findViewById<TextView>(R.id.tvFavoriteRecipesTitle)
         val tvFavoriteRecipesEmpty = view.findViewById<TextView>(R.id.tvFavoriteRecipesEmpty)
-        val tvFavoriteBooksTitle = view.findViewById<TextView>(R.id.tvFavoriteBooksTitle)
         val tvFavoriteBooksEmpty = view.findViewById<TextView>(R.id.tvFavoriteBooksEmpty)
-        val tvSharedRecipesTitle = view.findViewById<TextView>(R.id.tvSharedRecipesTitle)
         val tvSharedRecipesEmpty = view.findViewById<TextView>(R.id.tvSharedRecipesEmpty)
-        val tvSharedBooksTitle = view.findViewById<TextView>(R.id.tvSharedBooksTitle)
         val tvSharedBooksEmpty = view.findViewById<TextView>(R.id.tvSharedBooksEmpty)
 
         val tvSeeAllRecentRecipes = view.findViewById<TextView>(R.id.tvSeeAllRecentRecipes)
-        tvSeeAllRecentRecipes.setOnClickListener {
-            // TODO: navigate to full recent recipes screen
-        }
-
         val tvSeeAllRecentBooks = view.findViewById<TextView>(R.id.tvSeeAllRecentBooks)
-        tvSeeAllRecentBooks.setOnClickListener {
-            // TODO: navigate to full recent books screen
-        }
+
+        val layoutRecentRecipesHeader = view.findViewById<View>(R.id.layoutRecentRecipesHeader)
+        val layoutRecentBooksHeader = view.findViewById<View>(R.id.layoutRecentBooksHeader)
+
+        val layoutFavoriteRecipesHeader = view.findViewById<View>(R.id.layoutFavoriteRecipesHeader)
+        val layoutFavoriteBooksHeader = view.findViewById<View>(R.id.layoutFavoriteBooksHeader)
+        val layoutSharedRecipesHeader = view.findViewById<View>(R.id.layoutSharedRecipesHeader)
+        val layoutSharedBooksHeader = view.findViewById<View>(R.id.layoutSharedBooksHeader)
 
         var allItems = listOf<SearchItem>()
         var allBooks = listOf<SearchItem>()
@@ -88,6 +83,14 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             )
         }
 
+        tvSeeAllRecentRecipes.setOnClickListener {
+            findNavController().navigate(R.id.action_searchFragment_to_myRecipesFragment)
+        }
+
+        tvSeeAllRecentBooks.setOnClickListener {
+            findNavController().navigate(R.id.action_searchFragment_to_homeFragment)
+        }
+
         val categories = listOf("Breakfast", "Lunch", "Dinner", "Dessert")
         val categoryAdapter = CategoryAdapter(categories) { selectedCategory ->
             val filtered = allItems.filter {
@@ -96,8 +99,22 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
             tvResultsTitle.visibility = View.VISIBLE
             rvResults.visibility = View.VISIBLE
-            tvRecentRecipesTitle.visibility = View.GONE
+
+            layoutRecentRecipesHeader.visibility = View.GONE
             rvRecentSearch.visibility = View.GONE
+
+            layoutRecentBooksHeader.visibility = View.GONE
+            tvBooksResultsTitle.visibility = View.GONE
+            rvBooks.visibility = View.GONE
+
+            layoutFavoriteRecipesHeader.visibility = View.GONE
+            tvFavoriteRecipesEmpty.visibility = View.GONE
+            layoutFavoriteBooksHeader.visibility = View.GONE
+            tvFavoriteBooksEmpty.visibility = View.GONE
+            layoutSharedRecipesHeader.visibility = View.GONE
+            tvSharedRecipesEmpty.visibility = View.GONE
+            layoutSharedBooksHeader.visibility = View.GONE
+            tvSharedBooksEmpty.visibility = View.GONE
 
             resultsAdapter.updateData(filtered)
         }
@@ -117,11 +134,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         rvBooks.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         rvBooks.adapter = booksAdapter
-
-        tvResultsTitle.visibility = View.GONE
-        rvResults.visibility = View.GONE
-        tvRecentRecipesTitle.visibility = View.VISIBLE
-        rvRecentSearch.visibility = View.VISIBLE
 
         val db = DatabaseProvider.getDatabase(requireContext())
         val recipeDao = db.recipeDao()
@@ -165,18 +177,27 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             allItems = recipeItems
             allBooks = bookItems
 
-            val recentRecipeIds = getRecentRecipeIds()
-            val recentRecipeItems = recentRecipeIds.mapNotNull { id ->
-                recipeItems.find { it.id == id && it.type == SearchItemType.RECIPE }
-            }
-
-            recentAdapter.updateData(recentRecipeItems)
-            val recentBookIds = getRecentBookIds()
-            val recentBookItems = recentBookIds.mapNotNull { id ->
-                bookItems.find { it.id == id && it.type == SearchItemType.BOOK }
-            }
-
-            booksAdapter.updateData(recentBookItems)
+            showDefaultSections(
+                allItems,
+                allBooks,
+                recentAdapter,
+                booksAdapter,
+                layoutRecentRecipesHeader,
+                rvRecentSearch,
+                tvResultsTitle,
+                rvResults,
+                layoutRecentBooksHeader,
+                tvBooksResultsTitle,
+                rvBooks,
+                layoutFavoriteRecipesHeader,
+                tvFavoriteRecipesEmpty,
+                layoutFavoriteBooksHeader,
+                tvFavoriteBooksEmpty,
+                layoutSharedRecipesHeader,
+                tvSharedRecipesEmpty,
+                layoutSharedBooksHeader,
+                tvSharedBooksEmpty
+            )
         }
 
         etSearch.addTextChangedListener(object : TextWatcher {
@@ -185,40 +206,30 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val query = s.toString().lowercase()
-
-                val recentRecipeIds = getRecentRecipeIds()
-                val recentRecipeItems = recentRecipeIds.mapNotNull { id ->
-                    allItems.find { it.id == id && it.type == SearchItemType.RECIPE }
-                }
+                val query = s.toString().trim().lowercase()
 
                 if (query.isBlank()) {
-                    tvResultsTitle.visibility = View.GONE
-                    rvResults.visibility = View.GONE
-                    tvRecentRecipesTitle.visibility = View.VISIBLE
-                    rvRecentSearch.visibility = View.VISIBLE
-
-                    tvRecentBooksTitle.visibility = View.VISIBLE
-                    tvBooksResultsTitle.visibility = View.GONE
-                    rvBooks.visibility = View.VISIBLE
-
-                    recentAdapter.updateData(recentRecipeItems)
-                    val recentBookIds = getRecentBookIds()
-                    val recentBookItems = recentBookIds.mapNotNull { id ->
-                        allBooks.find { it.id == id && it.type == SearchItemType.BOOK }
-                    }
-
-                    booksAdapter.updateData(recentBookItems)
-
-                    tvFavoriteRecipesTitle.visibility = View.VISIBLE
-                    tvFavoriteRecipesEmpty.visibility = View.VISIBLE
-                    tvFavoriteBooksTitle.visibility = View.VISIBLE
-                    tvFavoriteBooksEmpty.visibility = View.VISIBLE
-                    tvSharedRecipesTitle.visibility = View.VISIBLE
-                    tvSharedRecipesEmpty.visibility = View.VISIBLE
-                    tvSharedBooksTitle.visibility = View.VISIBLE
-                    tvSharedBooksEmpty.visibility = View.VISIBLE
-
+                    showDefaultSections(
+                        allItems,
+                        allBooks,
+                        recentAdapter,
+                        booksAdapter,
+                        layoutRecentRecipesHeader,
+                        rvRecentSearch,
+                        tvResultsTitle,
+                        rvResults,
+                        layoutRecentBooksHeader,
+                        tvBooksResultsTitle,
+                        rvBooks,
+                        layoutFavoriteRecipesHeader,
+                        tvFavoriteRecipesEmpty,
+                        layoutFavoriteBooksHeader,
+                        tvFavoriteBooksEmpty,
+                        layoutSharedRecipesHeader,
+                        tvSharedRecipesEmpty,
+                        layoutSharedBooksHeader,
+                        tvSharedBooksEmpty
+                    )
                 } else {
                     val filteredRecipes = allItems.filter {
                         it.title.lowercase().contains(query)
@@ -228,46 +239,97 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                         it.title.lowercase().contains(query)
                     }
 
-                    val recentIds = getRecentRecipeIds()
+                    val recentRecipeIds = getRecentRecipeIds()
+                    val recentBookIds = getRecentBookIds()
 
-                    // TODO: add priority for favorites (recent + favorite -> recent -> rest)
+                    val sortedRecipes = filteredRecipes.sortedWith(
+                        compareByDescending<SearchItem> { recentRecipeIds.contains(it.id) }
+                    )
 
-                    val sortedRecipes = filteredRecipes.sortedWith(compareByDescending<SearchItem> {
-                        recentIds.contains(it.id)
-                    })
+                    val sortedBooks = filteredBooks.sortedWith(
+                        compareByDescending<SearchItem> { recentBookIds.contains(it.id) }
+                    )
 
-                    // TODO: add priority for favorites (recent + favorite -> recent -> rest)
+                    tvResultsTitle.visibility =
+                        if (sortedRecipes.isNotEmpty()) View.VISIBLE else View.GONE
+                    rvResults.visibility =
+                        if (sortedRecipes.isNotEmpty()) View.VISIBLE else View.GONE
 
-                    val sortedBooks = filteredBooks.sortedWith(compareByDescending<SearchItem> {
-                        getRecentBookIds().contains(it.id)
-                    })
+                    tvBooksResultsTitle.visibility =
+                        if (sortedBooks.isNotEmpty()) View.VISIBLE else View.GONE
+                    rvBooks.visibility =
+                        if (sortedBooks.isNotEmpty()) View.VISIBLE else View.GONE
 
-                    android.widget.Toast.makeText(requireContext(), "recipes=${filteredRecipes.size}, books=${filteredBooks.size}", android.widget.Toast.LENGTH_SHORT).show()
-
-                    tvResultsTitle.visibility = View.VISIBLE
-                    rvResults.visibility = View.VISIBLE
-                    tvRecentRecipesTitle.visibility = View.GONE
+                    layoutRecentRecipesHeader.visibility = View.GONE
                     rvRecentSearch.visibility = View.GONE
+                    layoutRecentBooksHeader.visibility = View.GONE
 
-                    tvRecentBooksTitle.visibility = View.GONE
-                    tvBooksResultsTitle.visibility = View.VISIBLE
-                    rvBooks.visibility = View.VISIBLE
+                    layoutFavoriteRecipesHeader.visibility = View.GONE
+                    tvFavoriteRecipesEmpty.visibility = View.GONE
+                    layoutFavoriteBooksHeader.visibility = View.GONE
+                    tvFavoriteBooksEmpty.visibility = View.GONE
+                    layoutSharedRecipesHeader.visibility = View.GONE
+                    tvSharedRecipesEmpty.visibility = View.GONE
+                    layoutSharedBooksHeader.visibility = View.GONE
+                    tvSharedBooksEmpty.visibility = View.GONE
 
                     resultsAdapter.updateData(sortedRecipes)
                     booksAdapter.updateData(sortedBooks)
-
-                    tvFavoriteRecipesTitle.visibility = View.GONE
-                    tvFavoriteRecipesEmpty.visibility = View.GONE
-                    tvFavoriteBooksTitle.visibility = View.GONE
-                    tvFavoriteBooksEmpty.visibility = View.GONE
-                    tvSharedRecipesTitle.visibility = View.GONE
-                    tvSharedRecipesEmpty.visibility = View.GONE
-                    tvSharedBooksTitle.visibility = View.GONE
-                    tvSharedBooksEmpty.visibility = View.GONE
-
                 }
             }
         })
+    }
+
+    private fun showDefaultSections(
+        allItems: List<SearchItem>,
+        allBooks: List<SearchItem>,
+        recentAdapter: SearchRecipeAdapter,
+        booksAdapter: SearchRecipeAdapter,
+        layoutRecentRecipesHeader: View,
+        rvRecentSearch: RecyclerView,
+        tvResultsTitle: TextView,
+        rvResults: RecyclerView,
+        layoutRecentBooksHeader: View,
+        tvBooksResultsTitle: TextView,
+        rvBooks: RecyclerView,
+        layoutFavoriteRecipesHeader: View,
+        tvFavoriteRecipesEmpty: TextView,
+        layoutFavoriteBooksHeader: View,
+        tvFavoriteBooksEmpty: TextView,
+        layoutSharedRecipesHeader: View,
+        tvSharedRecipesEmpty: TextView,
+        layoutSharedBooksHeader: View,
+        tvSharedBooksEmpty: TextView
+    ) {
+        val recentRecipeItems = getRecentRecipeIds().mapNotNull { id ->
+            allItems.find { it.id == id && it.type == SearchItemType.RECIPE }
+        }
+
+        val recentBookItems = getRecentBookIds().mapNotNull { id ->
+            allBooks.find { it.id == id && it.type == SearchItemType.BOOK }
+        }
+
+        tvResultsTitle.visibility = View.GONE
+        rvResults.visibility = View.GONE
+
+        layoutRecentRecipesHeader.visibility = View.VISIBLE
+        rvRecentSearch.visibility = View.VISIBLE
+
+        layoutRecentBooksHeader.visibility = View.VISIBLE
+        tvBooksResultsTitle.visibility = View.GONE
+        rvBooks.visibility = View.VISIBLE
+
+        recentAdapter.updateData(recentRecipeItems)
+        booksAdapter.updateData(recentBookItems)
+
+        layoutFavoriteRecipesHeader.visibility = View.VISIBLE
+        tvFavoriteRecipesEmpty.visibility = View.VISIBLE
+        layoutFavoriteBooksHeader.visibility = View.VISIBLE
+        tvFavoriteBooksEmpty.visibility = View.VISIBLE
+        layoutSharedRecipesHeader.visibility = View.VISIBLE
+        tvSharedRecipesEmpty.visibility = View.VISIBLE
+        layoutSharedBooksHeader.visibility = View.VISIBLE
+        tvSharedBooksEmpty.visibility = View.VISIBLE
     }
 
     private fun saveRecentRecipe(recipeId: Int) {
@@ -323,5 +385,4 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             .split(",")
             .mapNotNull { it.toIntOrNull() }
     }
-
 }
