@@ -44,6 +44,16 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val tvSharedBooksTitle = view.findViewById<TextView>(R.id.tvSharedBooksTitle)
         val tvSharedBooksEmpty = view.findViewById<TextView>(R.id.tvSharedBooksEmpty)
 
+        val tvSeeAllRecentRecipes = view.findViewById<TextView>(R.id.tvSeeAllRecentRecipes)
+        tvSeeAllRecentRecipes.setOnClickListener {
+            // TODO: navigate to full recent recipes screen
+        }
+
+        val tvSeeAllRecentBooks = view.findViewById<TextView>(R.id.tvSeeAllRecentBooks)
+        tvSeeAllRecentBooks.setOnClickListener {
+            // TODO: navigate to full recent books screen
+        }
+
         var allItems = listOf<SearchItem>()
         var allBooks = listOf<SearchItem>()
 

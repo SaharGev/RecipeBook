@@ -47,7 +47,6 @@
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Categories -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvCategories"
             android:layout_width="0dp"
@@ -62,13 +61,13 @@
             android:id="@+id/tvResultsTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:text="Recipes Results"
             android:textColor="#2D2D2D"
             android:textSize="18sp"
             android:textStyle="bold"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/rvRecentSearch"
+            app:layout_constraintTop_toBottomOf="@id/rvCategories"
             app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -85,28 +84,36 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/searchContentBarrier"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:barrierDirection="bottom"
-            app:barrierAllowsGoneWidgets="false"
-            app:constraint_referenced_ids="rvRecentSearch,rvResults" />
-
-        <!-- Recent Recipes title -->
-        <TextView
-            android:id="@+id/tvRecentSearch"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/layoutRecentRecipesHeader"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Recent Recipes Search"
-            android:textColor="#2D2D2D"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
             app:layout_constraintTop_toBottomOf="@id/rvCategories"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Recipes -->
+            <TextView
+                android:id="@+id/tvRecentSearch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Recent Recipes Search"
+                android:textColor="#2D2D2D"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvSeeAllRecentRecipes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All"
+                android:textColor="#8B5E3C"
+                android:textSize="14sp" />
+        </LinearLayout>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvRecentSearch"
             android:layout_width="0dp"
@@ -116,35 +123,68 @@
             android:paddingStart="8dp"
             android:paddingBottom="8dp"
             android:clipToPadding="false"
-            app:layout_constraintTop_toBottomOf="@id/tvRecentSearch"
+            app:layout_constraintTop_toBottomOf="@id/layoutRecentRecipesHeader"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Books -->
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/searchContentBarrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:barrierAllowsGoneWidgets="false"
+            app:constraint_referenced_ids="rvRecentSearch,rvResults" />
+
         <TextView
             android:id="@+id/tvBooksResultsTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:text="Books Results"
             android:textColor="#2D2D2D"
             android:textSize="18sp"
             android:textStyle="bold"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/rvResults"
+            app:layout_constraintTop_toBottomOf="@id/searchContentBarrier"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Recent Books title -->
-        <TextView
-            android:id="@+id/tvRecentBooksTitle"
+        <LinearLayout
+            android:id="@+id/layoutRecentBooksHeader"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintTop_toBottomOf="@id/searchContentBarrier"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/tvRecentBooksTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Recent Books Search"
+                android:textColor="#2D2D2D"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvSeeAllRecentBooks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All"
+                android:textColor="#8B5E3C"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/booksTitleBarrier"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Recent Books Search"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            app:layout_constraintTop_toBottomOf="@id/searchContentBarrier"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:barrierDirection="bottom"
+            app:barrierAllowsGoneWidgets="false"
+            app:constraint_referenced_ids="layoutRecentBooksHeader,tvBooksResultsTitle" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvBooks"
@@ -156,17 +196,8 @@
             android:clipToPadding="false"
             app:layout_constraintTop_toBottomOf="@id/booksTitleBarrier"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/booksTitleBarrier"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:barrierDirection="bottom"
-            app:barrierAllowsGoneWidgets="false"
-            app:constraint_referenced_ids="tvRecentBooksTitle,tvBooksResultsTitle" />
-
-        <!-- Favorites Recipes -->
         <TextView
             android:id="@+id/tvFavoriteRecipesTitle"
             android:layout_width="wrap_content"
@@ -190,7 +221,6 @@
             app:layout_constraintTop_toBottomOf="@id/tvFavoriteRecipesTitle"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Favorites Books -->
         <TextView
             android:id="@+id/tvFavoriteBooksTitle"
             android:layout_width="wrap_content"
@@ -214,7 +244,6 @@
             app:layout_constraintTop_toBottomOf="@id/tvFavoriteBooksTitle"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Shared Recipes -->
         <TextView
             android:id="@+id/tvSharedRecipesTitle"
             android:layout_width="wrap_content"
@@ -238,7 +267,6 @@
             app:layout_constraintTop_toBottomOf="@id/tvSharedRecipesTitle"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Shared Books -->
         <TextView
             android:id="@+id/tvSharedBooksTitle"
             android:layout_width="wrap_content"
