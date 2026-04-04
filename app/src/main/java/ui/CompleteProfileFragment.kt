@@ -137,15 +137,17 @@ class CompleteProfileFragment : Fragment() {
 
             firebaseUser?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-
-                    val prefs = requireContext().getSharedPreferences("profile_prefs", android.content.Context.MODE_PRIVATE)
                     val uid = firebaseUser?.uid.orEmpty()
+                    val email = firebaseUser?.email.orEmpty()
+
+                    val prefs = requireContext().getSharedPreferences(
+                        "profile_prefs",
+                        android.content.Context.MODE_PRIVATE
+                    )
 
                     prefs.edit()
                         .putString("profile_image_uri_$uid", selectedImageUri?.toString())
                         .apply()
-
-                    val email = firebaseUser?.email.orEmpty()
 
                     showLoading()
 
@@ -153,17 +155,16 @@ class CompleteProfileFragment : Fragment() {
                         uid = uid,
                         username = username,
                         email = email,
-                        phone = null
+                        phone = null,
+                        profileImageUrl = null
                     )
 
                     userViewModel.saveUserLocallyAndRemotely(newUser) {
                         requireActivity().runOnUiThread {
                             hideLoading()
-
                             findNavController().navigate(R.id.action_completeProfileFragment_to_profileFragment)
                         }
                     }
-
                 } else {
                     Toast.makeText(requireContext(), "Failed to update profile", Toast.LENGTH_SHORT).show()
                 }

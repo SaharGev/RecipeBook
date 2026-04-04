@@ -28,7 +28,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private val takePhotoLauncher =
         registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
             if (bitmap != null) {
-                val savedUri = saveBitmapToCache(bitmap)
+                val savedUri = saveBitmapToFile(bitmap)
                 selectedImageUri = savedUri
 
                 view?.findViewById<ShapeableImageView>(R.id.imgSettingsProfile)?.let { imageView ->
@@ -108,12 +108,20 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
 
         btnSaveChanges.setOnClickListener {
-            saveProfileImage()
-            Toast.makeText(
-                requireContext(),
-                "Changes saved successfully",
-                Toast.LENGTH_SHORT
-            ).show()
+            if (selectedImageUri != null) {
+                saveProfileImage()
+                Toast.makeText(
+                    requireContext(),
+                    "Changes saved successfully",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "No image selected",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
 
         btnLogout.setOnClickListener {
@@ -147,8 +155,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
     }
 
-    private fun saveBitmapToCache(bitmap: Bitmap): Uri {
-        val file = File(requireContext().cacheDir, "profile_${System.currentTimeMillis()}.jpg")
+    private fun saveBitmapToFile(bitmap: Bitmap): Uri {
+        val file = File(requireContext().filesDir, "profile_${System.currentTimeMillis()}.jpg")
 
         FileOutputStream(file).use { outputStream ->
             bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
