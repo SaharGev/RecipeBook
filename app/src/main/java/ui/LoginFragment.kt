@@ -19,35 +19,53 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
+import androidx.core.os.bundleOf
+import com.example.recipebook.utils.showLoading
+import com.example.recipebook.utils.hideLoading
+import androidx.fragment.app.viewModels
+import com.example.recipebook.viewmodel.UserViewModel
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
+    private val userViewModel: UserViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         auth = FirebaseAuth.getInstance()
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
+        val firestore = FirebaseFirestore.getInstance()
 
-            val userDao = DatabaseProvider.getDatabase(requireContext()).userDao()
+        val currentUser = auth.currentUser
+
+        if (currentUser != null) {
             val uid = currentUser.uid
 
-            CoroutineScope(Dispatchers.IO).launch {
-                val user = userDao.getUserByUid(uid)
+            showLoading()
 
+            userViewModel.getOrFetchUser(uid) { user ->
                 requireActivity().runOnUiThread {
                     if (user != null) {
-                        findNavController().navigate(R.id.action_loginFragment_to_profileFragment)
+                        hideLoading()
+
+                        val navController = findNavController()
+                        if (navController.currentDestination?.id != R.id.profileFragment) {
+                            navController.navigate(R.id.profileFragment)
+                        }
                     } else {
                         val fullName = currentUser.displayName.orEmpty()
 
-                        findNavController().navigate(
-                            R.id.action_loginFragment_to_completeProfileFragment,
-                            androidx.core.os.bundleOf("fullName" to fullName)
-                        )
+                        hideLoading()
+
+                        val navController = findNavController()
+                        if (navController.currentDestination?.id != R.id.completeProfileFragment) {
+                            navController.navigate(
+                                R.id.completeProfileFragment,
+                                bundleOf("fullName" to fullName)
+                            )
+                        }
                     }
                 }
             }
@@ -106,9 +124,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                         }
                     }
             } else {
-                CoroutineScope(Dispatchers.IO).launch {
-                    val user = userDao.getUserByPhone(identifier)
-
+                userViewModel.getUserByPhone(identifier) { user ->
                     requireActivity().runOnUiThread {
                         if (user == null) {
                             tilEmail.error = "User not found"
@@ -122,7 +138,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                                     findNavController().navigate(R.id.action_loginFragment_to_profileFragment)
                                 } else {
                                     tilEmail.error = "Invalid email or password"
-                                    etEmail.requestFocus()                                }
+                                    etEmail.requestFocus()
+                                }
                             }
                     }
                 }
@@ -130,6 +147,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         }
 
         btnGoogleLogin.setOnClickListener {
+            showLoading()
+
             val signInIntent = googleSignInClient.signInIntent
             startActivityForResult(signInIntent, 100)
         }
@@ -162,30 +181,42 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
                             val firebaseUser = auth.currentUser
                             val uid = firebaseUser?.uid ?: return@addOnCompleteListener
+                            val firestore = FirebaseFirestore.getInstance()
 
-                            CoroutineScope(Dispatchers.IO).launch {
-                                val user = userDao.getUserByUid(uid)
-
+                            userViewModel.getOrFetchUser(uid) { user ->
                                 requireActivity().runOnUiThread {
                                     if (user != null) {
-                                        findNavController().navigate(R.id.action_loginFragment_to_profileFragment)
-                                    } else {
-                                        val fullName = firebaseUser?.displayName.orEmpty()
+                                        val navController = findNavController()
 
-                                        findNavController().navigate(
-                                            R.id.action_loginFragment_to_completeProfileFragment,
-                                            androidx.core.os.bundleOf("fullName" to fullName)
-                                        )
+                                        hideLoading()
+
+                                        if (navController.currentDestination?.id != R.id.profileFragment) {
+                                            navController.navigate(R.id.profileFragment)
+                                        }
+                                    } else {
+                                        val fullName = firebaseUser.displayName.orEmpty()
+
+                                        hideLoading()
+
+                                        val navController = findNavController()
+                                        if (navController.currentDestination?.id != R.id.completeProfileFragment) {
+                                            navController.navigate(
+                                                R.id.completeProfileFragment,
+                                                bundleOf("fullName" to fullName)
+                                            )
+                                        }
                                     }
                                 }
                             }
 
                         } else {
+                            hideLoading()
                             Toast.makeText(requireContext(), "Firebase auth failed", Toast.LENGTH_SHORT).show()
                         }
                     }
 
             } else {
+                hideLoading()
                 Toast.makeText(requireContext(), "Google Sign-In failed", Toast.LENGTH_SHORT).show()
             }
         }

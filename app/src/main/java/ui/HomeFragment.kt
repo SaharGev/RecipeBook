@@ -13,7 +13,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
-import com.example.recipebook.db.RecipeEntity
 import com.example.recipebook.viewmodel.RecipeViewModel
 
 class HomeFragment : Fragment() {
@@ -69,64 +68,61 @@ class HomeFragment : Fragment() {
                     rvRecipes.visibility = View.VISIBLE
                 }
 
-                val uiRecipes = recipes.map {
-                    com.example.recipebook.model.Recipe(
-                        id = it.id,
-                        name = it.name,
-                        description = it.description,
-                        ingredients = it.ingredients,
-                        instructions = it.instructions,
-                        imageUri = it.imageUri,
-                        cookTime = it.cookTime,
-                        isPublic = it.isPublic,
-                        difficulty = it.difficulty
-                    )
-                }
+                val uiRecipes = mapToUiRecipes(recipes)
 
-                rvRecipes.adapter = RecipeAdapter(
-                    uiRecipes,
-                    onItemClick = { clickedRecipe ->
-                        val bundle = Bundle()
-                        bundle.putParcelable("recipe", clickedRecipe)
-
-                        findNavController().navigate(
-                            R.id.action_homeFragment_to_recipeDetailsFragment,
-                            bundle
-                        )
-                    },
-                    onDeleteClick  = { clickedRecipe ->
-                        AlertDialog.Builder(requireContext())
-                            .setTitle("Delete Recipe")
-                            .setMessage("Are you sure you want to delete ${clickedRecipe.name}?")
-                            .setPositiveButton("Yes") { _, _ ->
-                                val recipeToDelete = RecipeEntity(
-                                    id = clickedRecipe.id,
-                                    bookId = 1,
-                                    name = clickedRecipe.name,
-                                    description = clickedRecipe.description,
-                                    ingredients = clickedRecipe.ingredients,
-                                    instructions = clickedRecipe.instructions,
-                                    imageUri = clickedRecipe.imageUri,
-                                    cookTime = clickedRecipe.cookTime,
-                                    isPublic = clickedRecipe.isPublic,
-                                    difficulty = clickedRecipe.difficulty
-                                )
-
-                                viewModel.deleteRecipe(recipeToDelete)
-
-                                android.widget.Toast.makeText(
-                                    requireContext(),
-                                    "Recipe deleted successfully",
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
-
-                                loadRecipes(rvRecipes)
-                            }
-                            .setNegativeButton("No", null)
-                            .show()
-                    }
-                )
+                setupRecipesAdapter(rvRecipes, uiRecipes)
             }
         }
+    }
+
+    private fun mapToUiRecipes(recipes: List<com.example.recipebook.db.RecipeEntity>): List<com.example.recipebook.model.Recipe> {
+        return recipes.map {
+            com.example.recipebook.model.Recipe(
+                id = it.id,
+                name = it.name,
+                description = it.description,
+                ingredients = it.ingredients,
+                instructions = it.instructions,
+                imageUri = it.imageUri,
+                cookTime = it.cookTime,
+                isPublic = it.isPublic,
+                difficulty = it.difficulty
+            )
+        }
+    }
+
+    private fun setupRecipesAdapter(
+        rvRecipes: RecyclerView,
+        uiRecipes: List<com.example.recipebook.model.Recipe>
+    ) {
+        rvRecipes.adapter = RecipeAdapter(
+            uiRecipes,
+            onItemClick = { clickedRecipe ->
+                val bundle = Bundle()
+                bundle.putParcelable("recipe", clickedRecipe)
+
+                findNavController().navigate(
+                    R.id.action_homeFragment_to_recipeDetailsFragment,
+                    bundle
+                )
+            },
+            onDeleteClick = { clickedRecipe ->
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Delete Recipe")
+                    .setMessage("Are you sure you want to delete ${clickedRecipe.name}?")
+                    .setPositiveButton("Yes") { _, _ ->
+                        viewModel.deleteRecipeById(clickedRecipe.id)
+
+                        android.widget.Toast.makeText(
+                            requireContext(),
+                            "Recipe deleted successfully",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
+            }
+        )
     }
 }

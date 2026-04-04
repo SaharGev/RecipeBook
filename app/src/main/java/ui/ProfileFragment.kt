@@ -21,9 +21,11 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.firebase.auth.FirebaseAuth
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import com.example.recipebook.viewmodel.UserViewModel
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
+    private val userViewModel: UserViewModel by viewModels()
     private val recipeViewModel: RecipeViewModel by viewModels()
     private val bookViewModel: BookViewModel by viewModels()
 
@@ -63,9 +65,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         rvProfileBooks.layoutManager = GridLayoutManager(requireContext(), 2)
         rvProfileBooks.isNestedScrollingEnabled = false
 
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        tvUserName.text = currentUser?.displayName ?: "User Name"
-        tvEmail.text = currentUser?.email ?: ""
+        val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
+        userViewModel.getUserByUid(uid) { user ->
+            tvUserName.text = user?.username ?: "User Name"
+            tvEmail.text = user?.email ?: ""
+        }
         tvFriendsCount.text = "0"
 
         statBooks.setOnClickListener {
@@ -116,7 +121,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private fun loadSavedProfileImage(imageView: ShapeableImageView) {
         val prefs = requireContext().getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
-        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
         val savedImageUri = prefs.getString("profile_image_uri_$uid", null)
 
         if (!savedImageUri.isNullOrEmpty()) {
@@ -170,7 +175,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                                 },
                                 onDeleteClick = { book ->
                                     viewLifecycleOwner.lifecycleScope.launch {
-                                        bookViewModel.deleteBook(book.id) // לפי הקוד שלך
+                                        bookViewModel.deleteBook(book.id)
                                         refreshProfileData()
                                     }
                                 },

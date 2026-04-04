@@ -9,14 +9,12 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
 import com.example.recipebook.model.Recipe
 import com.example.recipebook.viewmodel.RecipeViewModel
-import kotlinx.coroutines.launch
 
 class MyRecipesFragment : Fragment() {
 
@@ -55,6 +53,11 @@ class MyRecipesFragment : Fragment() {
         return view
     }
 
+    override fun onResume() {
+        super.onResume()
+        loadMyRecipes()
+    }
+
     private fun loadMyRecipes() {
         recipeViewModel.getRecipes { recipeEntities ->
             activity?.runOnUiThread {
@@ -84,14 +87,8 @@ class MyRecipesFragment : Fragment() {
                         recipes = recipes,
                         onItemClick = { recipe -> navigateToRecipeDetails(recipe) },
                         onDeleteClick = { recipe ->
-                            lifecycleScope.launch {
-                                // convert ot RecipeEntity
-                                val entityToDelete = recipeEntities.find { it.id == recipe.id }
-                                entityToDelete?.let {
-                                    recipeViewModel.deleteRecipe(it)
-                                    loadMyRecipes()
-                                }
-                            }
+                            recipeViewModel.deleteRecipeById(recipe.id)
+
                         }
                     )
                 }

@@ -51,4 +51,11 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
     }
+
+    fun deleteBookAndDetachRecipes(bookId: Int, recipeViewModel: RecipeViewModel) {
+        viewModelScope.launch(Dispatchers.IO) {
+            recipeViewModel.removeBookFromRecipes(bookId)
+            repository.deleteBook(bookId)
+        }
+    }
 }

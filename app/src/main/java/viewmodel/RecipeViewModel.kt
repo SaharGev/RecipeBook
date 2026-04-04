@@ -95,4 +95,44 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             repository.removeBookFromRecipes(bookId)
         }
     }
+
+    fun deleteRecipeById(recipeId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val recipes = repository.getAllRecipes()
+            val recipe = recipes.find { it.id == recipeId }
+            if (recipe != null) {
+                repository.deleteRecipe(recipe)
+            }
+        }
+    }
+
+    fun updateRecipeByFields(
+        id: Int,
+        bookId: Int,
+        name: String,
+        description: String,
+        ingredients: String,
+        instructions: String,
+        imageUri: String?,
+        cookTime: Int,
+        difficulty: String,
+        isPublic: Boolean
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateRecipe(
+                com.example.recipebook.db.RecipeEntity(
+                    id = id,
+                    bookId = bookId,
+                    name = name,
+                    description = description,
+                    ingredients = ingredients,
+                    instructions = instructions,
+                    imageUri = imageUri,
+                    cookTime = cookTime,
+                    difficulty = difficulty,
+                    isPublic = isPublic
+                )
+            )
+        }
+    }
 }
