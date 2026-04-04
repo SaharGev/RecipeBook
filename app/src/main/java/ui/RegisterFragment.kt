@@ -11,23 +11,20 @@ import com.example.recipebook.R
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.android.material.textfield.TextInputLayout
-import com.example.recipebook.db.DatabaseProvider
-import com.example.recipebook.db.UserEntity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import androidx.fragment.app.viewModels
+import com.example.recipebook.viewmodel.UserViewModel
+import com.example.recipebook.utils.showLoading
+import com.example.recipebook.utils.hideLoading
 
 class RegisterFragment : Fragment(R.layout.fragment_register) {
 
     private lateinit var auth: FirebaseAuth
+    private val userViewModel: UserViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         auth = FirebaseAuth.getInstance()
-
-        val userDao = DatabaseProvider.getDatabase(requireContext()).userDao()
-
 
         val etRegisterName = view.findViewById<TextInputEditText>(R.id.etRegisterName)
         val tilRegisterName = view.findViewById<TextInputLayout>(R.id.tilRegisterName)
@@ -57,7 +54,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             }
 
             if (username.length < 3) {
-                etRegisterName.error = "Username must be at least 3 characters"
+                tilRegisterName.error = "Username must be at least 3 characters"
                 etRegisterName.requestFocus()
                 return@setOnClickListener
             }
@@ -96,10 +93,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 putString("fullName", username)
             }
 
-            CoroutineScope(Dispatchers.IO).launch {
-                val existingUserByUsername = userDao.getUserByUsername(username)
-                val existingUserByPhone = if (phone.isNotEmpty()) userDao.getUserByPhone(phone) else null
-
+            userViewModel.getUserByUsername(username) { existingUserByUsername ->
                 requireActivity().runOnUiThread {
                     if (existingUserByUsername != null) {
                         tilRegisterName.error = "Username already exists"
@@ -107,47 +101,33 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                         return@runOnUiThread
                     }
 
-                    if (existingUserByPhone != null) {
-                        tilRegisterPhone.error = "Phone number already exists"
-                        etRegisterPhone.requestFocus()
-                        return@runOnUiThread
-                    }
-
-                    auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-
-                                val user = FirebaseAuth.getInstance().currentUser
-
-                                val profileUpdates = com.google.firebase.auth.UserProfileChangeRequest.Builder()
-                                    .setDisplayName(username)
-                                    .build()
-
-                                user?.updateProfile(profileUpdates)
-
-                                val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    userDao.insertUser(
-                                        UserEntity(
-                                            uid = uid,
-                                            username = username,
-                                            email = email,
-                                            phone = phone.ifEmpty { null }
-                                        )
-                                    )
+                    if (phone.isNotEmpty()) {
+                        userViewModel.getUserByPhone(phone) { existingUserByPhone ->
+                            requireActivity().runOnUiThread {
+                                if (existingUserByPhone != null) {
+                                    tilRegisterPhone.error = "Phone number already exists"
+                                    etRegisterPhone.requestFocus()
+                                    return@runOnUiThread
                                 }
 
-                                findNavController().navigate(
-                                    R.id.action_registerFragment_to_completeProfileFragment,
-                                    bundle
+                                registerUser(
+                                    username = username,
+                                    email = email,
+                                    phone = phone.ifEmpty { null },
+                                    password = password,
+                                    bundle = bundle
                                 )
-                            } else {
-                                tilRegisterEmail.error = "Email already exists"
-                                etRegisterEmail.requestFocus()
-                                tilRegisterPhone.error = null
                             }
                         }
+                    } else {
+                        registerUser(
+                            username = username,
+                            email = email,
+                            phone = null,
+                            password = password,
+                            bundle = bundle
+                        )
+                    }
                 }
             }
         }
@@ -155,5 +135,56 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
         tvGoToLogin.setOnClickListener {
             findNavController().popBackStack()
         }
+    }
+
+    private fun registerUser(
+        username: String,
+        email: String,
+        phone: String?,
+        password: String,
+        bundle: Bundle
+    ) {
+        showLoading()
+
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+
+                    val user = FirebaseAuth.getInstance().currentUser
+
+                    val profileUpdates = com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                        .setDisplayName(username)
+                        .build()
+
+                    user?.updateProfile(profileUpdates)
+
+                    val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
+                    val newUser = com.example.recipebook.db.UserEntity(
+                        uid = uid,
+                        username = username,
+                        email = email,
+                        phone = phone
+                    )
+
+                    userViewModel.saveUserLocallyAndRemotely(newUser) {
+                        requireActivity().runOnUiThread {
+                            hideLoading()
+
+                            findNavController().navigate(
+                                R.id.action_registerFragment_to_completeProfileFragment,
+                                bundle
+                            )
+                        }
+                    }
+                } else {
+                    hideLoading()
+                    requireActivity().runOnUiThread {
+                        view?.findViewById<TextInputLayout>(R.id.tilRegisterEmail)?.error = "Email already exists"
+                        view?.findViewById<TextInputEditText>(R.id.etRegisterEmail)?.requestFocus()
+                        view?.findViewById<TextInputLayout>(R.id.tilRegisterPhone)?.error = null
+                    }
+                }
+            }
     }
 }

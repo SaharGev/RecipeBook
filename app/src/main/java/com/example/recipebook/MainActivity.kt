@@ -1,26 +1,34 @@
-//MainActivity
 package com.example.recipebook
 
 import android.os.Bundle
 import android.view.View
+import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.NavigationUI
-import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.activity.viewModels
+import com.example.recipebook.ui.LoadingViewModel
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var loadingOverlay: FrameLayout
+    private val loadingViewModel: LoadingViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        loadingOverlay = findViewById(R.id.loadingOverlay)
+        loadingViewModel.isLoading.observe(this) { isLoading ->
+            loadingOverlay.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
-        //bottomNavigation.setupWithNavController(navController)
+
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
 
@@ -74,5 +82,13 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    fun showLoading() {
+        loadingViewModel.showLoading()
+    }
+
+    fun hideLoading() {
+        loadingViewModel.hideLoading()
     }
 }

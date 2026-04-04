@@ -9,14 +9,12 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
 import com.example.recipebook.viewmodel.BookViewModel
 import com.example.recipebook.viewmodel.RecipeViewModel
-import kotlinx.coroutines.launch
 
 class RecipeBooksFragment : Fragment() {
 
@@ -74,15 +72,7 @@ class RecipeBooksFragment : Fragment() {
                             )
                         },
                         onDeleteClick = { book ->
-                            // מחיקת ספר עם coroutine
-                            viewLifecycleOwner.lifecycleScope.launch {
-                                // קודם מסירים את הספר מהמתכונים
-                                recipeViewModel.removeBookFromRecipes(book.id)
-                                // אחר כך מוחקים את הספר עצמו
-                                viewModel.deleteBook(book.id)
-                                // רענון הרשימה
-                                loadBooks(rvBooks, tvEmptyBooks)
-                            }
+                            viewModel.deleteBookAndDetachRecipes(book.id, recipeViewModel)
                         }
                     )
                 }
@@ -112,11 +102,7 @@ class RecipeBooksFragment : Fragment() {
                                     )
                                 },
                                 onDeleteClick = { book ->
-                                    viewLifecycleOwner.lifecycleScope.launch {
-                                        recipeViewModel.removeBookFromRecipes(book.id)
-                                        viewModel.deleteBook(book.id)
-                                        loadBooks(rvBooks, tvEmptyBooks)
-                                    }
+                                    viewModel.deleteBookAndDetachRecipes(book.id, recipeViewModel)
                                 },
                                 countsMap = countsMap
                             )

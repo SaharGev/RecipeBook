@@ -6,18 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.recipebook.R
 import com.example.recipebook.db.BookEntity
-import com.example.recipebook.repository.BookRepository
+import androidx.fragment.app.viewModels
+import com.example.recipebook.viewmodel.AddRecipeBookViewModel
+import com.example.recipebook.db.RecipeEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
 class AddRecipeBookFragment : Fragment() {
 
-    private lateinit var repository: BookRepository
-    private lateinit var recipeRepository: com.example.recipebook.repository.RecipeRepository
-
+    private val viewModel: AddRecipeBookViewModel by viewModels()
     private lateinit var booksList: List<BookEntity>
     private lateinit var recipesList: List<com.example.recipebook.db.RecipeEntity>
 
@@ -28,9 +27,6 @@ class AddRecipeBookFragment : Fragment() {
     ): View {
 
         val view = inflater.inflate(R.layout.fragment_add_recipe_book, container, false)
-
-        repository = BookRepository(requireContext())
-        recipeRepository = com.example.recipebook.repository.RecipeRepository(requireContext())
 
         view.findViewById<Button>(R.id.btnBack).setOnClickListener {
             findNavController().popBackStack()
@@ -90,21 +86,21 @@ class AddRecipeBookFragment : Fragment() {
 
                 val selectedBook = booksList[position - 1]
 
-                lifecycleScope.launch {
-                    val allRecipes = recipeRepository.getAllRecipes()
+                viewModel.getAvailableRecipesForBook(selectedBook.id) { recipes ->
+                    requireActivity().runOnUiThread {
+                        recipesList = recipes
 
-                    recipesList = allRecipes.filter { it.bookId != selectedBook.id }
+                        val recipeNames = mutableListOf("Select Recipe")
+                        recipeNames.addAll(recipesList.map { it.name })
 
-                    val recipeNames = mutableListOf("Select Recipe")
-                    recipeNames.addAll(recipesList.map { it.name })
-
-                    val adapter = ArrayAdapter(
-                        requireContext(),
-                        android.R.layout.simple_spinner_item,
-                        recipeNames
-                    )
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    spinnerRecipes.adapter = adapter
+                        val adapter = ArrayAdapter(
+                            requireContext(),
+                            android.R.layout.simple_spinner_item,
+                            recipeNames
+                        )
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        spinnerRecipes.adapter = adapter
+                    }
                 }
             }
 
@@ -143,20 +139,18 @@ class AddRecipeBookFragment : Fragment() {
 
             val isPublic = privacySelection == "Public"
 
-            lifecycleScope.launch {
-                repository.insertBook(
-                    BookEntity(
-                        title = bookName,
-                        description = bookDescription,
-                        isPublic = isPublic
-                    )
-                )
+            viewModel.createBook(
+                title = bookName,
+                description = bookDescription,
+                isPublic = isPublic
+            ) {
+                requireActivity().runOnUiThread {
+                    Toast.makeText(requireContext(), "Book created successfully", Toast.LENGTH_SHORT).show()
 
-                Toast.makeText(requireContext(), "Book created successfully", Toast.LENGTH_SHORT).show()
-
-                etBookName.text.clear()
-                etBookDescription.text.clear()
-                spinnerPrivacy.setSelection(0)
+                    etBookName.text.clear()
+                    etBookDescription.text.clear()
+                    spinnerPrivacy.setSelection(0)
+                }
             }
         }
 
@@ -174,37 +168,35 @@ class AddRecipeBookFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            lifecycleScope.launch {
+            val selectedBook = booksList[selectedBookIndex - 1]
+            val selectedRecipe = recipesList[selectedRecipeIndex - 1]
 
-                val selectedBook = booksList[selectedBookIndex - 1]
-                val selectedRecipe = recipesList[selectedRecipeIndex - 1]
+            viewModel.addRecipeToBook(selectedRecipe, selectedBook.id) {
+                requireActivity().runOnUiThread {
 
-                val updatedRecipe = selectedRecipe.copy(bookId = selectedBook.id)
+                    recipesList = recipesList.filter { it.id != selectedRecipe.id }
 
-                recipeRepository.updateRecipe(updatedRecipe)
+                    val recipeNames = mutableListOf("Select Recipe")
+                    recipeNames.addAll(recipesList.map { it.name })
 
-                recipesList = recipesList.filter { it.id != updatedRecipe.id }
+                    val recipesAdapter = ArrayAdapter(
+                        requireContext(),
+                        android.R.layout.simple_spinner_item,
+                        recipeNames
+                    )
+                    recipesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    spinnerRecipes.adapter = recipesAdapter
 
-                val recipeNames = mutableListOf("Select Recipe")
-                recipeNames.addAll(recipesList.map { it.name })
-
-                val recipesAdapter = ArrayAdapter(
-                    requireContext(),
-                    android.R.layout.simple_spinner_item,
-                    recipeNames
-                )
-                recipesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                spinnerRecipes.adapter = recipesAdapter
-
-                Toast.makeText(requireContext(), "Recipe added to book!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Recipe added to book!", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
-        lifecycleScope.launch {
+        viewModel.getAllBooks { books ->
+            booksList = books
 
-            booksList = repository.getAllBooks()
             val bookTitles = mutableListOf("Select Book")
-            bookTitles.addAll(booksList.map { it.title })
+            bookTitles.addAll(books.map { it.title })
 
             val booksAdapter = ArrayAdapter(
                 requireContext(),
@@ -213,19 +205,6 @@ class AddRecipeBookFragment : Fragment() {
             )
             booksAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerBooks.adapter = booksAdapter
-
-
-            recipesList = recipeRepository.getAllRecipes()
-            val recipeNames = mutableListOf("Select Recipe")
-            recipeNames.addAll(recipesList.map { it.name })
-
-            val recipesAdapter = ArrayAdapter(
-                requireContext(),
-                android.R.layout.simple_spinner_item,
-                recipeNames
-            )
-            recipesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerRecipes.adapter = recipesAdapter
         }
 
         return view

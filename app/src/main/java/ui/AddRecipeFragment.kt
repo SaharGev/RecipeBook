@@ -159,7 +159,7 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
                 .takeIf { it != "Difficulty" } ?: "Easy"
 
             val privacyText = tvPrivacy.text.toString()
-            if (privacyText == "Privacy") { // "Privacy" זה הטקסט ההתחלתי של השדה
+            if (privacyText == "Privacy") {
                 android.widget.Toast.makeText(
                     requireContext(),
                     "Please select privacy",
@@ -205,19 +205,17 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
             }
 
             if (recipeToEdit != null) {
-                viewModel.updateRecipe(
-                    com.example.recipebook.db.RecipeEntity(
-                        id = recipeToEdit.id,
-                        bookId = 1, //recipeToEdit.bookId
-                        name = name,
-                        description = description,
-                        ingredients = ingredients,
-                        instructions = instructions,
-                        imageUri = selectedImageUri?.toString(),
-                        cookTime = time,
-                        difficulty = difficulty,
-                        isPublic = isPublic
-                    )
+                viewModel.updateRecipeByFields(
+                    id = recipeToEdit.id,
+                    bookId = 1,
+                    name = name,
+                    description = description,
+                    ingredients = ingredients,
+                    instructions = instructions,
+                    imageUri = selectedImageUri?.toString(),
+                    cookTime = time,
+                    difficulty = difficulty,
+                    isPublic = isPublic
                 )
             } else {
                 viewModel.addRecipe(

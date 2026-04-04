@@ -20,17 +20,30 @@ import android.graphics.Bitmap
 import java.io.File
 import java.io.FileOutputStream
 import androidx.core.content.FileProvider
-import com.example.recipebook.db.DatabaseProvider
 import com.example.recipebook.db.UserEntity
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import com.google.firebase.auth.UserProfileChangeRequest
+import androidx.fragment.app.viewModels
+import com.example.recipebook.viewmodel.UserViewModel
+import com.example.recipebook.utils.showLoading
+import com.example.recipebook.utils.hideLoading
 
 class CompleteProfileFragment : Fragment() {
 
     private var selectedImageUri: Uri? = null
+    private val userViewModel: UserViewModel by viewModels()
+    private val requestCameraPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                takePhotoLauncher.launch(null)
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Camera permission denied",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
 
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -49,7 +62,7 @@ class CompleteProfileFragment : Fragment() {
     private val takePhotoLauncher =
         registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
             if (bitmap != null) {
-                val file = File(requireContext().cacheDir, "profile_${System.currentTimeMillis()}.jpg")
+                val file = File(requireContext().filesDir, "profile_${System.currentTimeMillis()}.jpg")
 
                 FileOutputStream(file).use { outputStream ->
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
@@ -87,7 +100,6 @@ class CompleteProfileFragment : Fragment() {
 
         val btnSelectProfileImage = view.findViewById<Button>(R.id.btnSelectProfileImage)
         val btnFinishProfile = view.findViewById<Button>(R.id.btnFinishProfile)
-        val userDao = DatabaseProvider.getDatabase(requireContext()).userDao()
         val firebaseUser = FirebaseAuth.getInstance().currentUser
 
         val fullName = arguments?.getString("fullName").orEmpty()
@@ -101,7 +113,7 @@ class CompleteProfileFragment : Fragment() {
                 .setTitle("Select Image")
                 .setItems(options) { _, which ->
                     if (which == 0) {
-                        takePhotoLauncher.launch(null)
+                        requestCameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
                     } else {
                         pickImageLauncher.launch("image/*")
                     }
@@ -123,18 +135,20 @@ class CompleteProfileFragment : Fragment() {
                 .setDisplayName(username)
                 .build()
 
-            firebaseUser?.updateProfile(profileUpdates)?.addOnCompleteListener {
+            firebaseUser?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
 
-                val prefs = requireContext().getSharedPreferences("profile_prefs", android.content.Context.MODE_PRIVATE)
-                val uid = firebaseUser?.uid.orEmpty()
+                    val prefs = requireContext().getSharedPreferences("profile_prefs", android.content.Context.MODE_PRIVATE)
+                    val uid = firebaseUser?.uid.orEmpty()
 
-                prefs.edit()
-                    .putString("profile_image_uri_$uid", selectedImageUri?.toString())
-                    .apply()
+                    prefs.edit()
+                        .putString("profile_image_uri_$uid", selectedImageUri?.toString())
+                        .apply()
 
-                val email = firebaseUser?.email.orEmpty()
+                    val email = firebaseUser?.email.orEmpty()
 
-                CoroutineScope(Dispatchers.IO).launch {
+                    showLoading()
+
                     val newUser = UserEntity(
                         uid = uid,
                         username = username,
@@ -142,13 +156,17 @@ class CompleteProfileFragment : Fragment() {
                         phone = null
                     )
 
-                    userDao.insertUser(newUser)
+                    userViewModel.saveUserLocallyAndRemotely(newUser) {
+                        requireActivity().runOnUiThread {
+                            hideLoading()
 
-                    requireActivity().runOnUiThread {
-                        findNavController().navigate(R.id.action_completeProfileFragment_to_profileFragment)
+                            findNavController().navigate(R.id.action_completeProfileFragment_to_profileFragment)
+                        }
                     }
-                }
 
+                } else {
+                    Toast.makeText(requireContext(), "Failed to update profile", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

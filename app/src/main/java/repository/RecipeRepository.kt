@@ -34,4 +34,7 @@ class RecipeRepository(context: Context) {
         recipeDao.removeBookFromRecipes(bookId)
     }
 
+    suspend fun getRecipeById(id: Int): RecipeEntity? {
+        return recipeDao.getRecipeById(id)
+    }
 }
