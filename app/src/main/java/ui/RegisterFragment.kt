@@ -164,7 +164,8 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                         uid = uid,
                         username = username,
                         email = email,
-                        phone = phone
+                        phone = phone,
+                        profileImageUrl = null
                     )
 
                     userViewModel.saveUserLocallyAndRemotely(newUser) {

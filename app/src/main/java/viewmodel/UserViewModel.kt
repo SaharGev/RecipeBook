@@ -66,4 +66,5 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             callback(user)
         }
     }
+
 }

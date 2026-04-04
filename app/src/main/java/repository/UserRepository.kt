@@ -27,7 +27,8 @@ class UserRepository(context: Context) {
                     "uid" to user.uid,
                     "username" to user.username,
                     "email" to user.email,
-                    "phone" to user.phone
+                    "phone" to user.phone,
+                    "profileImageUrl" to user.profileImageUrl
                 )
             )
             .await()
@@ -45,7 +46,8 @@ class UserRepository(context: Context) {
             uid = uid,
             username = document.getString("username").orEmpty(),
             email = document.getString("email").orEmpty(),
-            phone = document.getString("phone")
+            phone = document.getString("phone"),
+            profileImageUrl = document.getString("profileImageUrl")
         )
     }
 
@@ -80,4 +82,5 @@ class UserRepository(context: Context) {
     suspend fun getUserByUsername(username: String): UserEntity? {
         return userDao.getUserByUsername(username)
     }
+
 }

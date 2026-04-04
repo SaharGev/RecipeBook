@@ -11,15 +11,10 @@ import androidx.navigation.fragment.findNavController
 import com.example.recipebook.R
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
-import com.example.recipebook.db.DatabaseProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.firestore.FirebaseFirestore
 import androidx.core.os.bundleOf
 import com.example.recipebook.utils.showLoading
 import com.example.recipebook.utils.hideLoading
@@ -36,7 +31,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         super.onViewCreated(view, savedInstanceState)
 
         auth = FirebaseAuth.getInstance()
-        val firestore = FirebaseFirestore.getInstance()
 
         val currentUser = auth.currentUser
 
@@ -80,7 +74,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
         googleSignInClient = GoogleSignIn.getClient(requireContext(), gso)
 
-        val userDao = DatabaseProvider.getDatabase(requireContext()).userDao()
 
         val etEmail = view.findViewById<TextInputEditText>(R.id.etEmail)
         val etPassword = view.findViewById<TextInputEditText>(R.id.etPassword)
@@ -118,7 +111,10 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 auth.signInWithEmailAndPassword(identifier, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            findNavController().navigate(R.id.action_loginFragment_to_profileFragment)
+                            val navController = findNavController()
+                            if (navController.currentDestination?.id == R.id.loginFragment) {
+                                navController.navigate(R.id.profileFragment)
+                            }
                         } else {
                             Toast.makeText(requireContext(), "Login failed", Toast.LENGTH_SHORT).show()
                         }
@@ -135,7 +131,10 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                         auth.signInWithEmailAndPassword(user.email, password)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
-                                    findNavController().navigate(R.id.action_loginFragment_to_profileFragment)
+                                    val navController = findNavController()
+                                    if (navController.currentDestination?.id == R.id.loginFragment) {
+                                        navController.navigate(R.id.profileFragment)
+                                    }
                                 } else {
                                     tilEmail.error = "Invalid email or password"
                                     etEmail.requestFocus()
@@ -173,15 +172,12 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
                 val credential = GoogleAuthProvider.getCredential(account.idToken, null)
 
-                val userDao = DatabaseProvider.getDatabase(requireContext()).userDao()
-
                 auth.signInWithCredential(credential)
                     .addOnCompleteListener { authTask ->
                         if (authTask.isSuccessful) {
 
                             val firebaseUser = auth.currentUser
                             val uid = firebaseUser?.uid ?: return@addOnCompleteListener
-                            val firestore = FirebaseFirestore.getInstance()
 
                             userViewModel.getOrFetchUser(uid) { user ->
                                 requireActivity().runOnUiThread {
