@@ -71,7 +71,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             tvUserName.text = user?.username ?: "User Name"
             tvEmail.text = user?.email ?: ""
         }
-        tvFriendsCount.text = "0"
+
+        userViewModel.getFriendsCount(uid) { count ->
+            activity?.runOnUiThread {
+                tvFriendsCount.text = count.toString()
+            }
+        }
 
         statBooks.setOnClickListener {
             findNavController().navigate(R.id.action_profileFragment_to_homeFragment)
@@ -82,11 +87,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
 
         statFriends.setOnClickListener {
-            Toast.makeText(
-                requireContext(),
-                "Friends screen coming soon",
-                Toast.LENGTH_SHORT
-            ).show()
+            findNavController().navigate(R.id.action_profileFragment_to_friendsFragment)
         }
 
         btnSettings.setOnClickListener {

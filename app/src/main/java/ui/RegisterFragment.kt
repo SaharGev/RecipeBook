@@ -91,6 +91,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
 
             val bundle = Bundle().apply {
                 putString("fullName", username)
+                putString("phone", phone)
             }
 
             userViewModel.getUserByUsername(username) { existingUserByUsername ->

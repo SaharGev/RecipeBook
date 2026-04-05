@@ -83,4 +83,88 @@ class UserRepository(context: Context) {
         return userDao.getUserByUsername(username)
     }
 
+    suspend fun searchUserByUsernameInFirestore(username: String): UserEntity? {
+        val result = firestore.collection("users")
+            .whereEqualTo("username", username)
+            .get()
+            .await()
+
+        val document = result.documents.firstOrNull() ?: return null
+
+        return UserEntity(
+            uid = document.getString("uid").orEmpty(),
+            username = document.getString("username").orEmpty(),
+            email = document.getString("email").orEmpty(),
+            phone = document.getString("phone"),
+            profileImageUrl = document.getString("profileImageUrl")
+        )
+    }
+
+    suspend fun addFriend(currentUid: String, friendUid: String) {
+        val userRef = firestore.collection("users").document(currentUid)
+
+        val document = userRef.get().await()
+        val currentFriends = document.get("friends") as? List<String> ?: emptyList()
+
+        if (!currentFriends.contains(friendUid)) {
+            userRef.update("friends", currentFriends + friendUid).await()
+        }
+    }
+
+    suspend fun searchUserByEmailInFirestore(email: String): UserEntity? {
+        val result = firestore.collection("users")
+            .whereEqualTo("email", email)
+            .get()
+            .await()
+
+        val document = result.documents.firstOrNull() ?: return null
+
+        return UserEntity(
+            uid = document.getString("uid").orEmpty(),
+            username = document.getString("username").orEmpty(),
+            email = document.getString("email").orEmpty(),
+            phone = document.getString("phone"),
+            profileImageUrl = document.getString("profileImageUrl")
+        )
+    }
+
+    suspend fun searchUserByPhoneInFirestore(phone: String): UserEntity? {
+        val result = firestore.collection("users")
+            .whereEqualTo("phone", phone)
+            .get()
+            .await()
+
+        val document = result.documents.firstOrNull() ?: return null
+
+        return UserEntity(
+            uid = document.getString("uid").orEmpty(),
+            username = document.getString("username").orEmpty(),
+            email = document.getString("email").orEmpty(),
+            phone = document.getString("phone"),
+            profileImageUrl = document.getString("profileImageUrl")
+        )
+    }
+
+    suspend fun getFriends(currentUid: String): List<UserEntity> {
+        val document = firestore.collection("users")
+            .document(currentUid)
+            .get()
+            .await()
+
+        val friendUids = document.get("friends") as? List<String> ?: emptyList()
+
+        return friendUids.mapNotNull { uid ->
+            getUserFromFirestore(uid)
+        }
+    }
+
+    suspend fun getFriendsCount(currentUid: String): Int {
+        val document = firestore.collection("users")
+            .document(currentUid)
+            .get()
+            .await()
+
+        val friendUids = document.get("friends") as? List<String> ?: emptyList()
+        return friendUids.size
+    }
 }

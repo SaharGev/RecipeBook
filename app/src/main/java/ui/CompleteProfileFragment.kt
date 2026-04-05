@@ -103,6 +103,7 @@ class CompleteProfileFragment : Fragment() {
         val firebaseUser = FirebaseAuth.getInstance().currentUser
 
         val fullName = arguments?.getString("fullName").orEmpty()
+        val phone = arguments?.getString("phone")
         val etCompleteName = view.findViewById<EditText>(R.id.etCompleteName)
         etCompleteName.setText(fullName)
 
@@ -155,14 +156,14 @@ class CompleteProfileFragment : Fragment() {
                         uid = uid,
                         username = username,
                         email = email,
-                        phone = null,
+                        phone = phone,
                         profileImageUrl = null
                     )
 
                     userViewModel.saveUserLocallyAndRemotely(newUser) {
                         requireActivity().runOnUiThread {
                             hideLoading()
-                            findNavController().navigate(R.id.action_completeProfileFragment_to_profileFragment)
+                            findNavController().navigate(R.id.action_completeProfileFragment_to_friendsFragment)
                         }
                     }
                 } else {
