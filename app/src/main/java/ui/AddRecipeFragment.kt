@@ -22,6 +22,8 @@ import android.Manifest
 import android.widget.TextView
 import com.example.recipebook.model.Recipe
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.example.recipebook.utils.showLoading
+import com.example.recipebook.utils.hideLoading
 
 class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
 
@@ -218,7 +220,12 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
                     isPublic = isPublic
                 )
             } else {
+                val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
+                showLoading()
+
                 viewModel.addRecipe(
+                    uid = uid,
                     bookId = selectedBookId,
                     name = name,
                     description = description,
@@ -227,17 +234,20 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
                     imageUri = selectedImageUri?.toString(),
                     cookTime = time,
                     difficulty = difficulty,
-                    isPublic = isPublic
+                    isPublic = isPublic,
+                    onDone = {
+                        requireActivity().runOnUiThread {
+                            hideLoading()
+                            android.widget.Toast.makeText(
+                                requireContext(),
+                                "Recipe saved successfully",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                            findNavController().popBackStack()
+                        }
+                    }
                 )
             }
-
-            android.widget.Toast.makeText(
-                requireContext(),
-                "Recipe saved successfully",
-                android.widget.Toast.LENGTH_SHORT
-            ).show()
-
-            findNavController().popBackStack()
         }
     }
 
