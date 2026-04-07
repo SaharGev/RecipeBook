@@ -52,6 +52,10 @@
             android:id="@+id/action_completeProfileFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
 
+        <action
+            android:id="@+id/action_completeProfileFragment_to_friendsFragment"
+            app:destination="@id/friendsFragment" />
+
     </fragment>
 
     <fragment
@@ -152,7 +156,9 @@
         <action
             android:id="@+id/action_profileFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
-
+        <action
+            android:id="@+id/action_profileFragment_to_friendsFragment"
+            app:destination="@id/friendsFragment" />
 
     </fragment>
 
@@ -227,5 +233,11 @@
             android:id="@+id/action_myRecipesFragment_to_recipeDetailsFragment"
             app:destination="@id/recipeDetailsFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/friendsFragment"
+        android:name="com.example.recipebook.ui.FriendsFragment"
+        android:label="Friends"
+        tools:layout="@layout/fragment_friends" />
 
 </navigation>

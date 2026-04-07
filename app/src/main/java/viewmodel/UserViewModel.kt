@@ -67,4 +67,50 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun searchUserByUsername(username: String, callback: (UserEntity?) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val user = repository.searchUserByUsernameInFirestore(username)
+            callback(user)
+        }
+    }
+
+    fun addFriend(currentUid: String, friendUid: String, onDone: (Boolean) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                repository.addFriend(currentUid, friendUid)
+                onDone(true)
+            } catch (e: Exception) {
+                onDone(false)
+            }
+        }
+    }
+
+    fun searchUser(query: String, callback: (UserEntity?) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val isEmail = android.util.Patterns.EMAIL_ADDRESS.matcher(query).matches()
+            val isPhone = query.all { it.isDigit() || it == '+' || it == '-' }
+
+            val user = when {
+                isEmail -> repository.searchUserByEmailInFirestore(query)
+                isPhone -> repository.searchUserByPhoneInFirestore(query)
+                else -> repository.searchUserByUsernameInFirestore(query)
+            }
+
+            callback(user)
+        }
+    }
+
+    fun getFriends(currentUid: String, callback: (List<UserEntity>) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val friends = repository.getFriends(currentUid)
+            callback(friends)
+        }
+    }
+
+    fun getFriendsCount(currentUid: String, callback: (Int) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val count = repository.getFriendsCount(currentUid)
+            callback(count)
+        }
+    }
 }
