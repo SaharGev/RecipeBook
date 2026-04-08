@@ -103,6 +103,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     }
 
     private fun refreshProfileData() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
         loadSavedProfileImage(imgProfile)
 
         recipeViewModel.getRecipesCount { count ->
@@ -111,7 +113,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             }
         }
 
-        bookViewModel.getBooksCount { count ->
+        bookViewModel.getBooksCount(uid) { count ->
             activity?.runOnUiThread {
                 tvBooksCount.text = count.toString()
             }
@@ -139,7 +141,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     }
 
     private fun loadProfileBooks(rvProfileBooks: RecyclerView, tvEmptyProfileBooks: TextView) {
-        bookViewModel.getBooks { books ->
+        val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        bookViewModel.getBooks(uid) { books ->
             val countsMap = mutableMapOf<Int, Int>()
 
             if (books.isEmpty()) {

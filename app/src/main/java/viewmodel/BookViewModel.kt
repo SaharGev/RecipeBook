@@ -13,16 +13,16 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = BookRepository(application.applicationContext)
 
-    fun getBooks(callback: (List<BookEntity>) -> Unit) {
+    fun getBooks(uid: String, callback: (List<BookEntity>) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val books = repository.getAllBooks()
+            val books = repository.getAllBooks(uid)
             callback(books)
         }
     }
 
-    fun getBooksCount(callback: (Int) -> Unit) {
+    fun getBooksCount(uid: String, callback: (Int) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val books = repository.getAllBooks()
+            val books = repository.getAllBooks(uid)
             callback(books.size)
         }
     }

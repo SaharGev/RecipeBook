@@ -20,6 +20,8 @@ class AddRecipeBookFragment : Fragment() {
     private lateinit var booksList: List<BookEntity>
     private lateinit var recipesList: List<com.example.recipebook.db.RecipeEntity>
 
+    private val selectedFriendUids = mutableListOf<String>()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -121,6 +123,54 @@ class AddRecipeBookFragment : Fragment() {
 
         spinnerPrivacy.setSelection(0)
 
+        val tvShareWith = view.findViewById<TextView>(R.id.tvShareWith)
+        val llFriendsList = view.findViewById<LinearLayout>(R.id.llFriendsList)
+
+        spinnerPrivacy.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, v: View?, position: Int, id: Long) {
+                val selected = privacyOptions[position]
+                if (selected == "Public") {
+                    tvShareWith.visibility = View.VISIBLE
+                    llFriendsList.visibility = View.VISIBLE
+
+                    val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+                    viewModel.getFriends(uid) { friends ->
+                        requireActivity().runOnUiThread {
+                            llFriendsList.removeAllViews()
+                            selectedFriendUids.clear()
+
+                            if (friends.isEmpty()) {
+                                val tvNoFriends = TextView(requireContext())
+                                tvNoFriends.text = "You have no friends yet"
+                                tvNoFriends.textSize = 14f
+                                llFriendsList.addView(tvNoFriends)
+                                return@runOnUiThread
+                            }
+
+                            friends.forEach { friend ->
+                                val checkBox = CheckBox(requireContext())
+                                checkBox.text = friend.username
+                                checkBox.setOnCheckedChangeListener { _, isChecked ->
+                                    if (isChecked) {
+                                        selectedFriendUids.add(friend.uid)
+                                    } else {
+                                        selectedFriendUids.remove(friend.uid)
+                                    }
+                                }
+                                llFriendsList.addView(checkBox)
+                            }
+                        }
+                    }
+                } else {
+                    tvShareWith.visibility = View.GONE
+                    llFriendsList.visibility = View.GONE
+                    selectedFriendUids.clear()
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
         btnCreateBook.setOnClickListener {
             val bookName = etBookName.text.toString().trim()
             val bookDescription = etBookDescription.text.toString().trim()
@@ -142,7 +192,8 @@ class AddRecipeBookFragment : Fragment() {
             viewModel.createBook(
                 title = bookName,
                 description = bookDescription,
-                isPublic = isPublic
+                isPublic = isPublic,
+                sharedWith = selectedFriendUids.joinToString(",")
             ) {
                 requireActivity().runOnUiThread {
                     Toast.makeText(requireContext(), "Book created successfully", Toast.LENGTH_SHORT).show()

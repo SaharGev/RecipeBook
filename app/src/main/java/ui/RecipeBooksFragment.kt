@@ -59,7 +59,8 @@ class RecipeBooksFragment : Fragment() {
     }
 
     private fun loadBooks(rvBooks: RecyclerView, tvEmptyBooks: TextView) {
-        viewModel.getBooks { books ->
+        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        viewModel.getBooks(uid) { books ->
             val countsMap = mutableMapOf<Int, Int>()
 
             if (books.isEmpty()) {

@@ -12,5 +12,6 @@ data class BookEntity(
     val description: String = "",
     val isPublic: Boolean = true,
     val imageUri: String? = null,
-    val ownerUid: String = ""
+    val ownerUid: String = "",
+    val sharedWith: String = ""
 )

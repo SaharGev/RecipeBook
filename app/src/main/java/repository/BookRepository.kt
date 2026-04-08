@@ -15,8 +15,30 @@ class BookRepository(context: Context) {
     private val firestore = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
 
-    suspend fun getAllBooks(): List<BookEntity> {
-        return bookDao.getAllBooks()
+    suspend fun getAllBooks(uid: String): List<BookEntity> {
+        val localBooks = bookDao.getAllBooks()
+        if (localBooks.isNotEmpty()) return localBooks
+
+        val result = firestore.collection("users")
+            .document(uid)
+            .collection("books")
+            .get()
+            .await()
+
+        val remoteBooks = result.documents.mapNotNull { doc ->
+            BookEntity(
+                id = (doc.getLong("id") ?: 0).toInt(),
+                title = doc.getString("title").orEmpty(),
+                description = doc.getString("description").orEmpty(),
+                isPublic = doc.getBoolean("isPublic") ?: true,
+                imageUri = doc.getString("imageUri"),
+                ownerUid = doc.getString("ownerUid").orEmpty(),
+                sharedWith = (doc.get("sharedWith") as? List<String>)?.joinToString(",").orEmpty()
+            )
+        }
+
+        remoteBooks.forEach { bookDao.insertBook(it) }
+        return remoteBooks
     }
 
     suspend fun insertBook(book: BookEntity): Long {
@@ -43,7 +65,8 @@ class BookRepository(context: Context) {
                     "description" to book.description,
                     "isPublic" to book.isPublic,
                     "imageUri" to book.imageUri,
-                    "ownerUid" to uid
+                    "ownerUid" to uid,
+                    "sharedWith" to book.sharedWith.split(",").filter { it.isNotEmpty() }
                 )
             )
             .await()
