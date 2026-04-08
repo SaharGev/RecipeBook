@@ -33,16 +33,33 @@ class AddRecipeBookViewModel(application: Application) : AndroidViewModel(applic
         title: String,
         description: String,
         isPublic: Boolean,
+        imageUri: String? = null,
         onDone: (() -> Unit)? = null
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            bookRepository.insertBook(
-                BookEntity(
-                    title = title,
-                    description = description,
-                    isPublic = isPublic
-                )
+            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
+            val newBook = BookEntity(
+                title = title,
+                description = description,
+                isPublic = isPublic,
+                imageUri = imageUri,
+                ownerUid = uid
             )
+
+            val id = bookRepository.insertBook(newBook)
+
+            val finalImageUrl = if (imageUri != null) {
+                try {
+                    bookRepository.uploadBookImage(uid, id.toInt(), android.net.Uri.parse(imageUri))
+                } catch (e: Exception) {
+                    android.util.Log.e("DEBUG", "Book image upload failed: ${e.message}", e)
+                    imageUri
+                }
+            } else null
+
+            val savedBook = newBook.copy(id = id.toInt(), imageUri = finalImageUrl)
+            bookRepository.saveBookToFirestore(savedBook, uid)
             onDone?.invoke()
         }
     }

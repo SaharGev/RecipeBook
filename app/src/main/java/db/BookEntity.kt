@@ -10,5 +10,7 @@ data class BookEntity(
     val id: Int = 0,
     val title: String,
     val description: String = "",
-    val isPublic: Boolean = true
+    val isPublic: Boolean = true,
+    val imageUri: String? = null,
+    val ownerUid: String = ""
 )

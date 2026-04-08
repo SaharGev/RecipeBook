@@ -41,8 +41,16 @@ class RecipeBooksFragment : Fragment() {
         }
 
         btnAddBook.setOnClickListener {
-            viewModel.addBook("My Recipe Book")
-            loadBooks(rvBooks, tvEmptyBooks)
+            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+            viewModel.addBook(
+                uid = uid,
+                title = "My Recipe Book",
+                onDone = {
+                    requireActivity().runOnUiThread {
+                        loadBooks(rvBooks, tvEmptyBooks)
+                    }
+                }
+            )
         }
 
         loadBooks(rvBooks, tvEmptyBooks)

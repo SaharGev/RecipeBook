@@ -13,7 +13,7 @@ interface BookDao {
     suspend fun getAllBooks(): List<BookEntity>
 
     @Insert
-    suspend fun insertBook(book: BookEntity)
+    suspend fun insertBook(book: BookEntity): Long
 
     @Query("DELETE FROM books WHERE id = :bookId")
     suspend fun deleteBook(bookId: Int)
