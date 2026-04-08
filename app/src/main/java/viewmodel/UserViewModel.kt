@@ -7,6 +7,7 @@ import com.example.recipebook.db.UserEntity
 import com.example.recipebook.repository.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import android.net.Uri
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -113,4 +114,17 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             callback(count)
         }
     }
+
+    fun uploadProfileImage(uid: String, imageUri: Uri, onDone: (String) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val url = repository.uploadProfileImage(uid, imageUri)
+                onDone(url)
+            } catch (e: Exception) {
+                android.util.Log.e("DEBUG", "Profile image upload failed: ${e.message}", e)
+                onDone("")
+            }
+        }
+    }
+
 }

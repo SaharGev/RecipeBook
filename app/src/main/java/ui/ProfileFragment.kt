@@ -121,18 +121,20 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     }
 
     private fun loadSavedProfileImage(imageView: ShapeableImageView) {
-        val prefs = requireContext().getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-        val savedImageUri = prefs.getString("profile_image_uri_$uid", null)
 
-        if (!savedImageUri.isNullOrEmpty()) {
-            Glide.with(this)
-                .load(Uri.parse(savedImageUri))
-                .placeholder(R.drawable.ic_launcher_foreground)
-                .error(R.drawable.ic_launcher_foreground)
-                .into(imageView)
-        } else {
-            imageView.setImageResource(R.drawable.ic_launcher_foreground)
+        userViewModel.getUserByUid(uid) { user ->
+            activity?.runOnUiThread {
+                if (!user?.profileImageUrl.isNullOrEmpty()) {
+                    Glide.with(this)
+                        .load(user?.profileImageUrl)
+                        .placeholder(R.drawable.ic_launcher_foreground)
+                        .error(R.drawable.ic_launcher_foreground)
+                        .into(imageView)
+                } else {
+                    imageView.setImageResource(R.drawable.ic_launcher_foreground)
+                }
+            }
         }
     }
 
