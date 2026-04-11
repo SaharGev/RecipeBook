@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Delete
 import androidx.room.Update
+import androidx.room.OnConflictStrategy
 
 @Dao
 interface RecipeDao {
@@ -16,7 +17,7 @@ interface RecipeDao {
     @Query("SELECT * FROM recipes WHERE bookId = :bookId")
     suspend fun getRecipesByBookId(bookId: Int): List<RecipeEntity>
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertRecipe(recipe: RecipeEntity): Long
 
     @Delete
