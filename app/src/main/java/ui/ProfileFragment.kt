@@ -142,51 +142,52 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private fun loadProfileBooks(rvProfileBooks: RecyclerView, tvEmptyProfileBooks: TextView) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-        bookViewModel.getBooks(uid) { books ->
-            val countsMap = mutableMapOf<Int, Int>()
 
-            if (books.isEmpty()) {
-                rvProfileBooks.post {
-                    rvProfileBooks.visibility = View.GONE
-                    tvEmptyProfileBooks.visibility = View.VISIBLE
+        bookViewModel.getBooks(uid) { myBooks ->
+            bookViewModel.getSharedWithMeBooks(uid) { sharedBooks ->
+                val allBooks = (myBooks + sharedBooks).distinctBy { it.id }
+                val countsMap = mutableMapOf<Int, Int>()
+
+                activity?.runOnUiThread {
+                    if (allBooks.isEmpty()) {
+                        rvProfileBooks.visibility = View.GONE
+                        tvEmptyProfileBooks.visibility = View.VISIBLE
+                        return@runOnUiThread
+                    }
+
+                    rvProfileBooks.visibility = View.VISIBLE
+                    tvEmptyProfileBooks.visibility = View.GONE
                 }
-                return@getBooks
-            }
 
-            rvProfileBooks.post {
-                rvProfileBooks.visibility = View.VISIBLE
-                tvEmptyProfileBooks.visibility = View.GONE
-            }
+                var remaining = allBooks.size
 
-            var remaining = books.size
+                allBooks.forEach { book ->
+                    recipeViewModel.getRecipesCountByBookId(book.id) { count ->
+                        countsMap[book.id] = count
+                        remaining--
 
-            books.forEach { book ->
-                recipeViewModel.getRecipesCountByBookId(book.id) { count ->
-                    countsMap[book.id] = count
-                    remaining--
-
-                    if (remaining == 0) {
-                        rvProfileBooks.post {
-                            rvProfileBooks.adapter = RecipeBooksAdapter(
-                                books = books,
-                                onItemClick = { clickedBook ->
-                                    val bundle = Bundle()
-                                    bundle.putInt("bookId", clickedBook.id)
-                                    bundle.putString("bookTitle", clickedBook.title)
-
-                                    findNavController().navigate(
-                                        R.id.action_profileFragment_to_bookRecipesFragment,
-                                        bundle
-                                    )
-                                },
-                                onDeleteClick = { book ->
-                                    viewLifecycleOwner.lifecycleScope.launch {
-                                        bookViewModel.deleteBook(book.id)
-                                        refreshProfileData()
-                                    }
-                                },
-                                countsMap = countsMap
-                            )
+                        if (remaining == 0) {
+                            rvProfileBooks.post {
+                                rvProfileBooks.adapter = RecipeBooksAdapter(
+                                    books = allBooks,
+                                    onItemClick = { clickedBook ->
+                                        val bundle = Bundle()
+                                        bundle.putInt("bookId", clickedBook.id)
+                                        bundle.putString("bookTitle", clickedBook.title)
+                                        findNavController().navigate(
+                                            R.id.action_profileFragment_to_bookRecipesFragment,
+                                            bundle
+                                        )
+                                    },
+                                    onDeleteClick = { book ->
+                                        viewLifecycleOwner.lifecycleScope.launch {
+                                            bookViewModel.deleteBook(book.id)
+                                            refreshProfileData()
+                                        }
+                                    },
+                                    countsMap = countsMap
+                                )
+                            }
                         }
                     }
                 }

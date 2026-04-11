@@ -84,4 +84,43 @@ class BookRepository(context: Context) {
         imageRef.putBytes(bytes).await()
         return imageRef.downloadUrl.await().toString()
     }
+
+    suspend fun getSharedWithMeBooks(myUid: String): List<BookEntity> {
+        val result = firestore.collection("users")
+            .get()
+            .await()
+
+        val sharedBooks = mutableListOf<BookEntity>()
+
+        for (userDoc in result.documents) {
+            if (userDoc.id == myUid) continue
+
+            val booksResult = firestore.collection("users")
+                .document(userDoc.id)
+                .collection("books")
+                .get()
+                .await()
+
+            for (bookDoc in booksResult.documents) {
+                val sharedWith = bookDoc.get("sharedWith") as? List<String> ?: emptyList()
+                val isSharedWithMe = sharedWith.any { it.startsWith(myUid) }
+
+                if (isSharedWithMe) {
+                    sharedBooks.add(
+                        BookEntity(
+                            id = (bookDoc.getLong("id") ?: 0).toInt(),
+                            title = bookDoc.getString("title").orEmpty(),
+                            description = bookDoc.getString("description").orEmpty(),
+                            isPublic = bookDoc.getBoolean("isPublic") ?: true,
+                            imageUri = bookDoc.getString("imageUri"),
+                            ownerUid = bookDoc.getString("ownerUid").orEmpty(),
+                            sharedWith = sharedWith.joinToString(",")
+                        )
+                    )
+                }
+            }
+        }
+
+        return sharedBooks
+    }
 }
