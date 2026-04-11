@@ -14,9 +14,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
     private val repository = RecipeRepository(application.applicationContext)
 
-    fun getRecipes(callback: (List<RecipeEntity>) -> Unit) {
+    fun getRecipes(uid: String, callback: (List<RecipeEntity>) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val recipes = repository.getAllRecipes()
+            val recipes = repository.getAllRecipes(uid)
             callback(recipes)
         }
     }
@@ -28,17 +28,20 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun getRecipesCount(callback: (Int) -> Unit) {
+    fun getRecipesCount(uid: String, callback: (Int) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val recipes = repository.getAllRecipes()
+            val recipes = repository.getAllRecipes(uid)
             callback(recipes.size)
         }
     }
 
-    fun getRecipesCountByBookId(bookId: Int, callback: (Int) -> Unit) {
+    fun deleteRecipeById(uid: String, recipeId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            val recipes = repository.getRecipesByBookId(bookId)
-            callback(recipes.size)
+            val recipes = repository.getAllRecipes(uid)
+            val recipe = recipes.find { it.id == recipeId }
+            if (recipe != null) {
+                repository.deleteRecipe(recipe)
+            }
         }
     }
 
@@ -104,13 +107,8 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun deleteRecipeById(recipeId: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val recipes = repository.getAllRecipes()
-            val recipe = recipes.find { it.id == recipeId }
-            if (recipe != null) {
-                repository.deleteRecipe(recipe)
-            }
-        }
+        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        deleteRecipeById(uid, recipeId)
     }
 
     fun updateRecipeByFields(
@@ -146,6 +144,13 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     fun saveRecipeToFirestore(recipe: RecipeEntity, uid: String) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.saveRecipeToFirestore(recipe, uid)
+        }
+    }
+
+    fun getRecipesCountByBookId(bookId: Int, callback: (Int) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val recipes = repository.getRecipesByBookId(bookId)
+            callback(recipes.size)
         }
     }
 }

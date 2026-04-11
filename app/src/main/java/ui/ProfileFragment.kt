@@ -107,7 +107,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         loadSavedProfileImage(imgProfile)
 
-        recipeViewModel.getRecipesCount { count ->
+        recipeViewModel.getRecipesCount(uid) { count ->
             activity?.runOnUiThread {
                 tvRecipesCount.text = count.toString()
             }

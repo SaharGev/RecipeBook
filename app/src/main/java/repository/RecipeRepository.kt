@@ -16,8 +16,33 @@ class RecipeRepository(context: Context) {
     private val firestore = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
 
-    suspend fun getAllRecipes(): List<RecipeEntity> {
-        return recipeDao.getAllRecipes()
+    suspend fun getAllRecipes(uid: String): List<RecipeEntity> {
+        val localRecipes = recipeDao.getAllRecipes()
+        if (localRecipes.isNotEmpty()) return localRecipes
+
+        val result = firestore.collection("users")
+            .document(uid)
+            .collection("recipes")
+            .get()
+            .await()
+
+        val remoteRecipes = result.documents.mapNotNull { doc ->
+            RecipeEntity(
+                id = (doc.getLong("id") ?: 0).toInt(),
+                bookId = (doc.getLong("bookId") ?: 0).toInt(),
+                name = doc.getString("name").orEmpty(),
+                description = doc.getString("description").orEmpty(),
+                ingredients = doc.getString("ingredients").orEmpty(),
+                instructions = doc.getString("instructions").orEmpty(),
+                imageUri = doc.getString("imageUri"),
+                cookTime = (doc.getLong("cookTime") ?: 0).toInt(),
+                difficulty = doc.getString("difficulty").orEmpty(),
+                isPublic = doc.getBoolean("isPublic") ?: false
+            )
+        }
+
+        remoteRecipes.forEach { recipeDao.insertRecipe(it) }
+        return remoteRecipes
     }
 
     suspend fun getRecipesByBookId(bookId: Int): List<RecipeEntity> {

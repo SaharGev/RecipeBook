@@ -26,7 +26,8 @@ class AddRecipeBookViewModel(application: Application) : AndroidViewModel(applic
 
     fun getAvailableRecipesForBook(bookId: Int, callback: (List<RecipeEntity>) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val allRecipes = recipeRepository.getAllRecipes()
+            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+            val allRecipes = recipeRepository.getAllRecipes(uid)
             val filteredRecipes = allRecipes.filter { it.bookId != bookId }
             callback(filteredRecipes)
         }
