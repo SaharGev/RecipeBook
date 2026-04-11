@@ -41,18 +41,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp" />
 
-    <Button
-        android:id="@+id/btnShare"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:text="↗"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#89abf6"
-        android:textSize="16sp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btnEdit"
-        android:layout_margin="16dp" />
-
     <LinearLayout
         android:id="@+id/card"
         android:layout_width="0dp"
@@ -125,6 +113,17 @@
                 android:paddingVertical="6dp"
                 android:background="@drawable/bg_chip_small"/>
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvSharedWith"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:background="@drawable/bg_chip_small"
+            android:layout_marginStart="6dp"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/tvIngredientsTitle"

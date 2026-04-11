@@ -37,7 +37,9 @@ class RecipeRepository(context: Context) {
                 imageUri = doc.getString("imageUri"),
                 cookTime = (doc.getLong("cookTime") ?: 0).toInt(),
                 difficulty = doc.getString("difficulty").orEmpty(),
-                isPublic = doc.getBoolean("isPublic") ?: false
+                isPublic = doc.getBoolean("isPublic") ?: false,
+                ownerUid = doc.getString("ownerUid").orEmpty(),
+                sharedWith = (doc.get("sharedWith") as? List<String>)?.joinToString(",").orEmpty()
             )
         }
 

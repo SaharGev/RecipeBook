@@ -88,7 +88,8 @@ class HomeFragment : Fragment() {
                 cookTime = it.cookTime,
                 isPublic = it.isPublic,
                 difficulty = it.difficulty,
-                ownerUid = it.ownerUid
+                ownerUid = it.ownerUid,
+                sharedWith = it.sharedWith
             )
         }
     }

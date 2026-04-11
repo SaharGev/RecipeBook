@@ -30,6 +30,8 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
     private val viewModel: RecipeViewModel by viewModels()
     private var selectedImageUri: Uri? = null
 
+    private val selectedFriendPermissions = mutableMapOf<String, String>()
+    private val userViewModel: com.example.recipebook.viewmodel.UserViewModel by viewModels()
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             if (uri != null) {
@@ -87,13 +89,80 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
         }
 
         // Privacy chip
+        val tvShareWith = view.findViewById<TextView>(R.id.tvShareWith)
+        val llFriendsList = view.findViewById<android.widget.LinearLayout>(R.id.llFriendsList)
+
         val privacyChip = view.findViewById<TextView>(R.id.tvPrivacy)
+
         privacyChip.setOnClickListener {
             val options = arrayOf("Public", "Private")
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Privacy")
                 .setItems(options) { _, which ->
                     privacyChip.text = options[which]
+
+                    if (options[which] == "Public") {
+                        tvShareWith.visibility = View.VISIBLE
+                        llFriendsList.visibility = View.VISIBLE
+
+                        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+                        userViewModel.getFriends(uid) { friends ->
+                            requireActivity().runOnUiThread {
+                                llFriendsList.removeAllViews()
+                                selectedFriendPermissions.clear()
+
+                                if (friends.isEmpty()) {
+                                    val tvNoFriends = android.widget.TextView(requireContext())
+                                    tvNoFriends.text = "You have no friends yet"
+                                    llFriendsList.addView(tvNoFriends)
+                                    return@runOnUiThread
+                                }
+
+                                friends.forEach { friend ->
+                                    val rowLayout = android.widget.LinearLayout(requireContext()).apply {
+                                        orientation = android.widget.LinearLayout.HORIZONTAL
+                                        gravity = android.view.Gravity.CENTER_VERTICAL
+                                    }
+
+                                    val checkBox = android.widget.CheckBox(requireContext()).apply {
+                                        text = friend.username
+                                        layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                                    }
+
+                                    val permissionSpinner = android.widget.Spinner(requireContext())
+                                    permissionSpinner.visibility = View.GONE
+                                    val permissions = listOf("view", "edit")
+                                    val permAdapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, permissions)
+                                    permAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                                    permissionSpinner.adapter = permAdapter
+
+                                    checkBox.setOnCheckedChangeListener { _, isChecked ->
+                                        if (isChecked) {
+                                            permissionSpinner.visibility = View.VISIBLE
+                                            selectedFriendPermissions[friend.uid] = "view"
+                                            permissionSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+                                                override fun onItemSelected(parent: android.widget.AdapterView<*>?, v: View?, position: Int, id: Long) {
+                                                    selectedFriendPermissions[friend.uid] = if (position == 0) "view" else "edit"
+                                                }
+                                                override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+                                            }
+                                        } else {
+                                            permissionSpinner.visibility = View.GONE
+                                            selectedFriendPermissions.remove(friend.uid)
+                                        }
+                                    }
+
+                                    rowLayout.addView(checkBox)
+                                    rowLayout.addView(permissionSpinner)
+                                    llFriendsList.addView(rowLayout)
+                                }
+                            }
+                        }
+                    } else {
+                        tvShareWith.visibility = View.GONE
+                        llFriendsList.visibility = View.GONE
+                        selectedFriendPermissions.clear()
+                    }
                 }
                 .show()
         }
@@ -207,9 +276,13 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
             }
 
             if (recipeToEdit != null) {
+                val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
+                showLoading()
+
                 viewModel.updateRecipeByFields(
                     id = recipeToEdit.id,
-                    bookId = 1,
+                    bookId = recipeToEdit.id,
                     name = name,
                     description = description,
                     ingredients = ingredients,
@@ -217,12 +290,27 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
                     imageUri = selectedImageUri?.toString(),
                     cookTime = time,
                     difficulty = difficulty,
-                    isPublic = isPublic
+                    isPublic = isPublic,
+                    sharedWith = selectedFriendPermissions.entries.joinToString(",") { "${it.key}:${it.value}" },
+                    uid = uid,
+                    onDone = {
+                        requireActivity().runOnUiThread {
+                            hideLoading()
+                            android.widget.Toast.makeText(
+                                requireContext(),
+                                "Recipe updated successfully",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                            findNavController().popBackStack()
+                        }
+                    }
                 )
             } else {
                 val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
 
                 showLoading()
+
+                val sharedWith = selectedFriendPermissions.entries.joinToString(",") { "${it.key}:${it.value}" }
 
                 viewModel.addRecipe(
                     uid = uid,
@@ -235,6 +323,7 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
                     cookTime = time,
                     difficulty = difficulty,
                     isPublic = isPublic,
+                    sharedWith = sharedWith,
                     onDone = {
                         requireActivity().runOnUiThread {
                             hideLoading()

@@ -15,5 +15,6 @@ data class Recipe(
     val cookTime: Int,
     val difficulty: String,
     val isPublic: Boolean,
-    val ownerUid: String = ""
+    val ownerUid: String = "",
+    val sharedWith: String = ""
 ) : Parcelable
