@@ -41,7 +41,12 @@ class RecipeRepository(context: Context) {
             )
         }
 
-        remoteRecipes.forEach { recipeDao.insertRecipe(it) }
+        remoteRecipes.forEach { recipe ->
+            val existing = recipeDao.getRecipeById(recipe.id)
+            if (existing == null) {
+                recipeDao.insertRecipe(recipe)
+            }
+        }
         return remoteRecipes
     }
 

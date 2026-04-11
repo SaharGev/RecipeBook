@@ -22,4 +22,10 @@ object DatabaseProvider {
 
         return instance!!
     }
+
+    fun clearDatabase(context: Context) {
+        instance?.close()
+        instance = null
+        context.deleteDatabase("recipe_database")
+    }
 }

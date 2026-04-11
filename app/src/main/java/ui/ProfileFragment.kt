@@ -68,8 +68,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
 
         userViewModel.getUserByUid(uid) { user ->
-            tvUserName.text = user?.username ?: "User Name"
-            tvEmail.text = user?.email ?: ""
+            activity?.runOnUiThread {
+                tvUserName.text = user?.username ?: "User Name"
+                tvEmail.text = user?.email ?: ""
+            }
         }
 
         userViewModel.getFriendsCount(uid) { count ->
@@ -95,6 +97,15 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
 
         refreshProfileData()
+        bookViewModel.listenToPendingInvitations(uid) { invitations ->
+            if (invitations.isEmpty()) return@listenToPendingInvitations
+            if (!isAdded) return@listenToPendingInvitations
+            requireActivity().runOnUiThread {
+                if (!isAdded) return@runOnUiThread
+                showInvitationDialog(invitations.first())
+            }
+        }
+
     }
 
     override fun onResume() {
@@ -145,7 +156,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         bookViewModel.getBooks(uid) { myBooks ->
             bookViewModel.getSharedWithMeBooks(uid) { sharedBooks ->
-                val allBooks = (myBooks + sharedBooks).distinctBy { it.id }
+                val myOwnBooks = myBooks.filter { it.ownerUid == uid }
+                val allBooks = (myOwnBooks + sharedBooks).distinctBy { it.id }
                 val countsMap = mutableMapOf<Int, Int>()
 
                 activity?.runOnUiThread {
@@ -191,6 +203,34 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun showInvitationDialog(invitation: Map<String, Any>) {
+        val invitationId = invitation["invitationId"] as? String ?: return
+        val fromUid = invitation["fromUid"] as? String ?: return
+        val bookTitle = invitation["bookTitle"] as? String ?: return
+        val permission = invitation["permission"] as? String ?: return
+
+        userViewModel.getUserByUid(fromUid) { fromUser ->
+            requireActivity().runOnUiThread {
+                val fromUsername = fromUser?.username ?: "Someone"
+
+                android.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Book Sharing Request")
+                    .setMessage("$fromUsername wants to share \"$bookTitle\" with you ($permission access)")
+                    .setPositiveButton("Accept") { _, _ ->
+                        bookViewModel.updateInvitationStatus(invitationId, "accepted") {
+                            requireActivity().runOnUiThread {
+                                refreshProfileData()
+                            }
+                        }
+                    }
+                    .setNegativeButton("Decline") { _, _ ->
+                        bookViewModel.updateInvitationStatus(invitationId, "declined")
+                    }
+                    .show()
             }
         }
     }

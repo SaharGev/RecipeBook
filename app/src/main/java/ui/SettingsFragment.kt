@@ -156,7 +156,12 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
 
         btnLogout.setOnClickListener {
+            val context = requireContext()
             com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+
+            // Clear local Room database
+            com.example.recipebook.db.DatabaseProvider.clearDatabase(context)
+
             findNavController().popBackStack(R.id.loginFragment, false)
         }
     }

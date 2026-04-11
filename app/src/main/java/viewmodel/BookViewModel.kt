@@ -91,4 +91,15 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
             callback(books)
         }
     }
+
+    fun listenToPendingInvitations(uid: String, callback: (List<Map<String, Any>>) -> Unit) {
+        repository.listenToPendingInvitations(uid, callback)
+    }
+
+    fun updateInvitationStatus(invitationId: String, status: String, onDone: () -> Unit = {}) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateInvitationStatus(invitationId, status)
+            onDone()
+        }
+    }
 }
