@@ -11,8 +11,14 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import androidx.navigation.fragment.findNavController
+import androidx.fragment.app.viewModels
+import com.example.recipebook.viewmodel.UserViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
+
+    private val userViewModel: UserViewModel by viewModels()
+    private val recipeViewModel: com.example.recipebook.viewmodel.RecipeViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -31,6 +37,72 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         val tvPrivacy = view.findViewById<TextView>(R.id.tvPrivacy)
         val btnBack = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnBack)
         val btnEdit = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnEdit)
+
+        val btnShare = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnShare)
+        val currentUid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
+        if (recipe?.ownerUid != currentUid) {
+            btnShare.visibility = View.GONE
+        } else {
+            btnShare.setOnClickListener {
+                userViewModel.getFriends(currentUid) { friends ->
+                    requireActivity().runOnUiThread {
+                        if (friends.isEmpty()) {
+                            android.widget.Toast.makeText(
+                                requireContext(),
+                                "You have no friends to share with",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                            return@runOnUiThread
+                        }
+
+                        val friendNames = friends.map { it.username }.toTypedArray()
+                        val selectedPermissions = mutableMapOf<String, String>()
+
+                        android.app.AlertDialog.Builder(requireContext())
+                            .setTitle("Share Recipe")
+                            .setMultiChoiceItems(friendNames, null) { _, which, isChecked ->
+                                val friend = friends[which]
+                                if (isChecked) {
+                                    selectedPermissions[friend.uid] = "view"
+                                } else {
+                                    selectedPermissions.remove(friend.uid)
+                                }
+                            }
+                            .setPositiveButton("Share") { _, _ ->
+                                if (selectedPermissions.isEmpty()) return@setPositiveButton
+                                if (recipe == null) return@setPositiveButton
+
+                                val sharedWith = selectedPermissions.entries.joinToString(",") { "${it.key}:${it.value}" }
+                                val updatedRecipe = com.example.recipebook.db.RecipeEntity(
+                                    id = recipe.id,
+                                    bookId = recipe.id,
+                                    name = recipe.name,
+                                    description = recipe.description,
+                                    ingredients = recipe.ingredients,
+                                    instructions = recipe.instructions,
+                                    imageUri = recipe.imageUri,
+                                    cookTime = recipe.cookTime,
+                                    difficulty = recipe.difficulty,
+                                    isPublic = recipe.isPublic,
+                                    ownerUid = currentUid,
+                                    sharedWith = sharedWith
+                                )
+
+                                recipeViewModel.sendRecipeInvitations(updatedRecipe, currentUid)
+
+                                android.widget.Toast.makeText(
+                                    requireContext(),
+                                    "Recipe shared successfully!",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            .setNegativeButton("Cancel", null)
+                            .show()
+                    }
+                }
+            }
+        }
 
         if (recipe != null) {
             tvTitle.text = "${recipe.name} (ID: ${recipe.id})"

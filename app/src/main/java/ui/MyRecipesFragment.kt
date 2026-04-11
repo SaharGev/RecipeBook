@@ -60,38 +60,42 @@ class MyRecipesFragment : Fragment() {
 
     private fun loadMyRecipes() {
         val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-        recipeViewModel.getRecipes(uid) { recipeEntities ->
-            activity?.runOnUiThread {
-                if (recipeEntities.isEmpty()) {
-                    rvRecipes.visibility = View.GONE
-                    tvEmptyRecipes.visibility = View.VISIBLE
-                } else {
-                    rvRecipes.visibility = View.VISIBLE
-                    tvEmptyRecipes.visibility = View.GONE
 
-                    // convert to recipe before the sent to the adapter
-                    val recipes = recipeEntities.map { entity ->
-                        Recipe(
-                            id = entity.id,
-                            name = entity.name,
-                            description = entity.description,
-                            ingredients = entity.ingredients,
-                            instructions = entity.instructions,
-                            imageUri = entity.imageUri,
-                            cookTime = entity.cookTime,
-                            difficulty = entity.difficulty,
-                            isPublic = entity.isPublic
+        recipeViewModel.getRecipes(uid) { myRecipes ->
+            recipeViewModel.getSharedWithMeRecipes(uid) { sharedRecipes ->
+                activity?.runOnUiThread {
+                    val allRecipes = (myRecipes + sharedRecipes).distinctBy { it.id }
+
+                    if (allRecipes.isEmpty()) {
+                        rvRecipes.visibility = View.GONE
+                        tvEmptyRecipes.visibility = View.VISIBLE
+                    } else {
+                        rvRecipes.visibility = View.VISIBLE
+                        tvEmptyRecipes.visibility = View.GONE
+
+                        val recipes = allRecipes.map { entity ->
+                            Recipe(
+                                id = entity.id,
+                                name = entity.name,
+                                description = entity.description,
+                                ingredients = entity.ingredients,
+                                instructions = entity.instructions,
+                                imageUri = entity.imageUri,
+                                cookTime = entity.cookTime,
+                                difficulty = entity.difficulty,
+                                isPublic = entity.isPublic,
+                                ownerUid = entity.ownerUid
+                            )
+                        }
+
+                        rvRecipes.adapter = RecipeAdapter(
+                            recipes = recipes,
+                            onItemClick = { recipe -> navigateToRecipeDetails(recipe) },
+                            onDeleteClick = { recipe ->
+                                recipeViewModel.deleteRecipeById(recipe.id)
+                            }
                         )
                     }
-
-                    rvRecipes.adapter = RecipeAdapter(
-                        recipes = recipes,
-                        onItemClick = { recipe -> navigateToRecipeDetails(recipe) },
-                        onDeleteClick = { recipe ->
-                            recipeViewModel.deleteRecipeById(recipe.id)
-
-                        }
-                    )
                 }
             }
         }

@@ -210,16 +210,23 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private fun showInvitationDialog(invitation: Map<String, Any>) {
         val invitationId = invitation["invitationId"] as? String ?: return
         val fromUid = invitation["fromUid"] as? String ?: return
-        val bookTitle = invitation["bookTitle"] as? String ?: return
         val permission = invitation["permission"] as? String ?: return
+        val type = invitation["type"] as? String ?: "book"
+
+        val itemName = if (type == "recipe") {
+            invitation["recipeName"] as? String ?: "a recipe"
+        } else {
+            invitation["bookTitle"] as? String ?: "a book"
+        }
 
         userViewModel.getUserByUid(fromUid) { fromUser ->
             requireActivity().runOnUiThread {
                 val fromUsername = fromUser?.username ?: "Someone"
+                val itemType = if (type == "recipe") "recipe" else "book"
 
                 android.app.AlertDialog.Builder(requireContext())
-                    .setTitle("Book Sharing Request")
-                    .setMessage("$fromUsername wants to share \"$bookTitle\" with you ($permission access)")
+                    .setTitle("Sharing Request")
+                    .setMessage("$fromUsername wants to share $itemType \"$itemName\" with you ($permission access)")
                     .setPositiveButton("Accept") { _, _ ->
                         bookViewModel.updateInvitationStatus(invitationId, "accepted") {
                             requireActivity().runOnUiThread {

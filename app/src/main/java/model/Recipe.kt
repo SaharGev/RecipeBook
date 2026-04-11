@@ -14,5 +14,6 @@ data class Recipe(
     val imageUri: String?,
     val cookTime: Int,
     val difficulty: String,
-    val isPublic: Boolean
+    val isPublic: Boolean,
+    val ownerUid: String = ""
 ) : Parcelable

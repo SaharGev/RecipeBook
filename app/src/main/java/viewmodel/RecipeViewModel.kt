@@ -68,7 +68,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                 imageUri = imageUri,
                 cookTime = cookTime,
                 difficulty = difficulty,
-                isPublic = isPublic
+                isPublic = isPublic,
+                ownerUid = uid,
+                sharedWith = ""
             )
 
             val id = repository.insertRecipe(newRecipe)
@@ -151,6 +153,19 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch(Dispatchers.IO) {
             val recipes = repository.getRecipesByBookId(bookId)
             callback(recipes.size)
+        }
+    }
+
+    fun getSharedWithMeRecipes(uid: String, callback: (List<RecipeEntity>) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val recipes = repository.getSharedWithMeRecipes(uid)
+            callback(recipes)
+        }
+    }
+
+    fun sendRecipeInvitations(recipe: com.example.recipebook.db.RecipeEntity, uid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.sendRecipeInvitations(recipe, uid)
         }
     }
 }

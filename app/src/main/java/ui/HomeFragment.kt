@@ -87,7 +87,8 @@ class HomeFragment : Fragment() {
                 imageUri = it.imageUri,
                 cookTime = it.cookTime,
                 isPublic = it.isPublic,
-                difficulty = it.difficulty
+                difficulty = it.difficulty,
+                ownerUid = it.ownerUid
             )
         }
     }
