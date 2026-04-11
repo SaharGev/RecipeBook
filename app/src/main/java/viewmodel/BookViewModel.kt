@@ -13,25 +13,51 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = BookRepository(application.applicationContext)
 
-    fun getBooks(callback: (List<BookEntity>) -> Unit) {
+    fun getBooks(uid: String, callback: (List<BookEntity>) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val books = repository.getAllBooks()
+            val books = repository.getAllBooks(uid)
             callback(books)
         }
     }
 
-    fun getBooksCount(callback: (Int) -> Unit) {
+    fun getBooksCount(uid: String, callback: (Int) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val books = repository.getAllBooks()
+            val books = repository.getAllBooks(uid)
             callback(books.size)
         }
     }
 
-    fun addBook(title: String) {
+    fun addBook(
+        uid: String,
+        title: String,
+        description: String = "",
+        isPublic: Boolean = true,
+        imageUri: String? = null,
+        onDone: () -> Unit = {}
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.insertBook(
-                BookEntity(title = title)
+            val newBook = BookEntity(
+                title = title,
+                description = description,
+                isPublic = isPublic,
+                imageUri = imageUri,
+                ownerUid = uid
             )
+
+            val id = repository.insertBook(newBook)
+
+            val finalImageUrl = if (imageUri != null) {
+                try {
+                    repository.uploadBookImage(uid, id.toInt(), android.net.Uri.parse(imageUri))
+                } catch (e: Exception) {
+                    android.util.Log.e("DEBUG", "Book image upload failed: ${e.message}", e)
+                    imageUri
+                }
+            } else null
+
+            val savedBook = newBook.copy(id = id.toInt(), imageUri = finalImageUrl)
+            repository.saveBookToFirestore(savedBook, uid)
+            onDone()
         }
     }
 

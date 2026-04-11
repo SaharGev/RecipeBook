@@ -104,6 +104,22 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"/>
 
+                <TextView
+                    android:id="@+id/tvShareWith"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Share with friends:"
+                    android:textSize="14sp"
+                    android:layout_marginTop="12dp"
+                    android:visibility="gone"/>
+
+                <LinearLayout
+                    android:id="@+id/llFriendsList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"/>
+
                 <Button
                     android:id="@+id/btnCreateBook"
                     android:layout_width="match_parent"

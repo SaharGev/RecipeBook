@@ -56,7 +56,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun loadRecipes(rvRecipes: RecyclerView) {
-        viewModel.getRecipes { recipes ->
+        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        viewModel.getRecipes(uid) { recipes ->
 
             rvRecipes.post {
 

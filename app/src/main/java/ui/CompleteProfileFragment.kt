@@ -141,15 +141,6 @@ class CompleteProfileFragment : Fragment() {
                     val uid = firebaseUser?.uid.orEmpty()
                     val email = firebaseUser?.email.orEmpty()
 
-                    val prefs = requireContext().getSharedPreferences(
-                        "profile_prefs",
-                        android.content.Context.MODE_PRIVATE
-                    )
-
-                    prefs.edit()
-                        .putString("profile_image_uri_$uid", selectedImageUri?.toString())
-                        .apply()
-
                     showLoading()
 
                     val newUser = UserEntity(

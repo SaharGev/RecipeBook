@@ -5,14 +5,21 @@ import com.example.recipebook.db.DatabaseProvider
 import com.example.recipebook.db.UserEntity
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import com.google.firebase.storage.FirebaseStorage
+import android.net.Uri
 
 class UserRepository(context: Context) {
 
     private val userDao = DatabaseProvider.getDatabase(context).userDao()
     private val firestore = FirebaseFirestore.getInstance()
+    private val context = context
+    private val storage = FirebaseStorage.getInstance()
+
 
     suspend fun getUserByUid(uid: String): UserEntity? {
-        return userDao.getUserByUid(uid)
+        val localUser = userDao.getUserByUid(uid)
+        if (localUser != null) return localUser
+        return getUserFromFirestore(uid)
     }
 
     suspend fun insertUser(user: UserEntity) {
@@ -67,7 +74,23 @@ class UserRepository(context: Context) {
     }
 
     suspend fun getUserByPhone(phone: String): UserEntity? {
-        return userDao.getUserByPhone(phone)
+        val localUser = userDao.getUserByPhone(phone)
+        if (localUser != null) return localUser
+
+        val result = firestore.collection("users")
+            .whereEqualTo("phone", phone)
+            .get()
+            .await()
+
+        val document = result.documents.firstOrNull() ?: return null
+
+        return UserEntity(
+            uid = document.getString("uid").orEmpty(),
+            username = document.getString("username").orEmpty(),
+            email = document.getString("email").orEmpty(),
+            phone = document.getString("phone"),
+            profileImageUrl = document.getString("profileImageUrl")
+        )
     }
 
     suspend fun saveUserLocallyAndRemotely(user: UserEntity) {
@@ -80,7 +103,23 @@ class UserRepository(context: Context) {
     }
 
     suspend fun getUserByUsername(username: String): UserEntity? {
-        return userDao.getUserByUsername(username)
+        val localUser = userDao.getUserByUsername(username)
+        if (localUser != null) return localUser
+
+        val result = firestore.collection("users")
+            .whereEqualTo("username", username)
+            .get()
+            .await()
+
+        val document = result.documents.firstOrNull() ?: return null
+
+        return UserEntity(
+            uid = document.getString("uid").orEmpty(),
+            username = document.getString("username").orEmpty(),
+            email = document.getString("email").orEmpty(),
+            phone = document.getString("phone"),
+            profileImageUrl = document.getString("profileImageUrl")
+        )
     }
 
     suspend fun searchUserByUsernameInFirestore(username: String): UserEntity? {
@@ -166,5 +205,18 @@ class UserRepository(context: Context) {
 
         val friendUids = document.get("friends") as? List<String> ?: emptyList()
         return friendUids.size
+    }
+
+    suspend fun uploadProfileImage(uid: String, imageUri: Uri): String {
+        val imageRef = storage.reference.child("profile_images/$uid.jpg")
+
+        val inputStream = context.contentResolver.openInputStream(imageUri)
+            ?: throw Exception("Cannot open image")
+
+        val bytes = inputStream.readBytes()
+        inputStream.close()
+
+        imageRef.putBytes(bytes).await()
+        return imageRef.downloadUrl.await().toString()
     }
 }

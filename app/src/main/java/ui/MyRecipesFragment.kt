@@ -59,7 +59,8 @@ class MyRecipesFragment : Fragment() {
     }
 
     private fun loadMyRecipes() {
-        recipeViewModel.getRecipes { recipeEntities ->
+        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        recipeViewModel.getRecipes(uid) { recipeEntities ->
             activity?.runOnUiThread {
                 if (recipeEntities.isEmpty()) {
                     rvRecipes.visibility = View.GONE

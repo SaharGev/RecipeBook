@@ -20,10 +20,15 @@ import com.google.android.material.imageview.ShapeableImageView
 import java.io.File
 import java.io.FileOutputStream
 import com.google.firebase.auth.FirebaseAuth
+import androidx.fragment.app.viewModels
+import com.example.recipebook.viewmodel.UserViewModel
+import com.example.recipebook.utils.showLoading
+import com.example.recipebook.utils.hideLoading
 
 class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
     private var selectedImageUri: Uri? = null
+    private val userViewModel: UserViewModel by viewModels()
 
     private val takePhotoLauncher =
         registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
@@ -109,12 +114,38 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
         btnSaveChanges.setOnClickListener {
             if (selectedImageUri != null) {
-                saveProfileImage()
-                Toast.makeText(
-                    requireContext(),
-                    "Changes saved successfully",
-                    Toast.LENGTH_SHORT
-                ).show()
+                val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
+                showLoading()
+
+                userViewModel.uploadProfileImage(uid, selectedImageUri!!) { imageUrl ->
+                    if (imageUrl.isNotEmpty()) {
+                        userViewModel.getUserByUid(uid) { user ->
+                            if (user != null) {
+                                val updatedUser = user.copy(profileImageUrl = imageUrl)
+                                userViewModel.saveUserLocallyAndRemotely(updatedUser) {
+                                    requireActivity().runOnUiThread {
+                                        hideLoading()
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "Changes saved successfully",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        requireActivity().runOnUiThread {
+                            hideLoading()
+                            Toast.makeText(
+                                requireContext(),
+                                "Failed to upload image",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
             } else {
                 Toast.makeText(
                     requireContext(),
@@ -140,18 +171,20 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     }
 
     private fun loadSavedProfileImage(imageView: ShapeableImageView) {
-        val prefs = requireContext().getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
-        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-        val savedImageUri = prefs.getString("profile_image_uri_$uid", null)
+        val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
 
-        if (!savedImageUri.isNullOrEmpty()) {
-            selectedImageUri = Uri.parse(savedImageUri)
-
-            Glide.with(this)
-                .load(selectedImageUri)
-                .placeholder(R.drawable.ic_launcher_foreground)
-                .error(R.drawable.ic_launcher_foreground)
-                .into(imageView)
+        userViewModel.getUserByUid(uid) { user ->
+            activity?.runOnUiThread {
+                if (!user?.profileImageUrl.isNullOrEmpty()) {
+                    Glide.with(this)
+                        .load(user?.profileImageUrl)
+                        .placeholder(R.drawable.ic_launcher_foreground)
+                        .error(R.drawable.ic_launcher_foreground)
+                        .into(imageView)
+                } else {
+                    imageView.setImageResource(R.drawable.ic_launcher_foreground)
+                }
+            }
         }
     }
 
