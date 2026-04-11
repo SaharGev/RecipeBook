@@ -24,6 +24,9 @@ import androidx.fragment.app.viewModels
 import com.example.recipebook.viewmodel.UserViewModel
 import com.example.recipebook.utils.showLoading
 import com.example.recipebook.utils.hideLoading
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
@@ -160,7 +163,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
 
             // Clear local Room database
-            com.example.recipebook.db.DatabaseProvider.clearDatabase(context)
+            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                com.example.recipebook.db.DatabaseProvider.clearAllData(requireContext())
+            }
 
             findNavController().popBackStack(R.id.loginFragment, false)
         }

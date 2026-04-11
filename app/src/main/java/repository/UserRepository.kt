@@ -97,8 +97,9 @@ class UserRepository(context: Context) {
         val existingUser = userDao.getUserByUid(user.uid)
         if (existingUser == null) {
             userDao.insertUser(user)
+        } else {
+            userDao.updateUser(user)
         }
-
         saveUserToFirestore(user)
     }
 

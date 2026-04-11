@@ -112,17 +112,23 @@ class BookRepository(context: Context) {
 
             if (!bookDoc.exists()) continue
 
-            sharedBooks.add(
-                BookEntity(
-                    id = (bookDoc.getLong("id") ?: 0).toInt(),
-                    title = bookDoc.getString("title").orEmpty(),
-                    description = bookDoc.getString("description").orEmpty(),
-                    isPublic = bookDoc.getBoolean("isPublic") ?: true,
-                    imageUri = bookDoc.getString("imageUri"),
-                    ownerUid = bookDoc.getString("ownerUid").orEmpty(),
-                    sharedWith = (bookDoc.get("sharedWith") as? List<String>)?.joinToString(",").orEmpty()
-                )
+            val book = BookEntity(
+                id = (bookDoc.getLong("id") ?: 0).toInt(),
+                title = bookDoc.getString("title").orEmpty(),
+                description = bookDoc.getString("description").orEmpty(),
+                isPublic = bookDoc.getBoolean("isPublic") ?: true,
+                imageUri = bookDoc.getString("imageUri"),
+                ownerUid = bookDoc.getString("ownerUid").orEmpty(),
+                sharedWith = (bookDoc.get("sharedWith") as? List<String>)?.joinToString(",").orEmpty()
             )
+
+            // Save to local Room cache
+            val existing = bookDao.getAllBooks()
+            if (existing.none { it.id == book.id }) {
+                bookDao.insertBook(book)
+            }
+
+            sharedBooks.add(book)
         }
 
         return sharedBooks
