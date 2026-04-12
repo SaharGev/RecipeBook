@@ -180,5 +180,30 @@ class BookRepository(context: Context) {
             .document(invitationId)
             .update("status", status)
             .await()
+
+        // Send notification to the owner
+        val invitationDoc = firestore.collection("invitations")
+            .document(invitationId)
+            .get()
+            .await()
+
+        val fromUid = invitationDoc.getString("fromUid") ?: return
+        val toUid = invitationDoc.getString("toUid") ?: return
+        val itemName = invitationDoc.getString("recipeName")
+            ?: invitationDoc.getString("bookTitle")
+            ?: "item"
+        val type = invitationDoc.getString("type") ?: "book"
+
+        firestore.collection("notifications")
+            .add(mapOf(
+                "toUid" to fromUid,
+                "fromUid" to toUid,
+                "status" to status,
+                "itemName" to itemName,
+                "type" to type,
+                "seen" to false,
+                "timestamp" to com.google.firebase.Timestamp.now()
+            ))
+            .await()
     }
 }

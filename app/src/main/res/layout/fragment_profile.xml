@@ -15,6 +15,27 @@
         android:paddingBottom="28dp">
 
         <ImageButton
+            android:id="@+id/btnNotifications"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Notifications"
+            android:padding="8dp"
+            android:src="@drawable/ic_notifications"
+            app:tint="#2D2D2D"
+            app:layout_constraintTop_toTopOf="@id/imgProfile"
+            app:layout_constraintEnd_toStartOf="@id/btnSettings" />
+
+        <View
+            android:id="@+id/badgeNotifications"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/bg_badge"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@id/btnNotifications"
+            app:layout_constraintEnd_toEndOf="@id/btnNotifications" />
+
+        <ImageButton
             android:id="@+id/btnSettings"
             android:layout_width="40dp"
             android:layout_height="40dp"
@@ -50,7 +71,7 @@
             android:textStyle="bold"
             app:layout_constraintTop_toTopOf="@id/imgProfile"
             app:layout_constraintStart_toEndOf="@id/imgProfile"
-            app:layout_constraintEnd_toStartOf="@id/btnSettings"
+            app:layout_constraintEnd_toStartOf="@id/btnNotifications"
             app:layout_constraintBottom_toTopOf="@id/tvEmail" />
 
         <TextView
@@ -64,7 +85,7 @@
             android:textSize="15sp"
             app:layout_constraintTop_toBottomOf="@id/tvUserName"
             app:layout_constraintStart_toEndOf="@id/imgProfile"
-            app:layout_constraintEnd_toStartOf="@id/btnSettings" />
+            app:layout_constraintEnd_toStartOf="@id/btnNotifications" />
 
         <LinearLayout
             android:id="@+id/layoutStats"

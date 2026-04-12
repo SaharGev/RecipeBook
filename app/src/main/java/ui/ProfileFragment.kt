@@ -42,28 +42,29 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private lateinit var statBooks: View
     private lateinit var statFriends: View
 
+    private lateinit var badgeNotifications: View
+
+    private lateinit var btnNotifications: ImageButton
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         tvUserName = view.findViewById(R.id.tvUserName)
         tvEmail = view.findViewById(R.id.tvEmail)
-
         statRecipes = view.findViewById(R.id.statRecipes)
         statBooks = view.findViewById(R.id.statBooks)
         statFriends = view.findViewById(R.id.statFriends)
-
         btnSettings = view.findViewById(R.id.btnSettings)
-
         tvRecipesCount = view.findViewById(R.id.tvRecipesCount)
         tvBooksCount = view.findViewById(R.id.tvBooksCount)
         tvFriendsCount = view.findViewById(R.id.tvFriendsCount)
-
         tvEmptyProfileBooks = view.findViewById(R.id.tvEmptyProfileBooks)
         imgProfile = view.findViewById(R.id.imgProfile)
-
         rvProfileBooks = view.findViewById(R.id.rvProfileBooks)
         rvProfileBooks.layoutManager = GridLayoutManager(requireContext(), 2)
         rvProfileBooks.isNestedScrollingEnabled = false
+        btnNotifications = view.findViewById(R.id.btnNotifications)
+        badgeNotifications = view.findViewById(R.id.badgeNotifications)
 
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
 
@@ -96,16 +97,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             findNavController().navigate(R.id.action_profileFragment_to_settingsFragment)
         }
 
-        refreshProfileData()
-        bookViewModel.listenToPendingInvitations(uid) { invitations ->
-            if (invitations.isEmpty()) return@listenToPendingInvitations
-            if (!isAdded) return@listenToPendingInvitations
-            requireActivity().runOnUiThread {
-                if (!isAdded) return@runOnUiThread
-                showInvitationDialog(invitations.first())
-            }
+        btnNotifications.setOnClickListener {
+            listenToNotifications(uid)
         }
 
+        refreshProfileData()
     }
 
     override fun onResume() {
@@ -131,6 +127,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
 
         loadProfileBooks(rvProfileBooks, tvEmptyProfileBooks)
+        checkForUnseenNotifications(uid)
     }
 
     private fun loadSavedProfileImage(imageView: ShapeableImageView) {
@@ -207,38 +204,136 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
     }
 
-    private fun showInvitationDialog(invitation: Map<String, Any>) {
-        val invitationId = invitation["invitationId"] as? String ?: return
-        val fromUid = invitation["fromUid"] as? String ?: return
-        val permission = invitation["permission"] as? String ?: return
-        val type = invitation["type"] as? String ?: "book"
+    private fun listenToNotifications(uid: String) {
+        val firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance()
 
-        val itemName = if (type == "recipe") {
-            invitation["recipeName"] as? String ?: "a recipe"
-        } else {
-            invitation["bookTitle"] as? String ?: "a book"
-        }
+        firestore.collection("invitations")
+            .whereEqualTo("toUid", uid)
+            .whereEqualTo("status", "pending")
+            .get()
+            .addOnSuccessListener { invitationsSnapshot ->
+                firestore.collection("notifications")
+                    .whereEqualTo("toUid", uid)
+                    .whereEqualTo("seen", false)
+                    .get()
+                    .addOnSuccessListener { notificationsSnapshot ->
+                        val pendingInvitations = invitationsSnapshot.documents
+                        val updateNotifications = notificationsSnapshot.documents
 
-        userViewModel.getUserByUid(fromUid) { fromUser ->
-            requireActivity().runOnUiThread {
-                val fromUsername = fromUser?.username ?: "Someone"
-                val itemType = if (type == "recipe") "recipe" else "book"
+                        if (pendingInvitations.isEmpty() && updateNotifications.isEmpty()) {
+                            android.app.AlertDialog.Builder(requireContext())
+                                .setTitle("Notifications")
+                                .setMessage("No new notifications")
+                                .setPositiveButton("OK", null)
+                                .show()
+                            return@addOnSuccessListener
+                        }
 
-                android.app.AlertDialog.Builder(requireContext())
-                    .setTitle("Sharing Request")
-                    .setMessage("$fromUsername wants to share $itemType \"$itemName\" with you ($permission access)")
-                    .setPositiveButton("Accept") { _, _ ->
-                        bookViewModel.updateInvitationStatus(invitationId, "accepted") {
-                            requireActivity().runOnUiThread {
-                                refreshProfileData()
+                        val items = mutableListOf<String>()
+                        var remaining = pendingInvitations.size + updateNotifications.size
+                        val invitationLabels = MutableList(pendingInvitations.size) { "" }
+                        val notificationLabels = MutableList(updateNotifications.size) { "" }
+
+                        fun tryShowDialog() {
+                            if (remaining > 0) return
+                            val allItems = (invitationLabels + notificationLabels).toTypedArray()
+
+                            android.app.AlertDialog.Builder(requireContext())
+                                .setTitle("Notifications")
+                                .setItems(allItems) { _, which ->
+                                    if (which < pendingInvitations.size) {
+                                        val doc = pendingInvitations[which]
+                                        val invitationId = doc.id
+                                        val type = doc.getString("type") ?: "book"
+                                        val itemName = if (type == "recipe") doc.getString("recipeName") ?: "a recipe"
+                                        else doc.getString("bookTitle") ?: "a book"
+                                        val fromUid = doc.getString("fromUid") ?: return@setItems
+                                        val permission = doc.getString("permission") ?: ""
+
+                                        userViewModel.getUserByUid(fromUid) { fromUser ->
+                                            requireActivity().runOnUiThread {
+                                                val fromUsername = fromUser?.username ?: "Someone"
+                                                android.app.AlertDialog.Builder(requireContext())
+                                                    .setTitle("Sharing Request")
+                                                    .setMessage("$fromUsername wants to share $type \"$itemName\" with you ($permission access)")
+                                                    .setPositiveButton("Accept") { _, _ ->
+                                                        bookViewModel.updateInvitationStatus(invitationId, "accepted") {
+                                                            requireActivity().runOnUiThread {
+                                                                refreshProfileData()
+                                                                checkForUnseenNotifications(uid)
+                                                            }
+                                                        }
+                                                    }
+                                                    .setNegativeButton("Decline") { _, _ ->
+                                                        bookViewModel.updateInvitationStatus(invitationId, "declined")
+                                                        checkForUnseenNotifications(uid)
+                                                    }
+                                                    .show()
+                                            }
+                                        }
+                                    } else {
+                                        notificationsSnapshot.documents[which - pendingInvitations.size]
+                                            .reference.update("seen", true)
+                                        checkForUnseenNotifications(uid)
+                                    }
+                                }
+                                .setPositiveButton("Mark all as read") { _, _ ->
+                                    updateNotifications.forEach { it.reference.update("seen", true) }
+                                    checkForUnseenNotifications(uid)
+                                }
+                                .show()
+                        }
+
+                        pendingInvitations.forEachIndexed { index, doc ->
+                            val fromUid = doc.getString("fromUid") ?: ""
+                            val type = doc.getString("type") ?: "book"
+                            val itemName = if (type == "recipe") doc.getString("recipeName") ?: "a recipe"
+                            else doc.getString("bookTitle") ?: "a book"
+                            userViewModel.getUserByUid(fromUid) { fromUser ->
+                                val fromUsername = fromUser?.username ?: "Someone"
+                                invitationLabels[index] = "📩 $fromUsername wants to share $type \"$itemName\" with you"
+                                remaining--
+                                requireActivity().runOnUiThread { tryShowDialog() }
+                            }
+                        }
+
+                        updateNotifications.forEachIndexed { index, doc ->
+                            val status = doc.getString("status") ?: ""
+                            val itemName = doc.getString("itemName") ?: ""
+                            val type = doc.getString("type") ?: "item"
+                            val fromUid = doc.getString("fromUid") ?: ""
+                            val emoji = if (status == "accepted") "✅" else "❌"
+                            userViewModel.getUserByUid(fromUid) { fromUser ->
+                                val fromUsername = fromUser?.username ?: "Someone"
+                                notificationLabels[index] = "$emoji $fromUsername $status your $type \"$itemName\""
+                                remaining--
+                                requireActivity().runOnUiThread { tryShowDialog() }
                             }
                         }
                     }
-                    .setNegativeButton("Decline") { _, _ ->
-                        bookViewModel.updateInvitationStatus(invitationId, "declined")
-                    }
-                    .show()
             }
-        }
     }
+
+    private fun checkForUnseenNotifications(uid: String) {
+        val firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+
+        firestore.collection("invitations")
+            .whereEqualTo("toUid", uid)
+            .whereEqualTo("status", "pending")
+            .get()
+            .addOnSuccessListener { invitationsSnapshot ->
+                firestore.collection("notifications")
+                    .whereEqualTo("toUid", uid)
+                    .whereEqualTo("seen", false)
+                    .get()
+                    .addOnSuccessListener { notificationsSnapshot ->
+                        val hasNew = invitationsSnapshot.documents.isNotEmpty() ||
+                                notificationsSnapshot.documents.isNotEmpty()
+                        activity?.runOnUiThread {
+                            badgeNotifications.visibility = if (hasNew) View.VISIBLE else View.GONE
+                        }
+                    }
+            }
+    }
+
 }

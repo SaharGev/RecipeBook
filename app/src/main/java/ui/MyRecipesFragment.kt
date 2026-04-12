@@ -84,7 +84,8 @@ class MyRecipesFragment : Fragment() {
                                 cookTime = entity.cookTime,
                                 difficulty = entity.difficulty,
                                 isPublic = entity.isPublic,
-                                ownerUid = entity.ownerUid
+                                ownerUid = entity.ownerUid,
+                                sharedWith = entity.sharedWith
                             )
                         }
 
