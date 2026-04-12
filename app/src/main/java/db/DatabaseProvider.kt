@@ -22,4 +22,8 @@ object DatabaseProvider {
 
         return instance!!
     }
+
+    suspend fun clearAllData(context: Context) {
+        getDatabase(context).clearAllTables()
+    }
 }

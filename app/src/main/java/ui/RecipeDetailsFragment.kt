@@ -11,8 +11,14 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import androidx.navigation.fragment.findNavController
+import androidx.fragment.app.viewModels
+import com.example.recipebook.viewmodel.UserViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
+
+    private val userViewModel: UserViewModel by viewModels()
+    private val recipeViewModel: com.example.recipebook.viewmodel.RecipeViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -31,6 +37,8 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         val tvPrivacy = view.findViewById<TextView>(R.id.tvPrivacy)
         val btnBack = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnBack)
         val btnEdit = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnEdit)
+
+        val currentUid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
 
         if (recipe != null) {
             tvTitle.text = "${recipe.name} (ID: ${recipe.id})"
@@ -52,6 +60,23 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
                     .placeholder(R.drawable.ic_launcher_foreground)
                     .error(R.drawable.ic_launcher_foreground)
                     .into(imgRecipe)
+            }
+
+            val tvSharedWith = view.findViewById<TextView>(R.id.tvSharedWith)
+
+            if (!recipe?.sharedWith.isNullOrEmpty() && recipe?.ownerUid == currentUid) {
+                val sharedUids = recipe.sharedWith.split(",").map { it.split(":")[0] }
+                userViewModel.getFriends(currentUid) { friends ->
+                    activity?.runOnUiThread {
+                        val sharedNames = friends
+                            .filter { sharedUids.contains(it.uid) }
+                            .map { it.username }
+                        if (sharedNames.isNotEmpty()) {
+                            tvSharedWith.visibility = View.VISIBLE
+                            tvSharedWith.text = "Shared with: ${sharedNames.joinToString(", ")}"
+                        }
+                    }
+                }
             }
 
         } else {

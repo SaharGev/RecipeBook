@@ -37,11 +37,18 @@ class RecipeRepository(context: Context) {
                 imageUri = doc.getString("imageUri"),
                 cookTime = (doc.getLong("cookTime") ?: 0).toInt(),
                 difficulty = doc.getString("difficulty").orEmpty(),
-                isPublic = doc.getBoolean("isPublic") ?: false
+                isPublic = doc.getBoolean("isPublic") ?: false,
+                ownerUid = doc.getString("ownerUid").orEmpty(),
+                sharedWith = (doc.get("sharedWith") as? List<String>)?.joinToString(",").orEmpty()
             )
         }
 
-        remoteRecipes.forEach { recipeDao.insertRecipe(it) }
+        remoteRecipes.forEach { recipe ->
+            val existing = recipeDao.getRecipeById(recipe.id)
+            if (existing == null) {
+                recipeDao.insertRecipe(recipe)
+            }
+        }
         return remoteRecipes
     }
 
@@ -85,7 +92,9 @@ class RecipeRepository(context: Context) {
                     "imageUri" to recipe.imageUri,
                     "cookTime" to recipe.cookTime,
                     "difficulty" to recipe.difficulty,
-                    "isPublic" to recipe.isPublic
+                    "isPublic" to recipe.isPublic,
+                    "ownerUid" to uid,
+                    "sharedWith" to recipe.sharedWith.split(",").filter { it.isNotEmpty() }
                 )
             )
             .await()
@@ -102,5 +111,83 @@ class RecipeRepository(context: Context) {
 
         imageRef.putBytes(bytes).await()
         return imageRef.downloadUrl.await().toString()
+    }
+
+    suspend fun sendRecipeInvitations(recipe: RecipeEntity, ownerUid: String) {
+        val sharedWithList = recipe.sharedWith.split(",").filter { it.isNotEmpty() }
+
+        sharedWithList.forEach { entry ->
+            val parts = entry.split(":")
+            if (parts.size != 2) return@forEach
+
+            val toUid = parts[0]
+            val permission = parts[1]
+
+            val invitation = hashMapOf(
+                "fromUid" to ownerUid,
+                "toUid" to toUid,
+                "recipeId" to recipe.id,
+                "recipeName" to recipe.name,
+                "permission" to permission,
+                "type" to "recipe",
+                "status" to "pending"
+            )
+
+            com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("invitations")
+                .add(invitation)
+                .await()
+        }
+    }
+
+    suspend fun getSharedWithMeRecipes(myUid: String): List<RecipeEntity> {
+        val acceptedInvitations = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+            .collection("invitations")
+            .whereEqualTo("toUid", myUid)
+            .whereEqualTo("status", "accepted")
+            .whereEqualTo("type", "recipe")
+            .get()
+            .await()
+
+        val sharedRecipes = mutableListOf<RecipeEntity>()
+
+        for (doc in acceptedInvitations.documents) {
+            val ownerUid = doc.getString("fromUid") ?: continue
+            val recipeId = (doc.getLong("recipeId") ?: continue).toInt()
+
+            val recipeDoc = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(ownerUid)
+                .collection("recipes")
+                .document(recipeId.toString())
+                .get()
+                .await()
+
+            if (!recipeDoc.exists()) continue
+
+            val recipe = RecipeEntity(
+                id = (recipeDoc.getLong("id") ?: 0).toInt(),
+                bookId = (recipeDoc.getLong("bookId") ?: 0).toInt(),
+                name = recipeDoc.getString("name").orEmpty(),
+                description = recipeDoc.getString("description").orEmpty(),
+                ingredients = recipeDoc.getString("ingredients").orEmpty(),
+                instructions = recipeDoc.getString("instructions").orEmpty(),
+                imageUri = recipeDoc.getString("imageUri"),
+                cookTime = (recipeDoc.getLong("cookTime") ?: 0).toInt(),
+                difficulty = recipeDoc.getString("difficulty").orEmpty(),
+                isPublic = recipeDoc.getBoolean("isPublic") ?: false,
+                ownerUid = ownerUid,
+                sharedWith = ""
+            )
+
+            val existing = recipeDao.getRecipeById(recipe.id)
+            if (existing == null) {
+                recipeDao.insertRecipe(recipe)
+            }
+
+            sharedRecipes.add(recipe)
+        }
+
+        return sharedRecipes
     }
 }

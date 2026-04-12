@@ -123,7 +123,6 @@ class CompleteProfileFragment : Fragment() {
         }
 
         btnFinishProfile.setOnClickListener {
-
             val username = etCompleteName.text.toString().trim()
 
             if (username.isEmpty()) {
@@ -143,19 +142,29 @@ class CompleteProfileFragment : Fragment() {
 
                     showLoading()
 
-                    val newUser = UserEntity(
-                        uid = uid,
-                        username = username,
-                        email = email,
-                        phone = phone,
-                        profileImageUrl = null
-                    )
+                    fun saveUser(profileImageUrl: String?) {
+                        val newUser = UserEntity(
+                            uid = uid,
+                            username = username,
+                            email = email,
+                            phone = phone,
+                            profileImageUrl = profileImageUrl
+                        )
 
-                    userViewModel.saveUserLocallyAndRemotely(newUser) {
-                        requireActivity().runOnUiThread {
-                            hideLoading()
-                            findNavController().navigate(R.id.action_completeProfileFragment_to_friendsFragment)
+                        userViewModel.saveUserLocallyAndRemotely(newUser) {
+                            requireActivity().runOnUiThread {
+                                hideLoading()
+                                findNavController().navigate(R.id.action_completeProfileFragment_to_friendsFragment)
+                            }
                         }
+                    }
+
+                    if (selectedImageUri != null) {
+                        userViewModel.uploadProfileImage(uid, selectedImageUri!!) { imageUrl ->
+                            saveUser(if (imageUrl.isNotEmpty()) imageUrl else null)
+                        }
+                    } else {
+                        saveUser(null)
                     }
                 } else {
                     Toast.makeText(requireContext(), "Failed to update profile", Toast.LENGTH_SHORT).show()

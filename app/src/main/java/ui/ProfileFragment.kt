@@ -68,8 +68,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
 
         userViewModel.getUserByUid(uid) { user ->
-            tvUserName.text = user?.username ?: "User Name"
-            tvEmail.text = user?.email ?: ""
+            activity?.runOnUiThread {
+                tvUserName.text = user?.username ?: "User Name"
+                tvEmail.text = user?.email ?: ""
+            }
         }
 
         userViewModel.getFriendsCount(uid) { count ->
@@ -95,6 +97,15 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
 
         refreshProfileData()
+        bookViewModel.listenToPendingInvitations(uid) { invitations ->
+            if (invitations.isEmpty()) return@listenToPendingInvitations
+            if (!isAdded) return@listenToPendingInvitations
+            requireActivity().runOnUiThread {
+                if (!isAdded) return@runOnUiThread
+                showInvitationDialog(invitations.first())
+            }
+        }
+
     }
 
     override fun onResume() {
@@ -142,54 +153,91 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private fun loadProfileBooks(rvProfileBooks: RecyclerView, tvEmptyProfileBooks: TextView) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-        bookViewModel.getBooks(uid) { books ->
-            val countsMap = mutableMapOf<Int, Int>()
 
-            if (books.isEmpty()) {
-                rvProfileBooks.post {
-                    rvProfileBooks.visibility = View.GONE
-                    tvEmptyProfileBooks.visibility = View.VISIBLE
+        bookViewModel.getBooks(uid) { myBooks ->
+            bookViewModel.getSharedWithMeBooks(uid) { sharedBooks ->
+                val myOwnBooks = myBooks.filter { it.ownerUid == uid }
+                val allBooks = (myOwnBooks + sharedBooks).distinctBy { it.id }
+                val countsMap = mutableMapOf<Int, Int>()
+
+                activity?.runOnUiThread {
+                    if (allBooks.isEmpty()) {
+                        rvProfileBooks.visibility = View.GONE
+                        tvEmptyProfileBooks.visibility = View.VISIBLE
+                        return@runOnUiThread
+                    }
+
+                    rvProfileBooks.visibility = View.VISIBLE
+                    tvEmptyProfileBooks.visibility = View.GONE
                 }
-                return@getBooks
-            }
 
-            rvProfileBooks.post {
-                rvProfileBooks.visibility = View.VISIBLE
-                tvEmptyProfileBooks.visibility = View.GONE
-            }
+                var remaining = allBooks.size
 
-            var remaining = books.size
+                allBooks.forEach { book ->
+                    recipeViewModel.getRecipesCountByBookId(book.id) { count ->
+                        countsMap[book.id] = count
+                        remaining--
 
-            books.forEach { book ->
-                recipeViewModel.getRecipesCountByBookId(book.id) { count ->
-                    countsMap[book.id] = count
-                    remaining--
-
-                    if (remaining == 0) {
-                        rvProfileBooks.post {
-                            rvProfileBooks.adapter = RecipeBooksAdapter(
-                                books = books,
-                                onItemClick = { clickedBook ->
-                                    val bundle = Bundle()
-                                    bundle.putInt("bookId", clickedBook.id)
-                                    bundle.putString("bookTitle", clickedBook.title)
-
-                                    findNavController().navigate(
-                                        R.id.action_profileFragment_to_bookRecipesFragment,
-                                        bundle
-                                    )
-                                },
-                                onDeleteClick = { book ->
-                                    viewLifecycleOwner.lifecycleScope.launch {
-                                        bookViewModel.deleteBook(book.id)
-                                        refreshProfileData()
-                                    }
-                                },
-                                countsMap = countsMap
-                            )
+                        if (remaining == 0) {
+                            rvProfileBooks.post {
+                                rvProfileBooks.adapter = RecipeBooksAdapter(
+                                    books = allBooks,
+                                    onItemClick = { clickedBook ->
+                                        val bundle = Bundle()
+                                        bundle.putInt("bookId", clickedBook.id)
+                                        bundle.putString("bookTitle", clickedBook.title)
+                                        findNavController().navigate(
+                                            R.id.action_profileFragment_to_bookRecipesFragment,
+                                            bundle
+                                        )
+                                    },
+                                    onDeleteClick = { book ->
+                                        viewLifecycleOwner.lifecycleScope.launch {
+                                            bookViewModel.deleteBook(book.id)
+                                            refreshProfileData()
+                                        }
+                                    },
+                                    countsMap = countsMap
+                                )
+                            }
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun showInvitationDialog(invitation: Map<String, Any>) {
+        val invitationId = invitation["invitationId"] as? String ?: return
+        val fromUid = invitation["fromUid"] as? String ?: return
+        val permission = invitation["permission"] as? String ?: return
+        val type = invitation["type"] as? String ?: "book"
+
+        val itemName = if (type == "recipe") {
+            invitation["recipeName"] as? String ?: "a recipe"
+        } else {
+            invitation["bookTitle"] as? String ?: "a book"
+        }
+
+        userViewModel.getUserByUid(fromUid) { fromUser ->
+            requireActivity().runOnUiThread {
+                val fromUsername = fromUser?.username ?: "Someone"
+                val itemType = if (type == "recipe") "recipe" else "book"
+
+                android.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Sharing Request")
+                    .setMessage("$fromUsername wants to share $itemType \"$itemName\" with you ($permission access)")
+                    .setPositiveButton("Accept") { _, _ ->
+                        bookViewModel.updateInvitationStatus(invitationId, "accepted") {
+                            requireActivity().runOnUiThread {
+                                refreshProfileData()
+                            }
+                        }
+                    }
+                    .setNegativeButton("Decline") { _, _ ->
+                        bookViewModel.updateInvitationStatus(invitationId, "declined")
+                    }
+                    .show()
             }
         }
     }

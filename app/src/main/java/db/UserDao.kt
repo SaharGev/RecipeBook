@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-
+import androidx.room.Update
 @Dao
 interface UserDao {
 
@@ -20,4 +20,6 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE uid = :uid LIMIT 1")
     suspend fun getUserByUid(uid: String): UserEntity?
 
+    @Update
+    suspend fun updateUser(user: UserEntity)
 }

@@ -56,6 +56,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         cookTime: Int,
         difficulty: String,
         isPublic: Boolean,
+        sharedWith: String = "",
         onDone: () -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -68,7 +69,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                 imageUri = imageUri,
                 cookTime = cookTime,
                 difficulty = difficulty,
-                isPublic = isPublic
+                isPublic = isPublic,
+                ownerUid = uid,
+                sharedWith = sharedWith
             )
 
             val id = repository.insertRecipe(newRecipe)
@@ -84,6 +87,11 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
             val savedRecipe = newRecipe.copy(id = id.toInt(), imageUri = finalImageUrl)
             repository.saveRecipeToFirestore(savedRecipe, uid)
+
+            if (sharedWith.isNotEmpty()) {
+                repository.sendRecipeInvitations(savedRecipe, uid)
+            }
+
             onDone()
         }
     }
@@ -121,23 +129,37 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         imageUri: String?,
         cookTime: Int,
         difficulty: String,
-        isPublic: Boolean
+        isPublic: Boolean,
+        sharedWith: String = "",
+        uid: String = "",
+        onDone: () -> Unit = {}
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.updateRecipe(
-                com.example.recipebook.db.RecipeEntity(
-                    id = id,
-                    bookId = bookId,
-                    name = name,
-                    description = description,
-                    ingredients = ingredients,
-                    instructions = instructions,
-                    imageUri = imageUri,
-                    cookTime = cookTime,
-                    difficulty = difficulty,
-                    isPublic = isPublic
-                )
+            val updatedRecipe = RecipeEntity(
+                id = id,
+                bookId = bookId,
+                name = name,
+                description = description,
+                ingredients = ingredients,
+                instructions = instructions,
+                imageUri = imageUri,
+                cookTime = cookTime,
+                difficulty = difficulty,
+                isPublic = isPublic,
+                ownerUid = uid,
+                sharedWith = sharedWith
             )
+
+            repository.updateRecipe(updatedRecipe)
+
+            if (uid.isNotEmpty()) {
+                repository.saveRecipeToFirestore(updatedRecipe, uid)
+                if (sharedWith.isNotEmpty()) {
+                    repository.sendRecipeInvitations(updatedRecipe, uid)
+                }
+            }
+
+            onDone()
         }
     }
 
@@ -151,6 +173,19 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch(Dispatchers.IO) {
             val recipes = repository.getRecipesByBookId(bookId)
             callback(recipes.size)
+        }
+    }
+
+    fun getSharedWithMeRecipes(uid: String, callback: (List<RecipeEntity>) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val recipes = repository.getSharedWithMeRecipes(uid)
+            callback(recipes)
+        }
+    }
+
+    fun sendRecipeInvitations(recipe: com.example.recipebook.db.RecipeEntity, uid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.sendRecipeInvitations(recipe, uid)
         }
     }
 }

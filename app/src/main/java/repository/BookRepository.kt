@@ -37,7 +37,12 @@ class BookRepository(context: Context) {
             )
         }
 
-        remoteBooks.forEach { bookDao.insertBook(it) }
+        remoteBooks.forEach { book ->
+            val existing = bookDao.getAllBooks()
+            if (existing.none { it.id == book.id }) {
+                bookDao.insertBook(book)
+            }
+        }
         return remoteBooks
     }
 
@@ -83,5 +88,97 @@ class BookRepository(context: Context) {
 
         imageRef.putBytes(bytes).await()
         return imageRef.downloadUrl.await().toString()
+    }
+
+    suspend fun getSharedWithMeBooks(myUid: String): List<BookEntity> {
+        val acceptedInvitations = firestore.collection("invitations")
+            .whereEqualTo("toUid", myUid)
+            .whereEqualTo("status", "accepted")
+            .get()
+            .await()
+
+        val sharedBooks = mutableListOf<BookEntity>()
+
+        for (doc in acceptedInvitations.documents) {
+            val ownerUid = doc.getString("fromUid") ?: continue
+            val bookId = (doc.getLong("bookId") ?: continue).toInt()
+
+            val bookDoc = firestore.collection("users")
+                .document(ownerUid)
+                .collection("books")
+                .document(bookId.toString())
+                .get()
+                .await()
+
+            if (!bookDoc.exists()) continue
+
+            val book = BookEntity(
+                id = (bookDoc.getLong("id") ?: 0).toInt(),
+                title = bookDoc.getString("title").orEmpty(),
+                description = bookDoc.getString("description").orEmpty(),
+                isPublic = bookDoc.getBoolean("isPublic") ?: true,
+                imageUri = bookDoc.getString("imageUri"),
+                ownerUid = bookDoc.getString("ownerUid").orEmpty(),
+                sharedWith = (bookDoc.get("sharedWith") as? List<String>)?.joinToString(",").orEmpty()
+            )
+
+            // Save to local Room cache
+            val existing = bookDao.getAllBooks()
+            if (existing.none { it.id == book.id }) {
+                bookDao.insertBook(book)
+            }
+
+            sharedBooks.add(book)
+        }
+
+        return sharedBooks
+    }
+
+    suspend fun sendBookInvitations(book: BookEntity, ownerUid: String) {
+        val sharedWithList = book.sharedWith.split(",").filter { it.isNotEmpty() }
+
+        sharedWithList.forEach { entry ->
+            val parts = entry.split(":")
+            if (parts.size != 2) return@forEach
+
+            val toUid = parts[0]
+            val permission = parts[1]
+
+            val invitation = hashMapOf(
+                "fromUid" to ownerUid,
+                "toUid" to toUid,
+                "bookId" to book.id,
+                "bookTitle" to book.title,
+                "permission" to permission,
+                "status" to "pending"
+            )
+
+            firestore.collection("invitations")
+                .add(invitation)
+                .await()
+        }
+    }
+
+    fun listenToPendingInvitations(uid: String, onInvitation: (List<Map<String, Any>>) -> Unit) {
+        firestore.collection("invitations")
+            .whereEqualTo("toUid", uid)
+            .whereEqualTo("status", "pending")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
+
+                val invitations = snapshot.documents.mapNotNull { doc ->
+                    val data = doc.data ?: return@mapNotNull null
+                    data + mapOf("invitationId" to doc.id)
+                }
+
+                onInvitation(invitations)
+            }
+    }
+
+    suspend fun updateInvitationStatus(invitationId: String, status: String) {
+        firestore.collection("invitations")
+            .document(invitationId)
+            .update("status", status)
+            .await()
     }
 }

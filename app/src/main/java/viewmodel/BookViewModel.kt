@@ -84,4 +84,22 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
             repository.deleteBook(bookId)
         }
     }
+
+    fun getSharedWithMeBooks(uid: String, callback: (List<BookEntity>) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val books = repository.getSharedWithMeBooks(uid)
+            callback(books)
+        }
+    }
+
+    fun listenToPendingInvitations(uid: String, callback: (List<Map<String, Any>>) -> Unit) {
+        repository.listenToPendingInvitations(uid, callback)
+    }
+
+    fun updateInvitationStatus(invitationId: String, status: String, onDone: () -> Unit = {}) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateInvitationStatus(invitationId, status)
+            onDone()
+        }
+    }
 }

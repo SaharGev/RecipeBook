@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.OnConflictStrategy
 
 @Dao
 interface BookDao {
@@ -12,7 +13,7 @@ interface BookDao {
     @Query("SELECT * FROM books")
     suspend fun getAllBooks(): List<BookEntity>
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertBook(book: BookEntity): Long
 
     @Query("DELETE FROM books WHERE id = :bookId")

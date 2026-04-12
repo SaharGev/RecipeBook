@@ -20,7 +20,7 @@ class AddRecipeBookFragment : Fragment() {
     private lateinit var booksList: List<BookEntity>
     private lateinit var recipesList: List<com.example.recipebook.db.RecipeEntity>
 
-    private val selectedFriendUids = mutableListOf<String>()
+    private val selectedFriendPermissions = mutableMapOf<String, String>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -137,7 +137,7 @@ class AddRecipeBookFragment : Fragment() {
                     viewModel.getFriends(uid) { friends ->
                         requireActivity().runOnUiThread {
                             llFriendsList.removeAllViews()
-                            selectedFriendUids.clear()
+                            selectedFriendPermissions.clear()
 
                             if (friends.isEmpty()) {
                                 val tvNoFriends = TextView(requireContext())
@@ -148,23 +148,51 @@ class AddRecipeBookFragment : Fragment() {
                             }
 
                             friends.forEach { friend ->
-                                val checkBox = CheckBox(requireContext())
-                                checkBox.text = friend.username
+                                val rowLayout = LinearLayout(requireContext()).apply {
+                                    orientation = LinearLayout.HORIZONTAL
+                                    gravity = android.view.Gravity.CENTER_VERTICAL
+                                }
+
+                                val checkBox = CheckBox(requireContext()).apply {
+                                    text = friend.username
+                                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                                }
+
+                                val permissionSpinner = Spinner(requireContext())
+                                permissionSpinner.visibility = View.GONE
+                                val permissions = listOf("view", "edit")
+                                val permAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, permissions)
+                                permAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                                permissionSpinner.adapter = permAdapter
+
+
                                 checkBox.setOnCheckedChangeListener { _, isChecked ->
                                     if (isChecked) {
-                                        selectedFriendUids.add(friend.uid)
+                                        permissionSpinner.visibility = View.VISIBLE
+                                        selectedFriendPermissions[friend.uid] = "view"
+                                        permissionSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                                            override fun onItemSelected(parent: AdapterView<*>?, v: View?, position: Int, id: Long) {
+                                                selectedFriendPermissions[friend.uid] = if (position == 0) "view" else "edit"
+                                            }
+                                            override fun onNothingSelected(parent: AdapterView<*>?) {}
+                                        }
                                     } else {
-                                        selectedFriendUids.remove(friend.uid)
+                                        permissionSpinner.visibility = View.GONE
+                                        selectedFriendPermissions.remove(friend.uid)
                                     }
                                 }
-                                llFriendsList.addView(checkBox)
+
+                                rowLayout.addView(checkBox)
+                                rowLayout.addView(permissionSpinner)
+                                llFriendsList.addView(rowLayout)
                             }
                         }
                     }
                 } else {
                     tvShareWith.visibility = View.GONE
                     llFriendsList.visibility = View.GONE
-                    selectedFriendUids.clear()
+                    selectedFriendPermissions.clear()
+
                 }
             }
 
@@ -193,7 +221,7 @@ class AddRecipeBookFragment : Fragment() {
                 title = bookName,
                 description = bookDescription,
                 isPublic = isPublic,
-                sharedWith = selectedFriendUids.joinToString(",")
+                sharedWith = selectedFriendPermissions.entries.joinToString(",") { "${it.key}:${it.value}" }
             ) {
                 requireActivity().runOnUiThread {
                     Toast.makeText(requireContext(), "Book created successfully", Toast.LENGTH_SHORT).show()

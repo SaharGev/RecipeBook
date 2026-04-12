@@ -66,6 +66,7 @@ class AddRecipeBookViewModel(application: Application) : AndroidViewModel(applic
 
             val savedBook = newBook.copy(id = id.toInt(), imageUri = finalImageUrl)
             bookRepository.saveBookToFirestore(savedBook, uid)
+            bookRepository.sendBookInvitations(savedBook, uid)
             onDone?.invoke()
         }
     }
