@@ -11,9 +11,9 @@ import com.example.recipebook.R
 import com.example.recipebook.db.BookEntity
 import androidx.fragment.app.viewModels
 import com.example.recipebook.viewmodel.AddRecipeBookViewModel
-import com.example.recipebook.db.RecipeEntity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.example.recipebook.utils.showLoading
+import com.example.recipebook.utils.hideLoading
+
 class AddRecipeBookFragment : Fragment() {
 
     private val viewModel: AddRecipeBookViewModel by viewModels()
@@ -217,6 +217,7 @@ class AddRecipeBookFragment : Fragment() {
 
             val isPublic = privacySelection == "Public"
 
+            showLoading()
             viewModel.createBook(
                 title = bookName,
                 description = bookDescription,
@@ -224,6 +225,7 @@ class AddRecipeBookFragment : Fragment() {
                 sharedWith = selectedFriendPermissions.entries.joinToString(",") { "${it.key}:${it.value}" }
             ) {
                 requireActivity().runOnUiThread {
+                    hideLoading()
                     Toast.makeText(requireContext(), "Book created successfully", Toast.LENGTH_SHORT).show()
 
                     etBookName.text.clear()
@@ -250,9 +252,10 @@ class AddRecipeBookFragment : Fragment() {
             val selectedBook = booksList[selectedBookIndex - 1]
             val selectedRecipe = recipesList[selectedRecipeIndex - 1]
 
+            showLoading()
             viewModel.addRecipeToBook(selectedRecipe, selectedBook.id) {
                 requireActivity().runOnUiThread {
-
+                    hideLoading()
                     recipesList = recipesList.filter { it.id != selectedRecipe.id }
 
                     val recipeNames = mutableListOf("Select Recipe")

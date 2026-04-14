@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
 import com.example.recipebook.viewmodel.RecipeViewModel
+import com.example.recipebook.utils.showLoading
+import com.example.recipebook.utils.hideLoading
 
 class BookRecipesFragment : Fragment() {
 
@@ -70,8 +72,10 @@ class BookRecipesFragment : Fragment() {
     }
 
     private fun loadRecipes(bookId: Int, rvRecipes: RecyclerView) {
+        showLoading()
         viewModel.getRecipesByBookId(bookId) { recipes ->
             rvRecipes.post {
+                hideLoading()
                 if (recipes.isEmpty()) {
                     tvEmptyState.visibility = View.VISIBLE
                     rvRecipes.visibility = View.GONE

@@ -107,9 +107,12 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 return@setOnClickListener
             }
 
+            showLoading()  // ← הוסיפי כאן
+
             if (isEmail) {
                 auth.signInWithEmailAndPassword(identifier, password)
                     .addOnCompleteListener { task ->
+                        hideLoading()  // ← הוסיפי כאן
                         if (task.isSuccessful) {
                             val navController = findNavController()
                             if (navController.currentDestination?.id == R.id.loginFragment) {
@@ -123,6 +126,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 userViewModel.getUserByPhone(identifier) { user ->
                     requireActivity().runOnUiThread {
                         if (user == null) {
+                            hideLoading()  // ← הוסיפי כאן
                             tilEmail.error = "User not found"
                             etEmail.requestFocus()
                             return@runOnUiThread
@@ -130,6 +134,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
                         auth.signInWithEmailAndPassword(user.email, password)
                             .addOnCompleteListener { task ->
+                                hideLoading()  // ← הוסיפי כאן
                                 if (task.isSuccessful) {
                                     val navController = findNavController()
                                     if (navController.currentDestination?.id == R.id.loginFragment) {

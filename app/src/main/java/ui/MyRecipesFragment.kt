@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
 import com.example.recipebook.model.Recipe
 import com.example.recipebook.viewmodel.RecipeViewModel
+import com.example.recipebook.utils.showLoading
+import com.example.recipebook.utils.hideLoading
 
 class MyRecipesFragment : Fragment() {
 
@@ -60,10 +62,11 @@ class MyRecipesFragment : Fragment() {
 
     private fun loadMyRecipes() {
         val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-
+        showLoading()
         recipeViewModel.getRecipes(uid) { myRecipes ->
             recipeViewModel.getSharedWithMeRecipes(uid) { sharedRecipes ->
                 activity?.runOnUiThread {
+                    hideLoading()
                     val allRecipes = (myRecipes + sharedRecipes).distinctBy { it.id }
 
                     if (allRecipes.isEmpty()) {

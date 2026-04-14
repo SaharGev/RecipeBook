@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
 import com.example.recipebook.viewmodel.BookViewModel
 import com.example.recipebook.viewmodel.RecipeViewModel
+import com.example.recipebook.utils.showLoading
+import com.example.recipebook.utils.hideLoading
 
 class RecipeBooksFragment : Fragment() {
 
@@ -60,10 +62,12 @@ class RecipeBooksFragment : Fragment() {
 
     private fun loadBooks(rvBooks: RecyclerView, tvEmptyBooks: TextView) {
         val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        showLoading()
         viewModel.getBooks(uid) { books ->
             val countsMap = mutableMapOf<Int, Int>()
 
             if (books.isEmpty()) {
+                hideLoading()
                 rvBooks.visibility = View.GONE
                 tvEmptyBooks.visibility = View.VISIBLE
 
@@ -98,6 +102,7 @@ class RecipeBooksFragment : Fragment() {
                     if (remaining == 0) {
                         rvBooks.post {
                             rvBooks.visibility = View.VISIBLE
+                            hideLoading()
                             tvEmptyBooks.visibility = View.GONE
                             rvBooks.adapter = RecipeBooksAdapter(
                                 books = books,
