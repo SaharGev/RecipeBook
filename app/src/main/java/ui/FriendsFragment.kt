@@ -17,6 +17,8 @@ import com.example.recipebook.viewmodel.UserViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import androidx.navigation.fragment.findNavController
+import com.example.recipebook.utils.showLoading
+import com.example.recipebook.utils.hideLoading
 
 class FriendsFragment : Fragment() {
 
@@ -57,9 +59,10 @@ class FriendsFragment : Fragment() {
                     foundUser = null
                     return
                 }
-
+                showLoading()
                 userViewModel.searchUser(query) { user ->
                     requireActivity().runOnUiThread {
+                        hideLoading()
                         if (user == null || user.uid == currentUid) {
                             tvSearchResult.text = "User not found"
                             tvSearchResult.visibility = View.VISIBLE
@@ -81,8 +84,10 @@ class FriendsFragment : Fragment() {
         btnAddFriend.setOnClickListener {
             val friend = foundUser ?: return@setOnClickListener
 
+            showLoading()
             userViewModel.addFriend(currentUid, friend.uid) { success ->
                 requireActivity().runOnUiThread {
+                    hideLoading()
                     if (success) {
                         btnAddFriend.visibility = View.GONE
                         cardSearchResult.visibility = View.GONE

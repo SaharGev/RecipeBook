@@ -8,6 +8,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.activity.viewModels
 import com.example.recipebook.ui.LoadingViewModel
+import androidx.navigation.ui.NavigationUI
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,46 +30,7 @@ class MainActivity : AppCompatActivity() {
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
 
-        bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-
-                R.id.searchFragment -> {
-                    navController.navigate(
-                        R.id.searchFragment,
-                        null,
-                        androidx.navigation.NavOptions.Builder()
-                            .setLaunchSingleTop(true)
-                            .setPopUpTo(R.id.searchFragment, false)
-                            .build()
-                    )
-                    true
-                }
-
-                R.id.profileFragment -> {
-                    navController.navigate(
-                        R.id.profileFragment,
-                        null,
-                        androidx.navigation.NavOptions.Builder()
-                            .setLaunchSingleTop(true)
-                            .build()
-                    )
-                    true
-                }
-
-                R.id.addNavbarFragment -> {
-                    navController.navigate(
-                        R.id.addNavbarFragment,
-                        null,
-                        androidx.navigation.NavOptions.Builder()
-                            .setPopUpTo(R.id.addNavbarFragment, true)
-                            .build()
-                    )
-                    true
-                }
-
-                else -> false
-            }
-        }
+        NavigationUI.setupWithNavController(bottomNavigation, navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {

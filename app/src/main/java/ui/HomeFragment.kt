@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
 import com.example.recipebook.viewmodel.RecipeViewModel
+import com.example.recipebook.utils.showLoading
+import com.example.recipebook.utils.hideLoading
 
 class HomeFragment : Fragment() {
 
@@ -57,10 +59,11 @@ class HomeFragment : Fragment() {
 
     private fun loadRecipes(rvRecipes: RecyclerView) {
         val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        showLoading()
         viewModel.getRecipes(uid) { recipes ->
 
             rvRecipes.post {
-
+                hideLoading()
                 if (recipes.isEmpty()) {
                     tvEmptyState.visibility = View.VISIBLE
                     rvRecipes.visibility = View.GONE

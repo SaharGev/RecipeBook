@@ -22,6 +22,8 @@ import com.google.firebase.auth.FirebaseAuth
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import com.example.recipebook.viewmodel.UserViewModel
+import com.example.recipebook.utils.showLoading
+import com.example.recipebook.utils.hideLoading
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
@@ -111,7 +113,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private fun refreshProfileData() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-
+        showLoading()
         loadSavedProfileImage(imgProfile)
 
         recipeViewModel.getRecipesCount(uid) { count ->
@@ -158,6 +160,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 val countsMap = mutableMapOf<Int, Int>()
 
                 activity?.runOnUiThread {
+                    hideLoading()
                     if (allBooks.isEmpty()) {
                         rvProfileBooks.visibility = View.GONE
                         tvEmptyProfileBooks.visibility = View.VISIBLE
@@ -177,6 +180,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
                         if (remaining == 0) {
                             rvProfileBooks.post {
+                                hideLoading()
                                 rvProfileBooks.adapter = RecipeBooksAdapter(
                                     books = allBooks,
                                     onItemClick = { clickedBook ->
