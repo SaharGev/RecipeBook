@@ -17,6 +17,7 @@ import com.example.recipebook.model.Recipe
 import com.example.recipebook.viewmodel.RecipeViewModel
 import com.example.recipebook.utils.showLoading
 import com.example.recipebook.utils.hideLoading
+import com.example.recipebook.utils.RecentItemsHelper
 
 class MyRecipesFragment : Fragment() {
 
@@ -106,6 +107,8 @@ class MyRecipesFragment : Fragment() {
     }
 
     private fun navigateToRecipeDetails(recipe: Recipe) {
+        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        RecentItemsHelper.saveRecentRecipe(requireContext(), recipe.id, uid)
         val bundle = Bundle().apply {
             putParcelable("recipe", recipe)
         }

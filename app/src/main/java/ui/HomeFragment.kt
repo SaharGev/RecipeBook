@@ -16,7 +16,7 @@ import com.example.recipebook.R
 import com.example.recipebook.viewmodel.RecipeViewModel
 import com.example.recipebook.utils.showLoading
 import com.example.recipebook.utils.hideLoading
-
+import com.example.recipebook.utils.RecentItemsHelper
 class HomeFragment : Fragment() {
 
     private val viewModel: RecipeViewModel by viewModels()
@@ -104,6 +104,8 @@ class HomeFragment : Fragment() {
         rvRecipes.adapter = RecipeAdapter(
             uiRecipes,
             onItemClick = { clickedRecipe ->
+                val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+                RecentItemsHelper.saveRecentRecipe(requireContext(), clickedRecipe.id, uid)
                 val bundle = Bundle()
                 bundle.putParcelable("recipe", clickedRecipe)
 
