@@ -17,8 +17,15 @@ import com.example.recipebook.db.DatabaseProvider
 import com.example.recipebook.model.Recipe
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
-
+import androidx.fragment.app.viewModels
+import com.example.recipebook.viewmodel.RecipeViewModel
+import com.example.recipebook.viewmodel.BookViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.example.recipebook.utils.RecentItemsHelper
 class SearchFragment : Fragment(R.layout.fragment_search) {
+
+    private val recipeViewModel: RecipeViewModel by viewModels()
+    private val bookViewModel: BookViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -163,9 +170,10 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 )
             }
 
-            val bookItems = books.map { book ->
+            val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+            val myBooks = books.filter { it.ownerUid == uid }
+            val bookItems = myBooks.map { book ->
                 val count = recipeDao.getRecipesByBookId(book.id).size
-
                 SearchItem(
                     id = book.id,
                     title = book.title,
@@ -278,6 +286,87 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 }
             }
         })
+
+        val rvSharedRecipes = view.findViewById<RecyclerView>(R.id.rvSharedRecipes)
+        val rvSharedBooks = view.findViewById<RecyclerView>(R.id.rvSharedBooks)
+
+        rvSharedRecipes.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        rvSharedBooks.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+
+        val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
+        val sharedRecipesAdapter = SearchRecipeAdapter(emptyList()) { item ->
+            item.recipe?.let { recipe ->
+                findNavController().navigate(
+                    R.id.action_searchFragment_to_recipeDetailsFragment,
+                    bundleOf("recipe" to recipe)
+                )
+            }
+        }
+
+        val sharedBooksAdapter = SearchRecipeAdapter(emptyList()) { item ->
+            findNavController().navigate(
+                R.id.action_searchFragment_to_bookRecipesFragment,
+                bundleOf("bookId" to item.id, "bookTitle" to item.title)
+            )
+        }
+
+        rvSharedRecipes.adapter = sharedRecipesAdapter
+        rvSharedBooks.adapter = sharedBooksAdapter
+
+        recipeViewModel.getSharedWithMeRecipes(uid) { recipes ->
+            activity?.runOnUiThread {
+                if (recipes.isEmpty()) {
+                    tvSharedRecipesEmpty.visibility = View.VISIBLE
+                    rvSharedRecipes.visibility = View.GONE
+                } else {
+                    tvSharedRecipesEmpty.visibility = View.GONE
+                    rvSharedRecipes.visibility = View.VISIBLE
+                    val items = recipes.map {
+                        SearchItem(
+                            id = it.id,
+                            title = it.name,
+                            type = SearchItemType.RECIPE,
+                            imageUri = it.imageUri,
+                            recipe = Recipe(
+                                id = it.id,
+                                name = it.name,
+                                description = it.description,
+                                ingredients = it.ingredients,
+                                instructions = it.instructions,
+                                imageUri = it.imageUri,
+                                cookTime = it.cookTime,
+                                difficulty = it.difficulty,
+                                isPublic = it.isPublic
+                            )
+                        )
+                    }
+                    sharedRecipesAdapter.updateData(items)
+                }
+            }
+        }
+
+        bookViewModel.getSharedWithMeBooks(uid) { books ->
+            activity?.runOnUiThread {
+                val trueSharedBooks = books.filter { it.ownerUid != uid }
+                if (trueSharedBooks.isEmpty()) {
+                    tvSharedBooksEmpty.visibility = View.VISIBLE
+                    rvSharedBooks.visibility = View.GONE
+                } else {
+                    tvSharedBooksEmpty.visibility = View.GONE
+                    rvSharedBooks.visibility = View.VISIBLE
+                    val items = trueSharedBooks.map {
+                    SearchItem(
+                            id = it.id,
+                            title = it.title,
+                            type = SearchItemType.BOOK,
+                            imageUri = null
+                        )
+                    }
+                    sharedBooksAdapter.updateData(items)
+                }
+            }
+        }
     }
 
     private fun showDefaultSections(
@@ -327,62 +416,26 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         layoutFavoriteBooksHeader.visibility = View.VISIBLE
         tvFavoriteBooksEmpty.visibility = View.VISIBLE
         layoutSharedRecipesHeader.visibility = View.VISIBLE
-        tvSharedRecipesEmpty.visibility = View.VISIBLE
         layoutSharedBooksHeader.visibility = View.VISIBLE
-        tvSharedBooksEmpty.visibility = View.VISIBLE
     }
 
     private fun saveRecentRecipe(recipeId: Int) {
-        val prefs = requireContext().getSharedPreferences("recent_recipes", Context.MODE_PRIVATE)
-        val currentIds = prefs.getString("ids", "") ?: ""
-
-        val idsList = currentIds
-            .split(",")
-            .filter { it.isNotBlank() && it != recipeId.toString() }
-            .toMutableList()
-
-        idsList.add(0, recipeId.toString())
-
-        val limitedList = idsList.take(10)
-
-        prefs.edit()
-            .putString("ids", limitedList.joinToString(","))
-            .apply()
-    }
-
-    private fun getRecentRecipeIds(): List<Int> {
-        val prefs = requireContext().getSharedPreferences("recent_recipes", Context.MODE_PRIVATE)
-        val idsString = prefs.getString("ids", "") ?: ""
-
-        return idsString
-            .split(",")
-            .mapNotNull { it.toIntOrNull() }
+        val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        RecentItemsHelper.saveRecentRecipe(requireContext(), recipeId, uid)
     }
 
     private fun saveRecentBook(bookId: Int) {
-        val prefs = requireContext().getSharedPreferences("recent_books", Context.MODE_PRIVATE)
-        val currentIds = prefs.getString("ids", "") ?: ""
+        val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        RecentItemsHelper.saveRecentBook(requireContext(), bookId, uid)
+    }
 
-        val idsList = currentIds
-            .split(",")
-            .filter { it.isNotBlank() && it != bookId.toString() }
-            .toMutableList()
-
-        idsList.add(0, bookId.toString())
-
-        val limitedList = idsList.take(10)
-
-        prefs.edit()
-            .putString("ids", limitedList.joinToString(","))
-            .apply()
+    private fun getRecentRecipeIds(): List<Int> {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        return RecentItemsHelper.getRecentRecipeIds(requireContext(), uid)
     }
 
     private fun getRecentBookIds(): List<Int> {
-        val prefs = requireContext().getSharedPreferences("recent_books", Context.MODE_PRIVATE)
-        val idsString = prefs.getString("ids", "") ?: ""
-
-        return idsString
-            .split(",")
-            .mapNotNull { it.toIntOrNull() }
+        val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        return RecentItemsHelper.getRecentBookIds(requireContext(), uid)
     }
 }

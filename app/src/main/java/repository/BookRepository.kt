@@ -121,7 +121,7 @@ class BookRepository(context: Context) {
                 ownerUid = bookDoc.getString("ownerUid").orEmpty(),
                 sharedWith = (bookDoc.get("sharedWith") as? List<String>)?.joinToString(",").orEmpty()
             )
-
+            if (book.ownerUid == myUid) continue
             // Save to local Room cache
             val existing = bookDao.getAllBooks()
             if (existing.none { it.id == book.id }) {

@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import com.example.recipebook.viewmodel.UserViewModel
 import com.example.recipebook.utils.showLoading
 import com.example.recipebook.utils.hideLoading
+import com.example.recipebook.utils.RecentItemsHelper
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
@@ -184,6 +185,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                                 rvProfileBooks.adapter = RecipeBooksAdapter(
                                     books = allBooks,
                                     onItemClick = { clickedBook ->
+                                        val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+                                        RecentItemsHelper.saveRecentBook(requireContext(), clickedBook.id, uid)
                                         val bundle = Bundle()
                                         bundle.putInt("bookId", clickedBook.id)
                                         bundle.putString("bookTitle", clickedBook.title)

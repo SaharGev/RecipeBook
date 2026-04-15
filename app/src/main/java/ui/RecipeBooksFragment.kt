@@ -17,6 +17,8 @@ import com.example.recipebook.viewmodel.BookViewModel
 import com.example.recipebook.viewmodel.RecipeViewModel
 import com.example.recipebook.utils.showLoading
 import com.example.recipebook.utils.hideLoading
+import com.example.recipebook.utils.RecentItemsHelper
+import com.google.firebase.auth.FirebaseAuth
 
 class RecipeBooksFragment : Fragment() {
 
@@ -76,6 +78,8 @@ class RecipeBooksFragment : Fragment() {
                         books = books,
                         countsMap = countsMap,
                         onItemClick = { clickedBook ->
+                            val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+                            RecentItemsHelper.saveRecentBook(requireContext(), clickedBook.id, uid)
                             val bundle = Bundle()
                             bundle.putInt("bookId", clickedBook.id)
                             bundle.putString("bookTitle", clickedBook.title)
@@ -107,6 +111,8 @@ class RecipeBooksFragment : Fragment() {
                             rvBooks.adapter = RecipeBooksAdapter(
                                 books = books,
                                 onItemClick = { clickedBook ->
+                                    val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+                                    RecentItemsHelper.saveRecentBook(requireContext(), clickedBook.id, uid)
                                     val bundle = Bundle()
                                     bundle.putInt("bookId", clickedBook.id)
                                     bundle.putString("bookTitle", clickedBook.title)

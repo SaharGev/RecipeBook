@@ -17,6 +17,7 @@ import com.example.recipebook.model.Recipe
 import com.example.recipebook.viewmodel.RecipeViewModel
 import com.example.recipebook.utils.showLoading
 import com.example.recipebook.utils.hideLoading
+import com.example.recipebook.utils.RecentItemsHelper
 
 class MyRecipesFragment : Fragment() {
 
@@ -64,48 +65,48 @@ class MyRecipesFragment : Fragment() {
         val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
         showLoading()
         recipeViewModel.getRecipes(uid) { myRecipes ->
-            recipeViewModel.getSharedWithMeRecipes(uid) { sharedRecipes ->
-                activity?.runOnUiThread {
-                    hideLoading()
-                    val allRecipes = (myRecipes + sharedRecipes).distinctBy { it.id }
+            activity?.runOnUiThread {
+                hideLoading()
+                val myOwnRecipes = myRecipes.filter { it.ownerUid == uid }
 
-                    if (allRecipes.isEmpty()) {
-                        rvRecipes.visibility = View.GONE
-                        tvEmptyRecipes.visibility = View.VISIBLE
-                    } else {
-                        rvRecipes.visibility = View.VISIBLE
-                        tvEmptyRecipes.visibility = View.GONE
+                if (myOwnRecipes.isEmpty()) {
+                    rvRecipes.visibility = View.GONE
+                    tvEmptyRecipes.visibility = View.VISIBLE
+                } else {
+                    rvRecipes.visibility = View.VISIBLE
+                    tvEmptyRecipes.visibility = View.GONE
 
-                        val recipes = allRecipes.map { entity ->
-                            Recipe(
-                                id = entity.id,
-                                name = entity.name,
-                                description = entity.description,
-                                ingredients = entity.ingredients,
-                                instructions = entity.instructions,
-                                imageUri = entity.imageUri,
-                                cookTime = entity.cookTime,
-                                difficulty = entity.difficulty,
-                                isPublic = entity.isPublic,
-                                ownerUid = entity.ownerUid,
-                                sharedWith = entity.sharedWith
-                            )
-                        }
-
-                        rvRecipes.adapter = RecipeAdapter(
-                            recipes = recipes,
-                            onItemClick = { recipe -> navigateToRecipeDetails(recipe) },
-                            onDeleteClick = { recipe ->
-                                recipeViewModel.deleteRecipeById(recipe.id)
-                            }
+                    val recipes = myOwnRecipes.map { entity ->
+                        Recipe(
+                            id = entity.id,
+                            name = entity.name,
+                            description = entity.description,
+                            ingredients = entity.ingredients,
+                            instructions = entity.instructions,
+                            imageUri = entity.imageUri,
+                            cookTime = entity.cookTime,
+                            difficulty = entity.difficulty,
+                            isPublic = entity.isPublic,
+                            ownerUid = entity.ownerUid,
+                            sharedWith = entity.sharedWith
                         )
                     }
+
+                    rvRecipes.adapter = RecipeAdapter(
+                        recipes = recipes,
+                        onItemClick = { recipe -> navigateToRecipeDetails(recipe) },
+                        onDeleteClick = { recipe ->
+                            recipeViewModel.deleteRecipeById(recipe.id)
+                        }
+                    )
                 }
             }
         }
     }
 
     private fun navigateToRecipeDetails(recipe: Recipe) {
+        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        RecentItemsHelper.saveRecentRecipe(requireContext(), recipe.id, uid)
         val bundle = Bundle().apply {
             putParcelable("recipe", recipe)
         }

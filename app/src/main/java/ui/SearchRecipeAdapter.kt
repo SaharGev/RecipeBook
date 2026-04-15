@@ -73,13 +73,13 @@ class SearchRecipeAdapter(
 
             val imageUri = item.imageUri
 
-            try {
-                if (imageUri != null) {
-                    holder.recipeImage?.setImageURI(android.net.Uri.parse(imageUri))
-                } else {
-                    holder.recipeImage?.setImageResource(R.drawable.ic_launcher_foreground)
-                }
-            } catch (e: SecurityException) {
+            if (imageUri != null) {
+                com.bumptech.glide.Glide.with(holder.itemView.context)
+                    .load(imageUri)
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .error(R.drawable.ic_launcher_foreground)
+                    .into(holder.recipeImage!!)
+            } else {
                 holder.recipeImage?.setImageResource(R.drawable.ic_launcher_foreground)
             }
         } else {

@@ -318,8 +318,21 @@
             android:text="Not available yet"
             android:textColor="#7A7A7A"
             android:textSize="14sp"
+            android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/layoutSharedRecipesHeader"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvSharedRecipes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:nestedScrollingEnabled="false"
+            android:paddingStart="8dp"
+            android:clipToPadding="false"
+            app:layout_constraintTop_toBottomOf="@id/tvSharedRecipesEmpty"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <LinearLayout
             android:id="@+id/layoutSharedBooksHeader"
@@ -328,7 +341,7 @@
             android:layout_marginTop="16dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            app:layout_constraintTop_toBottomOf="@id/tvSharedRecipesEmpty"
+            app:layout_constraintTop_toBottomOf="@id/rvSharedRecipes"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
@@ -337,7 +350,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Shared Books"
+                android:text="Books Shared With Me"
                 android:textColor="#2D2D2D"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -359,8 +372,21 @@
             android:text="Not available yet"
             android:textColor="#7A7A7A"
             android:textSize="14sp"
+            android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/layoutSharedBooksHeader"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvSharedBooks"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:nestedScrollingEnabled="false"
+            android:paddingStart="8dp"
+            android:clipToPadding="false"
+            app:layout_constraintTop_toBottomOf="@id/tvSharedBooksEmpty"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

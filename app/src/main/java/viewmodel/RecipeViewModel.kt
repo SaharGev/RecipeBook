@@ -31,7 +31,8 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     fun getRecipesCount(uid: String, callback: (Int) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             val recipes = repository.getAllRecipes(uid)
-            callback(recipes.size)
+            val myOwnRecipes = recipes.filter { it.ownerUid == uid }
+            callback(myOwnRecipes.size)
         }
     }
 
