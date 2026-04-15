@@ -350,7 +350,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Shared Books"
+                android:text="Books Shared With Me"
                 android:textColor="#2D2D2D"
                 android:textSize="18sp"
                 android:textStyle="bold" />

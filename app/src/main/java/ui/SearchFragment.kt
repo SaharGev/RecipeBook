@@ -170,9 +170,10 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 )
             }
 
-            val bookItems = books.map { book ->
+            val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+            val myBooks = books.filter { it.ownerUid == uid }
+            val bookItems = myBooks.map { book ->
                 val count = recipeDao.getRecipesByBookId(book.id).size
-
                 SearchItem(
                     id = book.id,
                     title = book.title,
@@ -347,14 +348,15 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         bookViewModel.getSharedWithMeBooks(uid) { books ->
             activity?.runOnUiThread {
-                if (books.isEmpty()) {
+                val trueSharedBooks = books.filter { it.ownerUid != uid }
+                if (trueSharedBooks.isEmpty()) {
                     tvSharedBooksEmpty.visibility = View.VISIBLE
                     rvSharedBooks.visibility = View.GONE
                 } else {
                     tvSharedBooksEmpty.visibility = View.GONE
                     rvSharedBooks.visibility = View.VISIBLE
-                    val items = books.map {
-                        SearchItem(
+                    val items = trueSharedBooks.map {
+                    SearchItem(
                             id = it.id,
                             title = it.title,
                             type = SearchItemType.BOOK,
