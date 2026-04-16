@@ -1,3 +1,4 @@
+//db/UserEntity
 package com.example.recipebook.db
 
 import androidx.room.Entity
