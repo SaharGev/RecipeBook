@@ -15,7 +15,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:background="#D9D9D9" />
+        android:background="#D9D9D9"/>
 
     <Button
         android:id="@+id/btnBack"
@@ -41,127 +41,172 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp" />
 
-    <LinearLayout
-        android:id="@+id/card"
+    <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
-        android:padding="16dp"
         android:layout_marginTop="-40dp"
-        android:background="@drawable/bg_chip"
         app:layout_constraintTop_toBottomOf="@id/imgRecipe"
+        app:layout_constraintBottom_toTopOf="@id/bottomBar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
-            android:id="@+id/tvRecipeTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Recipe Title"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:textColor="#2D2D2D"
-            android:layout_marginTop="16dp"/>
 
-        <TextView
-            android:id="@+id/tvDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Description from DB"
-            android:textSize="16sp"
-            android:layout_marginTop="8dp"
-            android:textColor="#555555"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginTop="12dp">
-
-            <TextView
-                android:id="@+id/tvCookTime"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/card"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="⏱ 30 דק"
-                android:textSize="13sp"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="6dp"
-                android:background="@drawable/bg_chip_small"
-                android:layout_marginEnd="6dp"/>
+                android:minHeight="435dp"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:layout_marginTop="18dp"
+                android:background="@drawable/bg_chip"
+                app:layout_constraintTop_toBottomOf="@id/imgRecipe"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:paddingBottom="24dp"
+                app:layout_constraintBottom_toTopOf="@id/bottomBar">
 
-            <TextView
-                android:id="@+id/tvDifficulty"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="קל"
-                android:textSize="13sp"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="6dp"
-                android:background="@drawable/bg_chip_small"
-                android:layout_marginEnd="6dp"/>
+                <TextView
+                    android:id="@+id/tvRecipeTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Recipe Title"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:textColor="#2D2D2D"
+                    android:layout_marginTop="16dp"/>
 
-            <TextView
-                android:id="@+id/tvPrivacy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Public"
-                android:textSize="13sp"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="6dp"
-                android:background="@drawable/bg_chip_small"/>
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tvDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Description from DB"
+                    android:textSize="16sp"
+                    android:layout_marginTop="8dp"
+                    android:textColor="#555555"/>
 
-        <TextView
-            android:id="@+id/tvSharedWith"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="13sp"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="6dp"
-            android:background="@drawable/bg_chip_small"
-            android:layout_marginStart="6dp"
-            android:visibility="gone"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginTop="12dp">
 
-        <TextView
-            android:id="@+id/tvIngredientsTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Ingredients"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"
-            android:textColor="#2D2D2D"/>
+                    <TextView
+                        android:id="@+id/tvCookTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⏱ 30 דק"
+                        android:textSize="13sp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp"
+                        android:background="@drawable/bg_chip_small"
+                        android:layout_marginEnd="6dp"/>
 
-        <TextView
-            android:id="@+id/tvIngredientsContent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Ingredients from DB"
-            android:textSize="16sp"
-            android:layout_marginTop="4dp"
-            android:textColor="#555555"/>
+                    <TextView
+                        android:id="@+id/tvDifficulty"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="קל"
+                        android:textSize="13sp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp"
+                        android:background="@drawable/bg_chip_small"
+                        android:layout_marginEnd="6dp"/>
 
-        <TextView
-            android:id="@+id/tvInstructionsTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Instructions"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"
-            android:textColor="#2D2D2D"/>
+                    <TextView
+                        android:id="@+id/tvPrivacy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Public"
+                        android:textSize="13sp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp"
+                        android:background="@drawable/bg_chip_small"/>
+                </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvInstructionsContent"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Instructions from DB"
-            android:textSize="16sp"
-            android:layout_marginTop="4dp"
-            android:textColor="#555555"/>
+                <TextView
+                    android:id="@+id/tvSharedWith"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:background="@drawable/bg_chip_small"
+                    android:layout_marginStart="6dp"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/tvIngredientsTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ingredients"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"
+                    android:textColor="#2D2D2D"/>
+
+                <TextView
+                    android:id="@+id/tvIngredientsContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ingredients from DB"
+                    android:textSize="16sp"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#555555"/>
+
+                <TextView
+                    android:id="@+id/tvInstructionsTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Instructions"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"
+                    android:textColor="#2D2D2D"/>
+
+                <TextView
+                    android:id="@+id/tvInstructionsContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Instructions from DB"
+                    android:textSize="16sp"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#555555"/>
+
+                </LinearLayout>
+
+
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:orientation="horizontal"
+        android:gravity="start"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/btnLike"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_heart_outline"
+            app:tint="#555555" />
+
+        <ImageView
+            android:id="@+id/btnComments"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_comment"
+            app:tint="#555555"
+            android:layout_marginStart="5dp"/>
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

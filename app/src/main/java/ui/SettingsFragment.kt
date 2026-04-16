@@ -163,9 +163,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
 
             // Clear local Room database
-            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-                com.example.recipebook.db.DatabaseProvider.clearAllData(requireContext())
-            }
+//            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+//                com.example.recipebook.db.DatabaseProvider.clearAllData(requireContext())
+//            }
 
             findNavController().popBackStack(R.id.loginFragment, false)
         }

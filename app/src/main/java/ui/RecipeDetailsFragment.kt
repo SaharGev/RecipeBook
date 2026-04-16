@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import com.example.recipebook.R
 import com.example.recipebook.model.Recipe
 import android.net.Uri
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import androidx.navigation.fragment.findNavController
@@ -23,9 +24,9 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setHasOptionsMenu(true)
+        val recipe = arguments?.getParcelable("recipe", Recipe::class.java)
 
-        val recipe = arguments?.getParcelable<com.example.recipebook.model.Recipe>("recipe")
+        if (recipe == null) return
 
         val tvTitle = view.findViewById<TextView>(R.id.tvRecipeTitle)
         val tvDescription = view.findViewById<TextView>(R.id.tvDescription)
@@ -37,6 +38,19 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         val tvPrivacy = view.findViewById<TextView>(R.id.tvPrivacy)
         val btnBack = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnBack)
         val btnEdit = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnEdit)
+
+        val btnComments = view.findViewById<ImageView>(R.id.btnComments)
+
+        btnComments.setOnClickListener {
+            val sheet = CommentsBottomSheetFragment()
+
+            val bundle = Bundle().apply {
+                putInt("recipeId", recipe.id)
+            }
+
+            sheet.arguments = bundle
+            sheet.show(parentFragmentManager, "CommentsBottomSheet")
+        }
 
         val currentUid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
 
@@ -64,7 +78,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
 
             val tvSharedWith = view.findViewById<TextView>(R.id.tvSharedWith)
 
-            if (!recipe?.sharedWith.isNullOrEmpty() && recipe?.ownerUid == currentUid) {
+            if (!recipe.sharedWith.isNullOrEmpty() && recipe.ownerUid == currentUid) {
                 val sharedUids = recipe.sharedWith.split(",").map { it.split(":")[0] }
                 userViewModel.getFriends(currentUid) { friends ->
                     activity?.runOnUiThread {
@@ -102,12 +116,5 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         (requireActivity() as androidx.appcompat.app.AppCompatActivity)
             .supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-    }
-    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
-            return true
-        }
-        return super.onOptionsItemSelected(item)
     }
 }
