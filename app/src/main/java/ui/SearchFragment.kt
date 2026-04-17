@@ -47,6 +47,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         val tvSeeAllRecentRecipes = view.findViewById<TextView>(R.id.tvSeeAllRecentRecipes)
         val tvSeeAllRecentBooks = view.findViewById<TextView>(R.id.tvSeeAllRecentBooks)
+        val tvSeeAllSharedRecipes = view.findViewById<TextView>(R.id.tvSeeAllSharedRecipes)
+        val tvSeeAllSharedBooks = view.findViewById<TextView>(R.id.tvSeeAllSharedBooks)
 
         val layoutRecentRecipesHeader = view.findViewById<View>(R.id.layoutRecentRecipesHeader)
         val layoutRecentBooksHeader = view.findViewById<View>(R.id.layoutRecentBooksHeader)
@@ -96,6 +98,22 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         tvSeeAllRecentBooks.setOnClickListener {
             findNavController().navigate(R.id.action_searchFragment_to_homeFragment)
+        }
+
+        tvSeeAllSharedRecipes.setOnClickListener {
+            findNavController().navigate(R.id.action_searchFragment_to_sharedRecipesFragment)
+        }
+
+        tvSeeAllSharedBooks.setOnClickListener {
+            findNavController().navigate(R.id.action_searchFragment_to_sharedBooksFragment)
+        }
+
+        tvSeeAllRecentRecipes.setOnClickListener {
+            findNavController().navigate(R.id.action_searchFragment_to_recentRecipesFragment)
+        }
+
+        tvSeeAllRecentBooks.setOnClickListener {
+            findNavController().navigate(R.id.action_searchFragment_to_recentBooksFragment)
         }
 
         val categories = listOf("Breakfast", "Lunch", "Dinner", "Dessert")
