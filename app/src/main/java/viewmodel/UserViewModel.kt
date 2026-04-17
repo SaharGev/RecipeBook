@@ -127,4 +127,10 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun getUserByEmail(email: String, callback: (UserEntity?) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val user = repository.getUserByEmail(email)
+            callback(user)
+        }
+    }
 }

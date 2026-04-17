@@ -220,4 +220,11 @@ class UserRepository(context: Context) {
         imageRef.putBytes(bytes).await()
         return imageRef.downloadUrl.await().toString()
     }
+
+    suspend fun getUserByEmail(email: String): UserEntity? {
+        val localUser = userDao.getUserByEmail(email)
+        if (localUser != null) return localUser
+
+        return searchUserByEmailInFirestore(email)
+    }
 }
