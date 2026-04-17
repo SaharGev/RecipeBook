@@ -127,4 +127,28 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun getUserByEmail(email: String, callback: (UserEntity?) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val user = repository.getUserByEmail(email)
+            callback(user)
+        }
+    }
+
+    fun searchUsersByUsernamePrefix(prefix: String, callback: (List<UserEntity>) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val users = repository.searchUsersByUsernamePrefix(prefix)
+            callback(users)
+        }
+    }
+
+    fun removeFriend(currentUid: String, friendUid: String, onDone: (Boolean) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                repository.removeFriend(currentUid, friendUid)
+                onDone(true)
+            } catch (e: Exception) {
+                onDone(false)
+            }
+        }
+    }
 }

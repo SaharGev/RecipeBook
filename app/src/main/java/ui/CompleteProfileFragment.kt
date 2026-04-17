@@ -50,7 +50,7 @@ class CompleteProfileFragment : Fragment() {
             if (uri != null) {
                 selectedImageUri = uri
 
-                view?.findViewById<ImageView>(R.id.imgProfilePreview)?.let { imageView ->                    Glide.with(this)
+                view?.findViewById<ShapeableImageView>(R.id.imgProfilePreview)?.let { imageView ->                    Glide.with(this)
                         .load(uri)
                         .placeholder(R.drawable.ic_launcher_foreground)
                         .error(R.drawable.ic_launcher_foreground)
@@ -77,7 +77,7 @@ class CompleteProfileFragment : Fragment() {
 
                 selectedImageUri = uri
 
-                view?.findViewById<ImageView>(R.id.imgProfilePreview)?.let { imageView ->
+                view?.findViewById<ShapeableImageView>(R.id.imgProfilePreview)?.let { imageView ->
                     Glide.with(this)
                         .load(uri)
                         .placeholder(R.drawable.ic_launcher_foreground)
@@ -98,7 +98,6 @@ class CompleteProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val btnSelectProfileImage = view.findViewById<Button>(R.id.btnSelectProfileImage)
         val btnFinishProfile = view.findViewById<Button>(R.id.btnFinishProfile)
         val firebaseUser = FirebaseAuth.getInstance().currentUser
 
@@ -107,7 +106,7 @@ class CompleteProfileFragment : Fragment() {
         val etCompleteName = view.findViewById<EditText>(R.id.etCompleteName)
         etCompleteName.setText(fullName)
 
-        btnSelectProfileImage.setOnClickListener {
+        view.findViewById<android.widget.ImageView>(R.id.imgEditPhoto).setOnClickListener {
             val options = arrayOf("Camera", "Gallery")
 
             android.app.AlertDialog.Builder(requireContext())
@@ -124,50 +123,68 @@ class CompleteProfileFragment : Fragment() {
 
         btnFinishProfile.setOnClickListener {
             val username = etCompleteName.text.toString().trim()
+            val tilCompleteName = view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilCompleteName)
+
+            tilCompleteName.error = null
 
             if (username.isEmpty()) {
-                etCompleteName.error = "Username is required"
+                tilCompleteName.error = "Username is required"
                 etCompleteName.requestFocus()
                 return@setOnClickListener
             }
 
-            val profileUpdates = UserProfileChangeRequest.Builder()
-                .setDisplayName(username)
-                .build()
+            if (username.length < 3) {
+                tilCompleteName.error = "Username must be at least 3 characters"
+                etCompleteName.requestFocus()
+                return@setOnClickListener
+            }
 
-            firebaseUser?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val uid = firebaseUser?.uid.orEmpty()
-                    val email = firebaseUser?.email.orEmpty()
+            // Check if username already exists
+            userViewModel.getUserByUsername(username) { existingUser ->
+                val uid = firebaseUser?.uid.orEmpty()
+                requireActivity().runOnUiThread {
+                    if (existingUser != null && existingUser.uid != uid) {
+                        tilCompleteName.error = "Username already exists"
+                        etCompleteName.requestFocus()
+                        return@runOnUiThread
+                    }
 
-                    showLoading()
+                    val profileUpdates = UserProfileChangeRequest.Builder()
+                        .setDisplayName(username)
+                        .build()
 
-                    fun saveUser(profileImageUrl: String?) {
-                        val newUser = UserEntity(
-                            uid = uid,
-                            username = username,
-                            email = email,
-                            phone = phone,
-                            profileImageUrl = profileImageUrl
-                        )
+                    firebaseUser?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val email = firebaseUser?.email.orEmpty()
+                            showLoading()
 
-                        userViewModel.saveUserLocallyAndRemotely(newUser) {
-                            requireActivity().runOnUiThread {
-                                hideLoading()
-                                findNavController().navigate(R.id.action_completeProfileFragment_to_friendsFragment)
+                            fun saveUser(profileImageUrl: String?) {
+                                val newUser = UserEntity(
+                                    uid = uid,
+                                    username = username,
+                                    email = email,
+                                    phone = phone,
+                                    profileImageUrl = profileImageUrl
+                                )
+                                userViewModel.saveUserLocallyAndRemotely(newUser) {
+                                    requireActivity().runOnUiThread {
+                                        hideLoading()
+                                        findNavController().navigate(R.id.action_completeProfileFragment_to_friendsFragment)
+                                    }
+                                }
                             }
-                        }
-                    }
 
-                    if (selectedImageUri != null) {
-                        userViewModel.uploadProfileImage(uid, selectedImageUri!!) { imageUrl ->
-                            saveUser(if (imageUrl.isNotEmpty()) imageUrl else null)
+                            if (selectedImageUri != null) {
+                                userViewModel.uploadProfileImage(uid, selectedImageUri!!) { imageUrl ->
+                                    saveUser(if (imageUrl.isNotEmpty()) imageUrl else null)
+                                }
+                            } else {
+                                saveUser(null)
+                            }
+                        } else {
+                            Toast.makeText(requireContext(), "Failed to update profile", Toast.LENGTH_SHORT).show()
                         }
-                    } else {
-                        saveUser(null)
                     }
-                } else {
-                    Toast.makeText(requireContext(), "Failed to update profile", Toast.LENGTH_SHORT).show()
                 }
             }
         }
