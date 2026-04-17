@@ -189,7 +189,21 @@
         <action
             android:id="@+id/action_searchFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_searchFragment_to_sharedRecipesFragment"
+            app:destination="@id/sharedRecipesFragment" />
 
+        <action
+            android:id="@+id/action_searchFragment_to_sharedBooksFragment"
+            app:destination="@id/sharedBooksFragment" />
+
+        <action
+            android:id="@+id/action_searchFragment_to_recentRecipesFragment"
+            app:destination="@id/recentRecipesFragment" />
+
+        <action
+            android:id="@+id/action_searchFragment_to_recentBooksFragment"
+            app:destination="@id/recentBooksFragment" />
 
     </fragment>
 
@@ -240,4 +254,51 @@
         android:label="Friends"
         tools:layout="@layout/fragment_friends" />
 
+    <fragment
+        android:id="@+id/sharedRecipesFragment"
+        android:name="com.example.recipebook.ui.SharedRecipesFragment"
+        android:label="Shared Recipes"
+        tools:layout="@layout/fragment_shared_recipes">
+
+        <action
+            android:id="@+id/action_sharedRecipesFragment_to_recipeDetailsFragment"
+            app:destination="@id/recipeDetailsFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/sharedBooksFragment"
+        android:name="com.example.recipebook.ui.SharedBooksFragment"
+        android:label="Shared Books"
+        tools:layout="@layout/fragment_shared_books">
+
+        <action
+            android:id="@+id/action_sharedBooksFragment_to_bookRecipesFragment"
+            app:destination="@id/bookRecipesFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/recentRecipesFragment"
+        android:name="com.example.recipebook.ui.RecentRecipesFragment"
+        android:label="Recent Recipes"
+        tools:layout="@layout/fragment_recent_recipes">
+
+        <action
+            android:id="@+id/action_recentRecipesFragment_to_recipeDetailsFragment"
+            app:destination="@id/recipeDetailsFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/recentBooksFragment"
+        android:name="com.example.recipebook.ui.RecentBooksFragment"
+        android:label="Recent Books"
+        tools:layout="@layout/fragment_recent_books">
+
+        <action
+            android:id="@+id/action_recentBooksFragment_to_bookRecipesFragment"
+            app:destination="@id/bookRecipesFragment" />
+
+    </fragment>
 </navigation>
