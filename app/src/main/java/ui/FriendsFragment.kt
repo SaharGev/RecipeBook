@@ -64,25 +64,48 @@ class FriendsFragment : Fragment() {
                     return
                 }
 
+                val isEmail = android.util.Patterns.EMAIL_ADDRESS.matcher(query).matches()
+                val isPhone = query.all { it.isDigit() || it == '+' || it == '-' }
+
                 searchJob?.cancel()
                 searchJob = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
                     kotlinx.coroutines.delay(500)
-                    showLoading()
-                    userViewModel.searchUser(query) { user ->
-                        requireActivity().runOnUiThread {
-                            hideLoading()
-                            if (user == null || user.uid == currentUid) {
-                                tvSearchResult.text = "User not found"
-                                tvSearchResult.visibility = View.VISIBLE
-                                cardSearchResult.visibility = View.VISIBLE
-                                btnAddFriend.visibility = View.GONE
-                                foundUser = null
-                            } else {
-                                foundUser = user
-                                tvSearchResult.text = "Found: ${user.username}"
-                                tvSearchResult.visibility = View.VISIBLE
-                                cardSearchResult.visibility = View.VISIBLE
-                                btnAddFriend.visibility = View.VISIBLE
+
+                    if (isEmail || isPhone) {
+                        userViewModel.searchUser(query) { user ->
+                            requireActivity().runOnUiThread {
+                                if (user == null || user.uid == currentUid) {
+                                    tvSearchResult.text = "User not found"
+                                    tvSearchResult.visibility = View.VISIBLE
+                                    cardSearchResult.visibility = View.VISIBLE
+                                    btnAddFriend.visibility = View.GONE
+                                    foundUser = null
+                                } else {
+                                    foundUser = user
+                                    tvSearchResult.text = "Found: ${user.username}"
+                                    tvSearchResult.visibility = View.VISIBLE
+                                    cardSearchResult.visibility = View.VISIBLE
+                                    btnAddFriend.visibility = View.VISIBLE
+                                }
+                            }
+                        }
+                    } else {
+                        userViewModel.searchUsersByUsernamePrefix(query) { users ->
+                            requireActivity().runOnUiThread {
+                                val filtered = users.filter { it.uid != currentUid }
+                                if (filtered.isEmpty()) {
+                                    tvSearchResult.text = "User not found"
+                                    tvSearchResult.visibility = View.VISIBLE
+                                    cardSearchResult.visibility = View.VISIBLE
+                                    btnAddFriend.visibility = View.GONE
+                                    foundUser = null
+                                } else {
+                                    foundUser = filtered.first()
+                                    tvSearchResult.text = "Found: ${filtered.first().username}"
+                                    tvSearchResult.visibility = View.VISIBLE
+                                    cardSearchResult.visibility = View.VISIBLE
+                                    btnAddFriend.visibility = View.VISIBLE
+                                }
                             }
                         }
                     }
@@ -121,7 +144,19 @@ class FriendsFragment : Fragment() {
     private fun loadFriends(currentUid: String, rvFriends: RecyclerView) {
         userViewModel.getFriends(currentUid) { friends ->
             requireActivity().runOnUiThread {
-                rvFriends.adapter = FriendsAdapter(friends)
+                val mutableFriends = friends.toMutableList()
+                rvFriends.adapter = FriendsAdapter(mutableFriends) { friendToRemove ->
+                    userViewModel.removeFriend(currentUid, friendToRemove.uid) { success ->
+                        requireActivity().runOnUiThread {
+                            if (success) {
+                                mutableFriends.remove(friendToRemove)
+                                rvFriends.adapter?.notifyDataSetChanged()
+                            } else {
+                                Toast.makeText(requireContext(), "Failed to remove friend", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
             }
         }
     }

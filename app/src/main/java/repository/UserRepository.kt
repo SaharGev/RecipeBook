@@ -33,6 +33,7 @@ class UserRepository(context: Context) {
                 mapOf(
                     "uid" to user.uid,
                     "username" to user.username,
+                    "usernameLower" to user.username.lowercase(),
                     "email" to user.email,
                     "phone" to user.phone,
                     "profileImageUrl" to user.profileImageUrl
@@ -227,4 +228,31 @@ class UserRepository(context: Context) {
 
         return searchUserByEmailInFirestore(email)
     }
+
+    suspend fun searchUsersByUsernamePrefix(prefix: String): List<UserEntity> {
+        val lowerPrefix = prefix.lowercase()
+        val result = firestore.collection("users")
+            .whereGreaterThanOrEqualTo("usernameLower", lowerPrefix)
+            .whereLessThanOrEqualTo("usernameLower", lowerPrefix + "\uF8FF")
+            .get()
+            .await()
+
+        return result.documents.mapNotNull { document ->
+            UserEntity(
+                uid = document.getString("uid").orEmpty(),
+                username = document.getString("username").orEmpty(),
+                email = document.getString("email").orEmpty(),
+                phone = document.getString("phone"),
+                profileImageUrl = document.getString("profileImageUrl")
+            )
+        }
+    }
+
+    suspend fun removeFriend(currentUid: String, friendUid: String) {
+        val userRef = firestore.collection("users").document(currentUid)
+        val document = userRef.get().await()
+        val currentFriends = document.get("friends") as? List<String> ?: emptyList()
+        userRef.update("friends", currentFriends - friendUid).await()
+    }
+
 }
