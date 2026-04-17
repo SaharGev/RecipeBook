@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth
 import androidx.navigation.fragment.findNavController
 import com.example.recipebook.utils.showLoading
 import com.example.recipebook.utils.hideLoading
+import kotlinx.coroutines.launch
 
 class FriendsFragment : Fragment() {
 
@@ -46,6 +47,8 @@ class FriendsFragment : Fragment() {
 
         val currentUid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
 
+        var searchJob: kotlinx.coroutines.Job? = null
+
         etSearchFriend.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -57,24 +60,30 @@ class FriendsFragment : Fragment() {
                     cardSearchResult.visibility = View.GONE
                     btnAddFriend.visibility = View.GONE
                     foundUser = null
+                    searchJob?.cancel()
                     return
                 }
-                showLoading()
-                userViewModel.searchUser(query) { user ->
-                    requireActivity().runOnUiThread {
-                        hideLoading()
-                        if (user == null || user.uid == currentUid) {
-                            tvSearchResult.text = "User not found"
-                            tvSearchResult.visibility = View.VISIBLE
-                            cardSearchResult.visibility = View.VISIBLE
-                            btnAddFriend.visibility = View.GONE
-                            foundUser = null
-                        } else {
-                            foundUser = user
-                            tvSearchResult.text = "Found: ${user.username}"
-                            tvSearchResult.visibility = View.VISIBLE
-                            cardSearchResult.visibility = View.VISIBLE
-                            btnAddFriend.visibility = View.VISIBLE
+
+                searchJob?.cancel()
+                searchJob = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+                    kotlinx.coroutines.delay(500)
+                    showLoading()
+                    userViewModel.searchUser(query) { user ->
+                        requireActivity().runOnUiThread {
+                            hideLoading()
+                            if (user == null || user.uid == currentUid) {
+                                tvSearchResult.text = "User not found"
+                                tvSearchResult.visibility = View.VISIBLE
+                                cardSearchResult.visibility = View.VISIBLE
+                                btnAddFriend.visibility = View.GONE
+                                foundUser = null
+                            } else {
+                                foundUser = user
+                                tvSearchResult.text = "Found: ${user.username}"
+                                tvSearchResult.visibility = View.VISIBLE
+                                cardSearchResult.visibility = View.VISIBLE
+                                btnAddFriend.visibility = View.VISIBLE
+                            }
                         }
                     }
                 }
