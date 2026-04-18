@@ -107,9 +107,9 @@ class MyRecipesFragment : Fragment() {
     private fun navigateToRecipeDetails(recipe: Recipe) {
         val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
         RecentItemsHelper.saveRecentRecipe(requireContext(), recipe.id, uid)
-        val bundle = Bundle().apply {
-            putParcelable("recipe", recipe)
-        }
-        findNavController().navigate(R.id.action_myRecipesFragment_to_recipeDetailsFragment, bundle)
+        val action = MyRecipesFragmentDirections.actionMyRecipesFragmentToRecipeDetailsFragment(
+            recipe = recipe
+        )
+        findNavController().navigate(action)
     }
 }

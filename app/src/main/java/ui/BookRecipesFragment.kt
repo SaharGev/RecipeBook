@@ -31,8 +31,9 @@ class BookRecipesFragment : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_book_recipes, container, false)
 
-        val bookId = arguments?.getInt("bookId") ?: -1
-        val bookTitle = arguments?.getString("bookTitle") ?: "Recipe Book"
+        val args = BookRecipesFragmentArgs.fromBundle(requireArguments())
+        val bookId = args.bookId
+        val bookTitle = args.bookTitle
 
         val tvBookTitle = view.findViewById<TextView>(R.id.tvBookTitle)
         tvEmptyState = view.findViewById(R.id.tvEmptyState)
@@ -50,12 +51,10 @@ class BookRecipesFragment : Fragment() {
         //rvRecipes.setHasFixedSize(true)
 
         btnAddRecipe.setOnClickListener {
-            val bundle = Bundle()
-            bundle.putInt("bookId", bookId)
-            findNavController().navigate(
-                R.id.action_bookRecipesFragment_to_addRecipeFragment,
-                bundle
+            val action = BookRecipesFragmentDirections.actionBookRecipesFragmentToAddRecipeFragment(
+                bookId = bookId
             )
+            findNavController().navigate(action)
         }
 
         loadRecipes(bookId, rvRecipes)
@@ -66,7 +65,7 @@ class BookRecipesFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
-        val bookId = arguments?.getInt("bookId") ?: -1
+        val bookId = BookRecipesFragmentArgs.fromBundle(requireArguments()).bookId
         view?.findViewById<RecyclerView>(R.id.rvRecipes)?.let {
             loadRecipes(bookId, it)
         }
@@ -103,12 +102,10 @@ class BookRecipesFragment : Fragment() {
                     onItemClick = { clickedRecipe ->
                         val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
                         RecentItemsHelper.saveRecentRecipe(requireContext(), clickedRecipe.id, uid)
-                        val bundle = Bundle()
-                        bundle.putParcelable("recipe", clickedRecipe)
-                        findNavController().navigate(
-                            R.id.action_bookRecipesFragment_to_recipeDetailsFragment,
-                            bundle
+                        val action = BookRecipesFragmentDirections.actionBookRecipesFragmentToRecipeDetailsFragment(
+                            recipe = clickedRecipe
                         )
+                        findNavController().navigate(action)
                     },
                     onDeleteClick = { clickedRecipe ->
                         val recipeToDelete = com.example.recipebook.db.RecipeEntity(

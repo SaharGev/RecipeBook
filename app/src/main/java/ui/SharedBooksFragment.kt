@@ -40,10 +40,11 @@ class SharedBooksFragment : Fragment(R.layout.fragment_shared_books) {
                     )
                 }
                 val adapter = SearchRecipeAdapter(items) { item ->
-                    findNavController().navigate(
-                        R.id.action_sharedBooksFragment_to_bookRecipesFragment,
-                        bundleOf("bookId" to item.id, "bookTitle" to item.title)
+                    val action = SharedBooksFragmentDirections.actionSharedBooksFragmentToBookRecipesFragment(
+                        bookId = item.id,
+                        bookTitle = item.title
                     )
+                    findNavController().navigate(action)
                 }
                 rvSharedBooksFull.adapter = adapter
             }
