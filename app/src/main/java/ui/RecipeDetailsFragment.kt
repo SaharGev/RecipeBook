@@ -24,7 +24,8 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val recipe = arguments?.getParcelable("recipe", Recipe::class.java)
+        val args = RecipeDetailsFragmentArgs.fromBundle(requireArguments())
+        val recipe = args.recipe
 
         if (recipe == null) return
 
@@ -103,13 +104,10 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
 
         btnEdit.setOnClickListener {
             if (recipe != null) {
-                val bundle = Bundle()
-                bundle.putParcelable("recipe", recipe)
-
-                findNavController().navigate(
-                    R.id.action_recipeDetailsFragment_to_addRecipeFragment,
-                    bundle
+                val action = RecipeDetailsFragmentDirections.actionRecipeDetailsFragmentToAddRecipeFragment(
+                    recipe = recipe
                 )
+                findNavController().navigate(action)
             }
         }
 

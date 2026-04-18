@@ -71,10 +71,10 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         rvDiscover.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
         discoverAdapter = MealAdapter(emptyList()) { meal ->
-            findNavController().navigate(
-                R.id.action_searchFragment_to_mealDetailsFragment,
-                bundleOf("meal" to meal.idMeal)
+            val action = SearchFragmentDirections.actionSearchFragmentToMealDetailsFragment(
+                meal = meal.idMeal
             )
+            findNavController().navigate(action)
         }
 
         rvDiscover.adapter = discoverAdapter
@@ -91,32 +91,30 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val recentAdapter = SearchRecipeAdapter(emptyList()) { item ->
             item.recipe?.let { recipe ->
                 saveRecentRecipe(item.id)
-                findNavController().navigate(
-                    R.id.action_searchFragment_to_recipeDetailsFragment,
-                    bundleOf("recipe" to recipe)
+                val action = SearchFragmentDirections.actionSearchFragmentToRecipeDetailsFragment(
+                    recipe = recipe
                 )
+                findNavController().navigate(action)
             }
         }
 
         val resultsAdapter = SearchRecipeAdapter(emptyList()) { item ->
             item.recipe?.let { recipe ->
                 saveRecentRecipe(item.id)
-                findNavController().navigate(
-                    R.id.action_searchFragment_to_recipeDetailsFragment,
-                    bundleOf("recipe" to recipe)
+                val action = SearchFragmentDirections.actionSearchFragmentToRecipeDetailsFragment(
+                    recipe = recipe
                 )
+                findNavController().navigate(action)
             }
         }
 
         val booksAdapter = SearchRecipeAdapter(emptyList()) { item ->
             saveRecentBook(item.id)
-            findNavController().navigate(
-                R.id.action_searchFragment_to_bookRecipesFragment,
-                bundleOf(
-                    "bookId" to item.id,
-                    "bookTitle" to item.title
-                )
+            val action = SearchFragmentDirections.actionSearchFragmentToBookRecipesFragment(
+                bookId = item.id,
+                bookTitle = item.title
             )
+            findNavController().navigate(action)
         }
 
         tvSeeAllRecentRecipes.setOnClickListener {
@@ -348,18 +346,19 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         val sharedRecipesAdapter = SearchRecipeAdapter(emptyList()) { item ->
             item.recipe?.let { recipe ->
-                findNavController().navigate(
-                    R.id.action_searchFragment_to_recipeDetailsFragment,
-                    bundleOf("recipe" to recipe)
+                val action = SearchFragmentDirections.actionSearchFragmentToRecipeDetailsFragment(
+                    recipe = recipe
                 )
+                findNavController().navigate(action)
             }
         }
 
         val sharedBooksAdapter = SearchRecipeAdapter(emptyList()) { item ->
-            findNavController().navigate(
-                R.id.action_searchFragment_to_bookRecipesFragment,
-                bundleOf("bookId" to item.id, "bookTitle" to item.title)
+            val action = SearchFragmentDirections.actionSearchFragmentToBookRecipesFragment(
+                bookId = item.id,
+                bookTitle = item.title
             )
+            findNavController().navigate(action)
         }
 
         rvSharedRecipes.adapter = sharedRecipesAdapter

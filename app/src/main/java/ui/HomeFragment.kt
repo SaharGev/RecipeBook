@@ -106,13 +106,10 @@ class HomeFragment : Fragment() {
             onItemClick = { clickedRecipe ->
                 val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
                 RecentItemsHelper.saveRecentRecipe(requireContext(), clickedRecipe.id, uid)
-                val bundle = Bundle()
-                bundle.putParcelable("recipe", clickedRecipe)
-
-                findNavController().navigate(
-                    R.id.action_homeFragment_to_recipeDetailsFragment,
-                    bundle
+                val action = RecipeBooksFragmentDirections.actionHomeFragmentToRecipeDetailsFragment(
+                    recipe = clickedRecipe
                 )
+                findNavController().navigate(action)
             },
             onDeleteClick = { clickedRecipe ->
                 AlertDialog.Builder(requireContext())

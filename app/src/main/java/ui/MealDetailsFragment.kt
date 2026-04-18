@@ -19,7 +19,8 @@ class MealDetailsFragment : Fragment(R.layout.fragment_meal_details) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val mealId = arguments?.getString("meal") ?: return
+        val args = MealDetailsFragmentArgs.fromBundle(requireArguments())
+        val mealId = args.meal
 
         val imgMeal = view.findViewById<ImageView>(R.id.imgMeal)
         val tvMealName = view.findViewById<TextView>(R.id.tvMealName)

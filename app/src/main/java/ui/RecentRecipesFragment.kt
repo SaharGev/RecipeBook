@@ -56,10 +56,10 @@ class RecentRecipesFragment : Fragment(R.layout.fragment_recent_recipes) {
                 }
                 val adapter = SearchRecipeAdapter(items) { item ->
                     item.recipe?.let { recipe ->
-                        findNavController().navigate(
-                            R.id.action_recentRecipesFragment_to_recipeDetailsFragment,
-                            bundleOf("recipe" to recipe)
+                        val action = RecentRecipesFragmentDirections.actionRecentRecipesFragmentToRecipeDetailsFragment(
+                            recipe = recipe
                         )
+                        findNavController().navigate(action)
                     }
                 }
                 rvRecentRecipesFull.adapter = adapter

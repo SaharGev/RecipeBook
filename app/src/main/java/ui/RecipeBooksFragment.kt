@@ -100,13 +100,11 @@ class RecipeBooksFragment : Fragment() {
                                 onItemClick = { clickedBook ->
                                     val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
                                     RecentItemsHelper.saveRecentBook(requireContext(), clickedBook.id, uid)
-                                    val bundle = Bundle()
-                                    bundle.putInt("bookId", clickedBook.id)
-                                    bundle.putString("bookTitle", clickedBook.title)
-                                    findNavController().navigate(
-                                        R.id.action_homeFragment_to_bookRecipesFragment,
-                                        bundle
+                                    val action = RecipeBooksFragmentDirections.actionHomeFragmentToBookRecipesFragment(
+                                        bookId = clickedBook.id,
+                                        bookTitle = clickedBook.title
                                     )
+                                    findNavController().navigate(action)
                                 },
                                 onDeleteClick = { book ->
                                     viewModel.deleteBookAndDetachRecipes(book.id, recipeViewModel)

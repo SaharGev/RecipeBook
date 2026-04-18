@@ -47,10 +47,11 @@ class RecentBooksFragment : Fragment(R.layout.fragment_recent_books) {
                 }
                 activity?.runOnUiThread {
                     val adapter = SearchRecipeAdapter(items) { item ->
-                        findNavController().navigate(
-                            R.id.action_recentBooksFragment_to_bookRecipesFragment,
-                            bundleOf("bookId" to item.id, "bookTitle" to item.title)
+                        val action = RecentBooksFragmentDirections.actionRecentBooksFragmentToBookRecipesFragment(
+                            bookId = item.id,
+                            bookTitle = item.title
                         )
+                        findNavController().navigate(action)
                     }
                     rvRecentBooksFull.adapter = adapter
                 }

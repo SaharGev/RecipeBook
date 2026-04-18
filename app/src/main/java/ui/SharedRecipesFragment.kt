@@ -67,10 +67,10 @@ class SharedRecipesFragment : Fragment(R.layout.fragment_shared_recipes) {
                 }
                 val adapter = SearchRecipeAdapter(items) { item ->
                     item.recipe?.let { recipe ->
-                        findNavController().navigate(
-                            R.id.action_sharedRecipesFragment_to_recipeDetailsFragment,
-                            bundleOf("recipe" to recipe)
+                        val action = SharedRecipesFragmentDirections.actionSharedRecipesFragmentToRecipeDetailsFragment(
+                            recipe = recipe
                         )
+                        findNavController().navigate(action)
                     }
                 }
                 rvSharedRecipesFull.adapter = adapter

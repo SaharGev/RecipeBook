@@ -167,8 +167,9 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
                 .show()
         }
 
-        val recipeToEdit = arguments?.getParcelable<Recipe>("recipe")
-        val selectedBookId = arguments?.getInt("bookId", 1) ?: 1
+        val args = AddRecipeFragmentArgs.fromBundle(requireArguments())
+        val recipeToEdit = args.recipe
+        val selectedBookId = args.bookId
 
         val etName = view.findViewById<EditText>(R.id.etName)
         val etDescription = view.findViewById<EditText>(R.id.etDescription)

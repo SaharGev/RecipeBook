@@ -101,7 +101,8 @@ class CompleteProfileFragment : Fragment() {
         val btnFinishProfile = view.findViewById<Button>(R.id.btnFinishProfile)
         val firebaseUser = FirebaseAuth.getInstance().currentUser
 
-        val fullName = arguments?.getString("fullName").orEmpty()
+        val args = CompleteProfileFragmentArgs.fromBundle(requireArguments())
+        val fullName = args.fullName
         val phone = arguments?.getString("phone")
         val etCompleteName = view.findViewById<EditText>(R.id.etCompleteName)
         etCompleteName.setText(fullName)

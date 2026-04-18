@@ -29,10 +29,10 @@ class DiscoverFragment : Fragment(R.layout.fragment_discover) {
             activity?.runOnUiThread {
                 hideLoading()
                 val adapter = MealAdapter(meals) { meal ->
-                    findNavController().navigate(
-                        R.id.action_discoverFragment_to_mealDetailsFragment,
-                        bundleOf("meal" to meal.idMeal)
+                    val action = DiscoverFragmentDirections.actionDiscoverFragmentToMealDetailsFragment(
+                        meal = meal.idMeal
                     )
+                    findNavController().navigate(action)
                 }
                 rvDiscoverFull.adapter = adapter
             }

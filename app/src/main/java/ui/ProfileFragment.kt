@@ -189,13 +189,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                                     onItemClick = { clickedBook ->
                                         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
                                         RecentItemsHelper.saveRecentBook(requireContext(), clickedBook.id, uid)
-                                        val bundle = Bundle()
-                                        bundle.putInt("bookId", clickedBook.id)
-                                        bundle.putString("bookTitle", clickedBook.title)
-                                        findNavController().navigate(
-                                            R.id.action_profileFragment_to_bookRecipesFragment,
-                                            bundle
+                                        val action = ProfileFragmentDirections.actionProfileFragmentToBookRecipesFragment(
+                                            bookId = clickedBook.id,
+                                            bookTitle = clickedBook.title
                                         )
+                                        findNavController().navigate(action)
                                     },
                                     onDeleteClick = { book ->
                                         viewLifecycleOwner.lifecycleScope.launch {
