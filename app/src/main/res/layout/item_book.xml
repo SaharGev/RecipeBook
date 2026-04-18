@@ -16,17 +16,49 @@
             android:id="@+id/layoutBookImage"
             android:layout_width="0dp"
             android:layout_height="180dp"
-            android:background="#F2D7C7"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <ImageView
-                android:id="@+id/imgBookPreview"
+            <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@android:drawable/ic_menu_gallery" />
+                android:rowCount="2"
+                android:columnCount="2">
+
+                <ImageView
+                    android:id="@+id/imgBook1"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_rowWeight="1"
+                    android:layout_columnWeight="1"
+                    android:scaleType="centerCrop"/>
+
+                <ImageView
+                    android:id="@+id/imgBook2"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_rowWeight="1"
+                    android:layout_columnWeight="1"
+                    android:scaleType="centerCrop"/>
+
+                <ImageView
+                    android:id="@+id/imgBook3"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_rowWeight="1"
+                    android:layout_columnWeight="1"
+                    android:scaleType="centerCrop"/>
+
+                <ImageView
+                    android:id="@+id/imgBook4"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_rowWeight="1"
+                    android:layout_columnWeight="1"
+                    android:scaleType="centerCrop"/>
+
+            </GridLayout>
 
             <ImageButton
                 android:id="@+id/btnDeleteBook"

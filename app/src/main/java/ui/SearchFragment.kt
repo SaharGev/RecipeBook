@@ -218,12 +218,14 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
             val myBooks = books.filter { it.ownerUid == uid }
             val bookItems = myBooks.map { book ->
-                val count = recipeDao.getRecipesByBookId(book.id).size
+                val recipes = recipeDao.getRecipesByBookId(book.id)
+                val count = recipes.size
                 SearchItem(
                     id = book.id,
                     title = book.title,
                     type = SearchItemType.BOOK,
-                    imageUri = count.toString()
+                    imageUri = count.toString(),
+                    bookImages = recipes.take(4).map { it.imageUri }
                 )
             }
 
@@ -396,23 +398,27 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         }
 
         bookViewModel.getSharedWithMeBooks(uid) { books ->
-            activity?.runOnUiThread {
+            lifecycleScope.launch {
                 val trueSharedBooks = books.filter { it.ownerUid != uid }
-                if (trueSharedBooks.isEmpty()) {
-                    tvSharedBooksEmpty.visibility = View.VISIBLE
-                    rvSharedBooks.visibility = View.GONE
-                } else {
-                    tvSharedBooksEmpty.visibility = View.GONE
-                    rvSharedBooks.visibility = View.VISIBLE
-                    val items = trueSharedBooks.map {
+                val items = trueSharedBooks.map { book ->
+                    val recipes = recipeDao.getRecipesByBookId(book.id)
                     SearchItem(
-                            id = it.id,
-                            title = it.title,
-                            type = SearchItemType.BOOK,
-                            imageUri = null
-                        )
+                        id = book.id,
+                        title = book.title,
+                        type = SearchItemType.BOOK,
+                        imageUri = null,
+                        bookImages = recipes.take(4).map { it.imageUri }
+                    )
+                }
+                activity?.runOnUiThread {
+                    if (trueSharedBooks.isEmpty()) {
+                        tvSharedBooksEmpty.visibility = View.VISIBLE
+                        rvSharedBooks.visibility = View.GONE
+                    } else {
+                        tvSharedBooksEmpty.visibility = View.GONE
+                        rvSharedBooks.visibility = View.VISIBLE
+                        sharedBooksAdapter.updateData(items)
                     }
-                    sharedBooksAdapter.updateData(items)
                 }
             }
         }

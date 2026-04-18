@@ -19,7 +19,8 @@ data class SearchItem(
     val title: String,
     val type: SearchItemType,
     val imageUri: String? = null,
-    val recipe: Recipe? = null
+    val recipe: Recipe? = null,
+    val bookImages: List<String?> = emptyList()
 )
 
 class SearchRecipeAdapter(
@@ -36,7 +37,7 @@ class SearchRecipeAdapter(
         val recipeImage: ImageView? = itemView.findViewById(R.id.imgRecipe)
         val recipeName: TextView? = itemView.findViewById(R.id.tvRecipeName)
 
-        val bookImage: ImageView? = itemView.findViewById(R.id.imgBookPreview)
+        val bookImage: ImageView? = itemView.findViewById(R.id.imgBook1)
         val bookTitle: TextView? = itemView.findViewById(R.id.tvBookTitle)
         val bookRecipesCount: TextView? = itemView.findViewById(R.id.tvBookRecipesCount)
     }
@@ -85,7 +86,19 @@ class SearchRecipeAdapter(
         } else {
             holder.bookTitle?.text = item.title
             holder.bookRecipesCount?.text = "${item.imageUri ?: "0"} recipes"
-            holder.bookImage?.setImageResource(R.drawable.ic_launcher_foreground)
+            val imageViews = listOf(
+                holder.itemView.findViewById<ImageView>(R.id.imgBook1),
+                holder.itemView.findViewById<ImageView>(R.id.imgBook2),
+                holder.itemView.findViewById<ImageView>(R.id.imgBook3),
+                holder.itemView.findViewById<ImageView>(R.id.imgBook4)
+            )
+            imageViews.forEachIndexed { index, imageView ->
+                com.bumptech.glide.Glide.with(holder.itemView.context)
+                    .load(item.bookImages.getOrNull(index))
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .error(R.drawable.ic_launcher_foreground)
+                    .into(imageView)
+            }
         }
 
         holder.itemView.setOnClickListener {
