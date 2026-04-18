@@ -1,6 +1,5 @@
 package com.example.recipebook.ui
 
-import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -8,6 +7,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,15 +15,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
 import com.example.recipebook.db.DatabaseProvider
 import com.example.recipebook.model.Recipe
-import com.google.android.material.textfield.TextInputEditText
-import kotlinx.coroutines.launch
-import androidx.fragment.app.viewModels
-import com.example.recipebook.viewmodel.RecipeViewModel
-import com.example.recipebook.viewmodel.BookViewModel
-import com.google.firebase.auth.FirebaseAuth
 import com.example.recipebook.utils.RecentItemsHelper
+import com.example.recipebook.viewmodel.BookViewModel
+import com.example.recipebook.viewmodel.RecipeViewModel
+import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
+import com.example.recipebook.viewmodel.MealViewModel
+
 class SearchFragment : Fragment(R.layout.fragment_search) {
 
+    private lateinit var discoverAdapter: MealAdapter
+    private val mealViewModel: MealViewModel by viewModels()
     private val recipeViewModel: RecipeViewModel by viewModels()
     private val bookViewModel: BookViewModel by viewModels()
 
@@ -60,6 +63,30 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         var allItems = listOf<SearchItem>()
         var allBooks = listOf<SearchItem>()
+
+        val rvDiscover = view.findViewById<RecyclerView>(R.id.rvDiscover)
+        val layoutDiscoverHeader = view.findViewById<View>(R.id.layoutDiscoverHeader)
+        val tvSeeAllDiscover = view.findViewById<TextView>(R.id.tvSeeAllDiscover)
+
+        rvDiscover.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+
+        discoverAdapter = MealAdapter(emptyList()) { meal ->
+            findNavController().navigate(
+                R.id.action_searchFragment_to_mealDetailsFragment,
+                bundleOf("meal" to meal.idMeal)
+            )
+        }
+
+        rvDiscover.adapter = discoverAdapter
+        mealViewModel.getRandomMeals { meals ->
+            activity?.runOnUiThread {
+                discoverAdapter.updateData(meals)
+            }
+        }
+
+        tvSeeAllDiscover.setOnClickListener {
+            findNavController().navigate(R.id.action_searchFragment_to_discoverFragment)
+        }
 
         val recentAdapter = SearchRecipeAdapter(emptyList()) { item ->
             item.recipe?.let { recipe ->
@@ -222,7 +249,9 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 layoutSharedRecipesHeader,
                 tvSharedRecipesEmpty,
                 layoutSharedBooksHeader,
-                tvSharedBooksEmpty
+                tvSharedBooksEmpty,
+                layoutDiscoverHeader,
+                rvDiscover
             )
         }
 
@@ -254,7 +283,9 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                         layoutSharedRecipesHeader,
                         tvSharedRecipesEmpty,
                         layoutSharedBooksHeader,
-                        tvSharedBooksEmpty
+                        tvSharedBooksEmpty,
+                        layoutDiscoverHeader,
+                        rvDiscover
                     )
                 } else {
                     val filteredRecipes = allItems.filter {
@@ -406,7 +437,9 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         layoutSharedRecipesHeader: View,
         tvSharedRecipesEmpty: TextView,
         layoutSharedBooksHeader: View,
-        tvSharedBooksEmpty: TextView
+        tvSharedBooksEmpty: TextView,
+        layoutDiscoverHeader: View,
+        rvDiscover: RecyclerView
     ) {
         val recentRecipeItems = getRecentRecipeIds().mapNotNull { id ->
             allItems.find { it.id == id && it.type == SearchItemType.RECIPE }
@@ -435,6 +468,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         tvFavoriteBooksEmpty.visibility = View.VISIBLE
         layoutSharedRecipesHeader.visibility = View.VISIBLE
         layoutSharedBooksHeader.visibility = View.VISIBLE
+        layoutDiscoverHeader.visibility = View.VISIBLE
+        rvDiscover.visibility = View.VISIBLE
     }
 
     private fun saveRecentRecipe(recipeId: Int) {

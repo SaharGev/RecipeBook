@@ -205,6 +205,14 @@
             android:id="@+id/action_searchFragment_to_recentBooksFragment"
             app:destination="@id/recentBooksFragment" />
 
+        <action
+            android:id="@+id/action_searchFragment_to_discoverFragment"
+            app:destination="@id/discoverFragment" />
+
+        <action
+            android:id="@+id/action_searchFragment_to_mealDetailsFragment"
+            app:destination="@id/mealDetailsFragment" />
+
     </fragment>
 
     <fragment
@@ -301,4 +309,23 @@
             app:destination="@id/bookRecipesFragment" />
 
     </fragment>
+
+    <fragment
+        android:id="@+id/discoverFragment"
+        android:name="com.example.recipebook.ui.DiscoverFragment"
+        android:label="Discover"
+        tools:layout="@layout/fragment_discover">
+
+        <action
+            android:id="@+id/action_discoverFragment_to_mealDetailsFragment"
+            app:destination="@id/mealDetailsFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/mealDetailsFragment"
+        android:name="com.example.recipebook.ui.MealDetailsFragment"
+        android:label="Meal Details"
+        tools:layout="@layout/fragment_meal_details" />
+
 </navigation>
