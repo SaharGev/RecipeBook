@@ -63,50 +63,37 @@ class RecipeBooksFragment : Fragment() {
     }
 
     private fun loadBooks(rvBooks: RecyclerView, tvEmptyBooks: TextView) {
-        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
         showLoading()
         viewModel.getBooks(uid) { books ->
-            val countsMap = mutableMapOf<Int, Int>()
-
             if (books.isEmpty()) {
                 hideLoading()
-                rvBooks.visibility = View.GONE
-                tvEmptyBooks.visibility = View.VISIBLE
-
                 rvBooks.post {
+                    rvBooks.visibility = View.GONE
+                    tvEmptyBooks.visibility = View.VISIBLE
                     rvBooks.adapter = RecipeBooksAdapter(
                         books = books,
-                        countsMap = countsMap,
-                        onItemClick = { clickedBook ->
-                            val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-                            RecentItemsHelper.saveRecentBook(requireContext(), clickedBook.id, uid)
-                            val bundle = Bundle()
-                            bundle.putInt("bookId", clickedBook.id)
-                            bundle.putString("bookTitle", clickedBook.title)
-                            findNavController().navigate(
-                                R.id.action_homeFragment_to_bookRecipesFragment,
-                                bundle
-                            )
-                        },
-                        onDeleteClick = { book ->
-                            viewModel.deleteBookAndDetachRecipes(book.id, recipeViewModel)
-                        }
+                        onItemClick = {},
+                        onDeleteClick = {}
                     )
                 }
                 return@getBooks
             }
 
+            val countsMap = mutableMapOf<Int, Int>()
+            val bookImagesMap = mutableMapOf<Int, List<String?>>()
             var remaining = books.size
 
             books.forEach { book ->
-                recipeViewModel.getRecipesCountByBookId(book.id) { count ->
-                    countsMap[book.id] = count
+                recipeViewModel.getRecipesByBookId(book.id) { recipes ->
+                    countsMap[book.id] = recipes.size
+                    bookImagesMap[book.id] = recipes.take(4).map { it.imageUri }
                     remaining--
 
                     if (remaining == 0) {
                         rvBooks.post {
-                            rvBooks.visibility = View.VISIBLE
                             hideLoading()
+                            rvBooks.visibility = View.VISIBLE
                             tvEmptyBooks.visibility = View.GONE
                             rvBooks.adapter = RecipeBooksAdapter(
                                 books = books,
@@ -124,7 +111,8 @@ class RecipeBooksFragment : Fragment() {
                                 onDeleteClick = { book ->
                                     viewModel.deleteBookAndDetachRecipes(book.id, recipeViewModel)
                                 },
-                                countsMap = countsMap
+                                countsMap = countsMap,
+                                bookImagesMap = bookImagesMap
                             )
                         }
                     }

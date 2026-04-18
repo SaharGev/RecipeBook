@@ -5,13 +5,16 @@ import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
+import com.example.recipebook.db.DatabaseProvider
 import com.example.recipebook.utils.RecentItemsHelper
 import com.example.recipebook.viewmodel.BookViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 class RecentBooksFragment : Fragment(R.layout.fragment_recent_books) {
 
@@ -25,27 +28,32 @@ class RecentBooksFragment : Fragment(R.layout.fragment_recent_books) {
 
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
         val recentIds = RecentItemsHelper.getRecentBookIds(requireContext(), uid)
+        val recipeDao = DatabaseProvider.getDatabase(requireContext()).recipeDao()
 
         bookViewModel.getBooks(uid) { books ->
-            activity?.runOnUiThread {
+            lifecycleScope.launch {
                 val recentBooks = recentIds.mapNotNull { id ->
                     books.find { it.id == id }
                 }
-                val items = recentBooks.map {
+                val items = recentBooks.map { book ->
+                    val recipes = recipeDao.getRecipesByBookId(book.id)
                     SearchItem(
-                        id = it.id,
-                        title = it.title,
+                        id = book.id,
+                        title = book.title,
                         type = SearchItemType.BOOK,
-                        imageUri = it.imageUri
+                        imageUri = book.imageUri,
+                        bookImages = recipes.take(4).map { it.imageUri }
                     )
                 }
-                val adapter = SearchRecipeAdapter(items) { item ->
-                    findNavController().navigate(
-                        R.id.action_recentBooksFragment_to_bookRecipesFragment,
-                        bundleOf("bookId" to item.id, "bookTitle" to item.title)
-                    )
+                activity?.runOnUiThread {
+                    val adapter = SearchRecipeAdapter(items) { item ->
+                        findNavController().navigate(
+                            R.id.action_recentBooksFragment_to_bookRecipesFragment,
+                            bundleOf("bookId" to item.id, "bookTitle" to item.title)
+                        )
+                    }
+                    rvRecentBooksFull.adapter = adapter
                 }
-                rvRecentBooksFull.adapter = adapter
             }
         }
     }

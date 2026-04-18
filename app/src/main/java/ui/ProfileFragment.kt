@@ -172,11 +172,13 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                     tvEmptyProfileBooks.visibility = View.GONE
                 }
 
+                val bookImagesMap = mutableMapOf<Int, List<String?>>()
                 var remaining = allBooks.size
 
                 allBooks.forEach { book ->
-                    recipeViewModel.getRecipesCountByBookId(book.id) { count ->
-                        countsMap[book.id] = count
+                    recipeViewModel.getRecipesByBookId(book.id) { recipes ->
+                        countsMap[book.id] = recipes.size
+                        bookImagesMap[book.id] = recipes.take(4).map { it.imageUri }
                         remaining--
 
                         if (remaining == 0) {
@@ -201,7 +203,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                                             refreshProfileData()
                                         }
                                     },
-                                    countsMap = countsMap
+                                    countsMap = countsMap,
+                                    bookImagesMap = bookImagesMap
                                 )
                             }
                         }
