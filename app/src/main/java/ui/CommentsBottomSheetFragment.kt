@@ -1,3 +1,4 @@
+//ui/CommentsBottomSheetFragment
 package com.example.recipebook.ui
 
 import android.os.Bundle
@@ -53,10 +54,11 @@ class CommentsBottomSheetFragment : BottomSheetDialogFragment() {
                 recipeId = recipeId,
                 userUid = currentUser?.uid ?: "",
                 username = currentUser?.displayName ?: "Anonymous",
-                text = text
+                text = text,
+                profileImageUrl = currentUser?.photoUrl?.toString()
             ) {
                 etComment.text.clear()
-                loadComments(recipeId) // refresh
+                loadComments(recipeId)
             }
         }
 
@@ -76,7 +78,8 @@ class CommentsBottomSheetFragment : BottomSheetDialogFragment() {
                 val uiList = list.map {
                     Comment(
                         username = it.username,
-                        text = it.text
+                        text = it.text,
+                        profileImage = it.profileImageUrl
                     )
                 }
 
