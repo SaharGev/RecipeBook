@@ -12,38 +12,21 @@ import kotlinx.coroutines.withContext
 
 class CommentViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = CommentRepository(application.applicationContext)
-
-    fun getComments(recipeId: Int, callback: (List<CommentEntity>) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val comments = repository.getComments(recipeId)
-
-            withContext(Dispatchers.Main) {
-                callback(comments)
-            }
-        }
-    }
+    private val repository = CommentRepository()
 
     fun addComment(
         recipeId: Int,
         userUid: String,
         username: String,
         text: String,
+        profileImageUrl: String?,
         onDone: () -> Unit = {}
     ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.addComment(
-                CommentEntity(
-                    recipeId = recipeId,
-                    userUid = userUid,
-                    username = username,
-                    text = text
-                )
-            )
+        repository.addComment(recipeId, userUid, username, text, profileImageUrl)
+        onDone()
+    }
 
-            withContext(Dispatchers.Main) {
-                onDone()
-            }
-        }
+    fun getComments(recipeId: Int, callback: (List<CommentEntity>) -> Unit) {
+        repository.getComments(recipeId, callback)
     }
 }
