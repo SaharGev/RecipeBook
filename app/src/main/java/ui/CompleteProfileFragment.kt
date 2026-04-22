@@ -37,11 +37,7 @@ class CompleteProfileFragment : Fragment() {
             if (isGranted) {
                 takePhotoLauncher.launch(null)
             } else {
-                Toast.makeText(
-                    requireContext(),
-                    "Camera permission denied",
-                    Toast.LENGTH_SHORT
-                ).show()
+                com.google.android.material.snackbar.Snackbar.make(requireView(), "Camera permission denied", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
             }
         }
 
@@ -183,7 +179,7 @@ class CompleteProfileFragment : Fragment() {
                                 saveUser(null)
                             }
                         } else {
-                            Toast.makeText(requireContext(), "Failed to update profile", Toast.LENGTH_SHORT).show()
+                            com.google.android.material.snackbar.Snackbar.make(requireView(), "Failed to update profile", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                         }
                     }
                 }

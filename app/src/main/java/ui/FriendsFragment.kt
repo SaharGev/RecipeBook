@@ -127,7 +127,7 @@ class FriendsFragment : Fragment() {
                         foundUser = null
                         loadFriends(currentUid, rvFriends)
                     } else {
-                        Toast.makeText(requireContext(), "Failed to add friend", Toast.LENGTH_SHORT).show()
+                        com.google.android.material.snackbar.Snackbar.make(requireView(), "Failed to add friend", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -152,7 +152,7 @@ class FriendsFragment : Fragment() {
                                 mutableFriends.remove(friendToRemove)
                                 rvFriends.adapter?.notifyDataSetChanged()
                             } else {
-                                Toast.makeText(requireContext(), "Failed to remove friend", Toast.LENGTH_SHORT).show()
+                                com.google.android.material.snackbar.Snackbar.make(requireView(), "Failed to remove friend", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                             }
                         }
                     }
