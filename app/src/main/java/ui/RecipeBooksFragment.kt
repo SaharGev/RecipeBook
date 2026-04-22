@@ -65,19 +65,13 @@ class RecipeBooksFragment : Fragment() {
     private fun loadBooks(rvBooks: RecyclerView, tvEmptyBooks: TextView) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
         showLoading()
-        viewModel.getBooks(uid) { books ->
+        viewModel.loadBooks(uid)
+        viewModel.books.observe(viewLifecycleOwner) { books ->
             if (books.isEmpty()) {
                 hideLoading()
-                rvBooks.post {
-                    rvBooks.visibility = View.GONE
-                    tvEmptyBooks.visibility = View.VISIBLE
-                    rvBooks.adapter = RecipeBooksAdapter(
-                        books = books,
-                        onItemClick = {},
-                        onDeleteClick = {}
-                    )
-                }
-                return@getBooks
+                rvBooks.visibility = View.GONE
+                tvEmptyBooks.visibility = View.VISIBLE
+                return@observe
             }
 
             val countsMap = mutableMapOf<Int, Int>()
