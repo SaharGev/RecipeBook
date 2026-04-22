@@ -37,6 +37,7 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         val tvCookTime = view.findViewById<TextView>(R.id.tvCookTime)
         val tvDifficulty = view.findViewById<TextView>(R.id.tvDifficulty)
         val tvPrivacy = view.findViewById<TextView>(R.id.tvPrivacy)
+        tvPrivacy.visibility = View.GONE
         val btnBack = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnBack)
         val btnEdit = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnEdit)
 
@@ -54,6 +55,12 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         }
 
         val currentUid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        android.util.Log.d("DEBUG", "ownerUid: ${recipe.ownerUid}, currentUid: $currentUid")
+
+        if (recipe.ownerUid != currentUid) {
+            btnEdit.visibility = View.GONE
+            tvPrivacy.visibility = View.GONE
+        }
 
         if (recipe != null) {
             tvTitle.text = "${recipe.name} (ID: ${recipe.id})"
@@ -88,7 +95,22 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
                             .map { it.username }
                         if (sharedNames.isNotEmpty()) {
                             tvSharedWith.visibility = View.VISIBLE
-                            tvSharedWith.text = "Shared with: ${sharedNames.joinToString(", ")}"
+                            val spannable = android.text.SpannableString("Shared with:\n${sharedNames.joinToString("\n")}")
+                            spannable.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, "Shared with:".length, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                            tvSharedWith.text = spannable
+                        }
+                    }
+                }
+            }
+
+            if (recipe.ownerUid != currentUid && !recipe.ownerUid.isNullOrEmpty()) {
+                userViewModel.getUserByUid(recipe.ownerUid) { owner ->
+                    activity?.runOnUiThread {
+                        if (owner != null) {
+                            tvSharedWith.visibility = View.VISIBLE
+                            val spannable = android.text.SpannableString("Shared by:\n${owner.username}")
+                            spannable.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, "Shared by:".length, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                            tvSharedWith.text = spannable
                         }
                     }
                 }

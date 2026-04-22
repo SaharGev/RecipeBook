@@ -208,7 +208,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                         imageUri = it.imageUri,
                         cookTime = it.cookTime,
                         difficulty = it.difficulty,
-                        isPublic = it.isPublic
+                        isPublic = it.isPublic,
+                        ownerUid = it.ownerUid
                     )
                 )
             }

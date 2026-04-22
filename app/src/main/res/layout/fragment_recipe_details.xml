@@ -129,17 +129,6 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/tvSharedWith"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="13sp"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="6dp"
-                    android:background="@drawable/bg_chip_small"
-                    android:layout_marginStart="6dp"
-                    android:visibility="gone"/>
-
-                <TextView
                     android:id="@+id/tvIngredientsTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -176,6 +165,16 @@
                     android:textSize="16sp"
                     android:layout_marginTop="4dp"
                     android:textColor="#555555"/>
+
+                <TextView
+                    android:id="@+id/tvSharedWith"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textStyle="normal"
+                    android:textColor="#2D2D2D"
+                    android:layout_marginTop="24dp"
+                    android:visibility="gone"/>
 
                 </LinearLayout>
 
