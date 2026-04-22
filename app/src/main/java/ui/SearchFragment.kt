@@ -22,13 +22,16 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import com.example.recipebook.viewmodel.MealViewModel
-
+import com.example.recipebook.utils.showLoading
+import com.example.recipebook.utils.hideLoading
 class SearchFragment : Fragment(R.layout.fragment_search) {
 
     private lateinit var discoverAdapter: MealAdapter
     private val mealViewModel: MealViewModel by viewModels()
     private val recipeViewModel: RecipeViewModel by viewModels()
     private val bookViewModel: BookViewModel by viewModels()
+
+    private var savedQuery: String = ""
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,7 +42,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val rvBooks = view.findViewById<RecyclerView>(R.id.rvBooks)
 
         val etSearch = view.findViewById<TextInputEditText>(R.id.etSearch)
-
         val tvResultsTitle = view.findViewById<TextView>(R.id.tvResultsTitle)
         val tvBooksResultsTitle = view.findViewById<TextView>(R.id.tvBooksResultsTitle)
 
@@ -190,10 +192,11 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val bookDao = db.bookDao()
 
         lifecycleScope.launch {
+            showLoading()
             val recipes = recipeDao.getAllRecipes()
             val books = bookDao.getAllBooks()
 
-            val recipeItems = recipes.map {
+            val recipeItems = recipes.sortedByDescending { it.id }.map {
                 SearchItem(
                     id = it.id,
                     title = it.name,
@@ -231,6 +234,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             allItems = recipeItems
             allBooks = bookItems
 
+            hideLoading()
             showDefaultSections(
                 allItems,
                 allBooks,
@@ -256,12 +260,16 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             )
         }
 
+        val rvSharedRecipes = view.findViewById<RecyclerView>(R.id.rvSharedRecipes)
+        val rvSharedBooks = view.findViewById<RecyclerView>(R.id.rvSharedBooks)
+
         etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                savedQuery = s.toString()
                 val query = s.toString().trim().lowercase()
 
                 if (query.isBlank()) {
@@ -331,14 +339,21 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                     layoutSharedBooksHeader.visibility = View.GONE
                     tvSharedBooksEmpty.visibility = View.GONE
 
+                    rvSharedRecipes.visibility = View.GONE
+                    rvSharedBooks.visibility = View.GONE
+                    layoutDiscoverHeader.visibility = View.GONE
+                    rvDiscover.visibility = View.GONE
+
                     resultsAdapter.updateData(sortedRecipes)
                     booksAdapter.updateData(sortedBooks)
                 }
             }
         })
 
-        val rvSharedRecipes = view.findViewById<RecyclerView>(R.id.rvSharedRecipes)
-        val rvSharedBooks = view.findViewById<RecyclerView>(R.id.rvSharedBooks)
+        if (savedQuery.isNotEmpty()) {
+            etSearch.setText(savedQuery)
+            etSearch.setSelection(savedQuery.length)
+        }
 
         rvSharedRecipes.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         rvSharedBooks.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
@@ -373,7 +388,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 } else {
                     tvSharedRecipesEmpty.visibility = View.GONE
                     rvSharedRecipes.visibility = View.VISIBLE
-                    val items = recipes.map {
+                    val items = recipes.sortedByDescending { it.id }.map {
                         SearchItem(
                             id = it.id,
                             title = it.name,
@@ -399,7 +414,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         bookViewModel.getSharedWithMeBooks(uid) { books ->
             lifecycleScope.launch {
-                val trueSharedBooks = books.filter { it.ownerUid != uid }
+                val trueSharedBooks = books.filter { it.ownerUid != uid }.sortedByDescending { it.id }
                 val items = trueSharedBooks.map { book ->
                     val recipes = recipeDao.getRecipesByBookId(book.id)
                     SearchItem(
@@ -476,6 +491,9 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         layoutSharedBooksHeader.visibility = View.VISIBLE
         layoutDiscoverHeader.visibility = View.VISIBLE
         rvDiscover.visibility = View.VISIBLE
+
+        view?.findViewById<RecyclerView>(R.id.rvSharedRecipes)?.visibility = View.VISIBLE
+        view?.findViewById<RecyclerView>(R.id.rvSharedBooks)?.visibility = View.VISIBLE
     }
 
     private fun saveRecentRecipe(recipeId: Int) {

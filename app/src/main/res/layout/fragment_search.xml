@@ -55,7 +55,8 @@
             android:nestedScrollingEnabled="false"
             app:layout_constraintTop_toBottomOf="@id/tilSearch"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/tvResultsTitle"
