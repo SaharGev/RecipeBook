@@ -483,10 +483,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         recentAdapter.updateData(recentRecipeItems)
         booksAdapter.updateData(recentBookItems)
 
-        layoutFavoriteRecipesHeader.visibility = View.VISIBLE
-        tvFavoriteRecipesEmpty.visibility = View.VISIBLE
-        layoutFavoriteBooksHeader.visibility = View.VISIBLE
-        tvFavoriteBooksEmpty.visibility = View.VISIBLE
         layoutSharedRecipesHeader.visibility = View.VISIBLE
         layoutSharedBooksHeader.visibility = View.VISIBLE
         layoutDiscoverHeader.visibility = View.VISIBLE
