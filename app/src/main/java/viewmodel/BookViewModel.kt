@@ -13,6 +13,16 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = BookRepository(application.applicationContext)
 
+    private val _books = androidx.lifecycle.MutableLiveData<List<BookEntity>>()
+    val books: androidx.lifecycle.LiveData<List<BookEntity>> = _books
+
+    fun loadBooks(uid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = repository.getAllBooks(uid)
+            _books.postValue(result)
+        }
+    }
+
     fun getBooks(uid: String, callback: (List<BookEntity>) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             val books = repository.getAllBooks(uid)

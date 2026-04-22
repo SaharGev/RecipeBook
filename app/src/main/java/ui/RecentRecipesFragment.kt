@@ -25,6 +25,20 @@ class RecentRecipesFragment : Fragment(R.layout.fragment_recent_recipes) {
         val rvRecentRecipesFull = view.findViewById<RecyclerView>(R.id.rvRecentRecipesFull)
         rvRecentRecipesFull.layoutManager = GridLayoutManager(requireContext(), 2)
 
+        rvRecentRecipesFull.addItemDecoration(object : RecyclerView.ItemDecoration() {
+            override fun getItemOffsets(
+                outRect: android.graphics.Rect,
+                view: View,
+                parent: RecyclerView,
+                state: RecyclerView.State
+            ) {
+                outRect.bottom = 16
+                outRect.top = 16
+                outRect.left = 8
+                outRect.right = 8
+            }
+        })
+
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
         val recentIds = RecentItemsHelper.getRecentRecipeIds(requireContext(), uid)
 

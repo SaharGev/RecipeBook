@@ -55,7 +55,8 @@
             android:nestedScrollingEnabled="false"
             app:layout_constraintTop_toBottomOf="@id/tilSearch"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/tvResultsTitle"
@@ -207,7 +208,8 @@
             android:gravity="center_vertical"
             app:layout_constraintTop_toBottomOf="@id/rvBooks"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/tvFavoriteRecipesTitle"
@@ -237,7 +239,8 @@
             android:textColor="#7A7A7A"
             android:textSize="14sp"
             app:layout_constraintTop_toBottomOf="@id/layoutFavoriteRecipesHeader"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="gone"/>
 
         <LinearLayout
             android:id="@+id/layoutFavoriteBooksHeader"
@@ -248,7 +251,8 @@
             android:gravity="center_vertical"
             app:layout_constraintTop_toBottomOf="@id/tvFavoriteRecipesEmpty"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/tvFavoriteBooksTitle"
@@ -278,7 +282,8 @@
             android:textColor="#7A7A7A"
             android:textSize="14sp"
             app:layout_constraintTop_toBottomOf="@id/layoutFavoriteBooksHeader"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="gone"/>
 
         <LinearLayout
             android:id="@+id/layoutSharedRecipesHeader"
