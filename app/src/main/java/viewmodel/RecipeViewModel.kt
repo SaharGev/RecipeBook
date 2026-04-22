@@ -14,6 +14,16 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
     private val repository = RecipeRepository(application.applicationContext)
 
+    private val _recipes = androidx.lifecycle.MutableLiveData<List<RecipeEntity>>()
+    val recipes: androidx.lifecycle.LiveData<List<RecipeEntity>> = _recipes
+
+    fun loadRecipes(uid: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = repository.getAllRecipes(uid)
+            _recipes.postValue(result)
+        }
+    }
+
     fun getRecipes(uid: String, callback: (List<RecipeEntity>) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             val recipes = repository.getAllRecipes(uid)
