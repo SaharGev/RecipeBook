@@ -61,7 +61,8 @@ class SharedRecipesFragment : Fragment(R.layout.fragment_shared_recipes) {
                             imageUri = it.imageUri,
                             cookTime = it.cookTime,
                             difficulty = it.difficulty,
-                            isPublic = it.isPublic
+                            isPublic = it.isPublic,
+                            ownerUid = it.ownerUid
                         )
                     )
                 }

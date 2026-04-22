@@ -64,7 +64,6 @@ class AddRecipeBookFragment : Fragment() {
 
         val etBookName = view.findViewById<EditText>(R.id.etBookName)
         val etBookDescription = view.findViewById<EditText>(R.id.etBookDescription)
-        val spinnerPrivacy = view.findViewById<Spinner>(R.id.spinnerPrivacy)
         val btnCreateBook = view.findViewById<Button>(R.id.btnCreateBook)
 
         val spinnerBooks = view.findViewById<Spinner>(R.id.spinnerBooks)
@@ -111,98 +110,52 @@ class AddRecipeBookFragment : Fragment() {
 
         val btnAddRecipe = view.findViewById<Button>(R.id.btnAddRecipe)
 
-
-        val privacyOptions = listOf("Select Privacy", "Private","Public")
-        val adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            privacyOptions
-        )
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerPrivacy.adapter = adapter
-
-        spinnerPrivacy.setSelection(0)
-
-        val tvShareWith = view.findViewById<TextView>(R.id.tvShareWith)
         val llFriendsList = view.findViewById<LinearLayout>(R.id.llFriendsList)
+        val headerShareWith = view.findViewById<LinearLayout>(R.id.headerShareWith)
+        val tvShareWithArrow = view.findViewById<TextView>(R.id.tvShareWithArrow)
 
-        spinnerPrivacy.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, v: View?, position: Int, id: Long) {
-                val selected = privacyOptions[position]
-                if (selected == "Public") {
-                    tvShareWith.visibility = View.VISIBLE
-                    llFriendsList.visibility = View.VISIBLE
+        headerShareWith.setOnClickListener {
+            if (llFriendsList.visibility == View.GONE) {
+                llFriendsList.visibility = View.VISIBLE
+                tvShareWithArrow.text = "▲"
+            } else {
+                llFriendsList.visibility = View.GONE
+                tvShareWithArrow.text = "▼"
+            }
+        }
 
-                    val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-                    viewModel.getFriends(uid) { friends ->
-                        requireActivity().runOnUiThread {
-                            llFriendsList.removeAllViews()
-                            selectedFriendPermissions.clear()
+        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        viewModel.getFriends(uid) { friends ->
+            requireActivity().runOnUiThread {
+                llFriendsList.removeAllViews()
+                selectedFriendPermissions.clear()
 
-                            if (friends.isEmpty()) {
-                                val tvNoFriends = TextView(requireContext())
-                                tvNoFriends.text = "You have no friends yet"
-                                tvNoFriends.textSize = 14f
-                                llFriendsList.addView(tvNoFriends)
-                                return@runOnUiThread
-                            }
+                if (friends.isEmpty()) {
+                    val tvNoFriends = TextView(requireContext())
+                    tvNoFriends.text = "You have no friends yet"
+                    llFriendsList.addView(tvNoFriends)
+                    return@runOnUiThread
+                }
 
-                            friends.forEach { friend ->
-                                val rowLayout = LinearLayout(requireContext()).apply {
-                                    orientation = LinearLayout.HORIZONTAL
-                                    gravity = android.view.Gravity.CENTER_VERTICAL
-                                }
-
-                                val checkBox = CheckBox(requireContext()).apply {
-                                    text = friend.username
-                                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-                                }
-
-                                val permissionSpinner = Spinner(requireContext())
-                                permissionSpinner.visibility = View.GONE
-                                val permissions = listOf("view", "edit")
-                                val permAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, permissions)
-                                permAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                                permissionSpinner.adapter = permAdapter
-
-
-                                checkBox.setOnCheckedChangeListener { _, isChecked ->
-                                    if (isChecked) {
-                                        permissionSpinner.visibility = View.VISIBLE
-                                        selectedFriendPermissions[friend.uid] = "view"
-                                        permissionSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                                            override fun onItemSelected(parent: AdapterView<*>?, v: View?, position: Int, id: Long) {
-                                                selectedFriendPermissions[friend.uid] = if (position == 0) "view" else "edit"
-                                            }
-                                            override fun onNothingSelected(parent: AdapterView<*>?) {}
-                                        }
-                                    } else {
-                                        permissionSpinner.visibility = View.GONE
-                                        selectedFriendPermissions.remove(friend.uid)
-                                    }
-                                }
-
-                                rowLayout.addView(checkBox)
-                                rowLayout.addView(permissionSpinner)
-                                llFriendsList.addView(rowLayout)
-                            }
+                friends.forEach { friend ->
+                    val checkBox = CheckBox(requireContext()).apply {
+                        text = friend.username
+                    }
+                    checkBox.setOnCheckedChangeListener { _, isChecked ->
+                        if (isChecked) {
+                            selectedFriendPermissions[friend.uid] = "view"
+                        } else {
+                            selectedFriendPermissions.remove(friend.uid)
                         }
                     }
-                } else {
-                    tvShareWith.visibility = View.GONE
-                    llFriendsList.visibility = View.GONE
-                    selectedFriendPermissions.clear()
-
+                    llFriendsList.addView(checkBox)
                 }
             }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         btnCreateBook.setOnClickListener {
             val bookName = etBookName.text.toString().trim()
             val bookDescription = etBookDescription.text.toString().trim()
-            val privacySelection = spinnerPrivacy.selectedItem.toString()
 
             if (bookName.isEmpty()) {
                 etBookName.error = "Book name is required"
@@ -210,12 +163,8 @@ class AddRecipeBookFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            if (privacySelection == "Select Privacy") {
-                Toast.makeText(requireContext(), "Please select privacy", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
 
-            val isPublic = privacySelection == "Public"
+            val isPublic = false
 
             showLoading()
             viewModel.createBook(
@@ -230,7 +179,6 @@ class AddRecipeBookFragment : Fragment() {
 
                     etBookName.text.clear()
                     etBookDescription.text.clear()
-                    spinnerPrivacy.setSelection(0)
                 }
             }
         }

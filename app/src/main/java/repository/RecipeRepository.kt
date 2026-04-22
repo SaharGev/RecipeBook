@@ -44,10 +44,7 @@ class RecipeRepository(context: Context) {
         }
 
         remoteRecipes.forEach { recipe ->
-            val existing = recipeDao.getRecipeById(recipe.id)
-            if (existing == null) {
-                recipeDao.insertRecipe(recipe)
-            }
+            recipeDao.insertRecipe(recipe)
         }
         return remoteRecipes
     }
@@ -180,10 +177,7 @@ class RecipeRepository(context: Context) {
                 sharedWith = ""
             )
 
-            val existing = recipeDao.getRecipeById(recipe.id)
-            if (existing == null) {
-                recipeDao.insertRecipe(recipe)
-            }
+            recipeDao.insertRecipe(recipe)
 
             sharedRecipes.add(recipe)
         }
