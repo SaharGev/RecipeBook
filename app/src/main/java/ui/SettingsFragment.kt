@@ -59,7 +59,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private val requestCameraPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) takePhotoLauncher.launch(null)
-            else Toast.makeText(requireContext(), "Camera permission denied", Toast.LENGTH_SHORT).show()
+            else com.google.android.material.snackbar.Snackbar.make(requireView(), "Camera permission denied", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
         }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -225,7 +225,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                         userViewModel.saveUserLocallyAndRemotely(finalUser) {
                             requireActivity().runOnUiThread {
                                 hideLoading()
-                                Toast.makeText(requireContext(), "Changes saved successfully", Toast.LENGTH_SHORT).show()
+                                com.google.android.material.snackbar.Snackbar.make(requireView(), "Changes saved successfully", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -233,7 +233,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                     userViewModel.saveUserLocallyAndRemotely(updatedUser) {
                         requireActivity().runOnUiThread {
                             hideLoading()
-                            Toast.makeText(requireContext(), "Changes saved successfully", Toast.LENGTH_SHORT).show()
+                            com.google.android.material.snackbar.Snackbar.make(requireView(), "Changes saved successfully", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                         }
                     }
                 }

@@ -175,7 +175,7 @@ class AddRecipeBookFragment : Fragment() {
             ) {
                 requireActivity().runOnUiThread {
                     hideLoading()
-                    Toast.makeText(requireContext(), "Book created successfully", Toast.LENGTH_SHORT).show()
+                    com.google.android.material.snackbar.Snackbar.make(requireView(), "Book created successfully", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
 
                     etBookName.text.clear()
                     etBookDescription.text.clear()
@@ -188,12 +188,12 @@ class AddRecipeBookFragment : Fragment() {
             val selectedRecipeIndex = spinnerRecipes.selectedItemPosition
 
             if (selectedBookIndex == 0) {
-                Toast.makeText(requireContext(), "Please select a book", Toast.LENGTH_SHORT).show()
+                com.google.android.material.snackbar.Snackbar.make(requireView(), "Please select a book", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             if (selectedRecipeIndex == 0) {
-                Toast.makeText(requireContext(), "Please select a recipe", Toast.LENGTH_SHORT).show()
+                com.google.android.material.snackbar.Snackbar.make(requireView(), "Please select a recipe", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -217,7 +217,7 @@ class AddRecipeBookFragment : Fragment() {
                     recipesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     spinnerRecipes.adapter = recipesAdapter
 
-                    Toast.makeText(requireContext(), "Recipe added to book!", Toast.LENGTH_SHORT).show()
+                    com.google.android.material.snackbar.Snackbar.make(requireView(), "Recipe added to book!", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                 }
             }
         }

@@ -233,11 +233,7 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
             }
 
             if (tvDifficulty.text.toString() == "Difficulty") {
-                android.widget.Toast.makeText(
-                    requireContext(),
-                    "Please select difficulty",
-                    android.widget.Toast.LENGTH_SHORT
-                ).show()
+                com.google.android.material.snackbar.Snackbar.make(view, "Please select difficulty", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -262,11 +258,7 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
                     onDone = {
                         requireActivity().runOnUiThread {
                             hideLoading()
-                            android.widget.Toast.makeText(
-                                requireContext(),
-                                "Recipe updated successfully",
-                                android.widget.Toast.LENGTH_SHORT
-                            ).show()
+                            com.google.android.material.snackbar.Snackbar.make(requireView(), "Recipe updated successfully", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                             findNavController().popBackStack()
                         }
                     }
@@ -293,11 +285,7 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
                     onDone = {
                         requireActivity().runOnUiThread {
                             hideLoading()
-                            android.widget.Toast.makeText(
-                                requireContext(),
-                                "Recipe saved successfully",
-                                android.widget.Toast.LENGTH_SHORT
-                            ).show()
+                            com.google.android.material.snackbar.Snackbar.make(requireView(), "Recipe saved successfully", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                             findNavController().popBackStack()
                         }
                     }

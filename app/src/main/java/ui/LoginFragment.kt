@@ -81,7 +81,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         val btnLogin = view.findViewById<Button>(R.id.btnLogin)
         val btnGoogleLogin = view.findViewById<Button>(R.id.btnGoogleLogin)
 
-        val tvForgotPassword = view.findViewById<TextView>(R.id.tvForgotPassword)
         val tvGoToRegister = view.findViewById<TextView>(R.id.tvGoToRegister)
 
         val tilEmail = view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilEmail)
@@ -119,7 +118,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                                 navController.navigate(R.id.profileFragment)
                             }
                         } else {
-                            Toast.makeText(requireContext(), "Login failed", Toast.LENGTH_SHORT).show()
+                            com.google.android.material.snackbar.Snackbar.make(requireView(), "Login failed", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                         }
                     }
             } else {
@@ -155,10 +154,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
             val signInIntent = googleSignInClient.signInIntent
             startActivityForResult(signInIntent, 100)
-        }
-
-        tvForgotPassword.setOnClickListener {
-            Toast.makeText(requireContext(), "Forgot password coming soon", Toast.LENGTH_SHORT).show()
         }
 
         tvGoToRegister.setOnClickListener {
@@ -212,13 +207,13 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
                         } else {
                             hideLoading()
-                            Toast.makeText(requireContext(), "Firebase auth failed", Toast.LENGTH_SHORT).show()
+                            com.google.android.material.snackbar.Snackbar.make(requireView(), "Firebase auth failed", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
                         }
                     }
 
             } else {
                 hideLoading()
-                Toast.makeText(requireContext(), "Google Sign-In failed", Toast.LENGTH_SHORT).show()
+                com.google.android.material.snackbar.Snackbar.make(requireView(), "Google Sign-In failed", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
             }
         }
     }
