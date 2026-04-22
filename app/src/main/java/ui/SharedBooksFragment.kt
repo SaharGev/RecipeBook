@@ -13,7 +13,8 @@ import com.example.recipebook.viewmodel.BookViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.example.recipebook.utils.showLoading
 import com.example.recipebook.utils.hideLoading
-
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 class SharedBooksFragment : Fragment(R.layout.fragment_shared_books) {
 
     private val bookViewModel: BookViewModel by viewModels()
@@ -28,25 +29,30 @@ class SharedBooksFragment : Fragment(R.layout.fragment_shared_books) {
 
         showLoading()
         bookViewModel.getSharedWithMeBooks(uid) { books ->
-            activity?.runOnUiThread {
+            lifecycleScope.launch {
                 hideLoading()
                 val filtered = books.filter { it.ownerUid != uid }.sortedByDescending { it.id }
-                val items = filtered.map {
+                val recipeDao = com.example.recipebook.db.DatabaseProvider.getDatabase(requireContext()).recipeDao()
+                val items = filtered.map { book ->
+                    val recipes = recipeDao.getRecipesByBookId(book.id)
                     SearchItem(
-                        id = it.id,
-                        title = it.title,
+                        id = book.id,
+                        title = book.title,
                         type = SearchItemType.BOOK,
-                        imageUri = null
+                        imageUri = null,
+                        bookImages = recipes.take(4).map { it.imageUri }
                     )
                 }
-                val adapter = SearchRecipeAdapter(items) { item ->
-                    val action = SharedBooksFragmentDirections.actionSharedBooksFragmentToBookRecipesFragment(
-                        bookId = item.id,
-                        bookTitle = item.title
-                    )
-                    findNavController().navigate(action)
+                activity?.runOnUiThread {
+                    val adapter = SearchRecipeAdapter(items) { item ->
+                        val action = SharedBooksFragmentDirections.actionSharedBooksFragmentToBookRecipesFragment(
+                            bookId = item.id,
+                            bookTitle = item.title
+                        )
+                        findNavController().navigate(action)
+                    }
+                    rvSharedBooksFull.adapter = adapter
                 }
-                rvSharedBooksFull.adapter = adapter
             }
         }
     }

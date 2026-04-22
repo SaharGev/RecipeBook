@@ -191,8 +191,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val recipeDao = db.recipeDao()
         val bookDao = db.bookDao()
 
+        showLoading()
         lifecycleScope.launch {
-            showLoading()
             val recipes = recipeDao.getAllRecipes()
             val books = bookDao.getAllBooks()
 
@@ -218,7 +218,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             }
 
             val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-            val myBooks = books.filter { it.ownerUid == uid }
+            val myBooks = books
             val bookItems = myBooks.map { book ->
                 val recipes = recipeDao.getRecipesByBookId(book.id)
                 val count = recipes.size
@@ -380,8 +380,10 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         rvSharedRecipes.adapter = sharedRecipesAdapter
         rvSharedBooks.adapter = sharedBooksAdapter
 
+        showLoading()
         recipeViewModel.getSharedWithMeRecipes(uid) { recipes ->
             activity?.runOnUiThread {
+                hideLoading()
                 if (recipes.isEmpty()) {
                     tvSharedRecipesEmpty.visibility = View.VISIBLE
                     rvSharedRecipes.visibility = View.GONE
@@ -412,6 +414,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             }
         }
 
+        showLoading()
         bookViewModel.getSharedWithMeBooks(uid) { books ->
             lifecycleScope.launch {
                 val trueSharedBooks = books.filter { it.ownerUid != uid }.sortedByDescending { it.id }
@@ -426,6 +429,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                     )
                 }
                 activity?.runOnUiThread {
+                    hideLoading()
                     if (trueSharedBooks.isEmpty()) {
                         tvSharedBooksEmpty.visibility = View.VISIBLE
                         rvSharedBooks.visibility = View.GONE
