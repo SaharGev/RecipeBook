@@ -6,22 +6,29 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipebook.R
+import com.example.recipebook.repository.RecipeBookRepository
 import com.example.recipebook.viewmodel.RecipeViewModel
 import com.example.recipebook.utils.showLoading
 import com.example.recipebook.utils.hideLoading
 import com.example.recipebook.utils.RecentItemsHelper
+import com.example.recipebook.viewmodel.BookViewModel
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 class BookRecipesFragment : Fragment() {
 
     private val viewModel: RecipeViewModel by viewModels()
     private lateinit var tvEmptyState: TextView
+    val bookViewModel: BookViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,6 +41,22 @@ class BookRecipesFragment : Fragment() {
         val args = BookRecipesFragmentArgs.fromBundle(requireArguments())
         val bookId = args.bookId
         val bookTitle = args.bookTitle
+        val tvDescription = view.findViewById<TextView>(R.id.tvBookDescription)
+        val tvCount = view.findViewById<TextView>(R.id.tvRecipesCount)
+
+        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
+        bookViewModel.getBookById(bookId, uid) { book ->
+            view?.post {
+                tvDescription.text = book?.description ?: ""
+            }
+        }
+
+        viewModel.getRecipesByBookId(bookId) { recipes ->
+            view?.post {
+                tvCount.text = "${recipes.size} recipes"
+            }
+        }
 
         val tvBookTitle = view.findViewById<TextView>(R.id.tvBookTitle)
         tvEmptyState = view.findViewById(R.id.tvEmptyState)
@@ -45,6 +68,21 @@ class BookRecipesFragment : Fragment() {
         btnBack.setOnClickListener {
             findNavController().popBackStack()
         }
+
+        val btnEdit = view.findViewById<ImageButton>(R.id.btnEditBook)
+
+        btnEdit.setOnClickListener {
+            val action =
+                BookRecipesFragmentDirections
+                    .actionBookRecipesFragmentToEditRecipeBookFragment(
+                        bookId = bookId,
+                        bookTitle = bookTitle,
+                        bookDescription = ""
+                    )
+
+            findNavController().navigate(action)
+        }
+
 
         tvBookTitle.text = bookTitle
         rvRecipes.layoutManager = LinearLayoutManager(requireContext())
@@ -121,7 +159,14 @@ class BookRecipesFragment : Fragment() {
                             isPublic = clickedRecipe.isPublic
                         )
 
-                        viewModel.deleteRecipe(recipeToDelete)
+                        val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            val repo = RecipeBookRepository(requireContext())
+
+                            repo.removeRecipeFromBook(bookId, clickedRecipe.id)
+                            repo.removeRecipeFromBookFirestore(uid, bookId, clickedRecipe.id)
+                        }
 
                         rvRecipes.postDelayed({
                             loadRecipes(bookId, rvRecipes)

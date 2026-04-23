@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import com.example.recipebook.db.BookEntity
 import com.example.recipebook.db.DatabaseProvider
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
@@ -55,8 +56,23 @@ class BookRepository(context: Context) {
         bookDao.deleteBook(bookId)
     }
 
-    suspend fun updateBook(book: BookEntity) {
-        bookDao.updateBook(book)
+    suspend fun updateBook(bookId: Int, title: String, description: String) {
+
+        bookDao.updateBook(bookId, title, description)
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        val bookMap = mapOf(
+            "title" to title,
+            "description" to description
+        )
+
+        FirebaseFirestore.getInstance()
+            .collection("users")
+            .document(uid)
+            .collection("books")
+            .document(bookId.toString())
+            .update(bookMap)
+            .await()
     }
 
     suspend fun saveBookToFirestore(book: BookEntity, uid: String) {
@@ -215,5 +231,26 @@ class BookRepository(context: Context) {
             .document(bookId.toString())
             .delete()
             .await()
+    }
+
+    suspend fun getBookById(bookId: Int, uid: String): BookEntity? {
+        val doc = firestore.collection("users")
+            .document(uid)
+            .collection("books")
+            .document(bookId.toString())
+            .get()
+            .await()
+
+        if (!doc.exists()) return null
+
+        return BookEntity(
+            id = (doc.getLong("id") ?: 0).toInt(),
+            title = doc.getString("title").orEmpty(),
+            description = doc.getString("description").orEmpty(),
+            isPublic = doc.getBoolean("isPublic") ?: true,
+            imageUri = doc.getString("imageUri"),
+            ownerUid = doc.getString("ownerUid").orEmpty(),
+            sharedWith = (doc.get("sharedWith") as? List<String>)?.joinToString(",").orEmpty()
+        )
     }
 }
