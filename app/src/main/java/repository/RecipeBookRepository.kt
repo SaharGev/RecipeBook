@@ -17,8 +17,8 @@ class RecipeBookRepository(context: Context) {
         )
     }
 
-    suspend fun removeRecipeFromBook(recipeId: Int, bookId: Int) {
-        dao.removeRecipeFromBook(recipeId, bookId)
+    suspend fun removeRecipeFromBook(bookId: Int, recipeId: Int) {
+        dao.removeRecipeFromBook(bookId, recipeId)
     }
 
     suspend fun getRecipesForBook(bookId: Int): List<RecipeEntity> {
@@ -39,6 +39,18 @@ class RecipeBookRepository(context: Context) {
                     "addedAt" to com.google.firebase.Timestamp.now()
                 )
             )
+            .await()
+    }
+
+    suspend fun removeRecipeFromBookFirestore(uid: String, bookId: Int, recipeId: Int) {
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+            .collection("users")
+            .document(uid)
+            .collection("books")
+            .document(bookId.toString())
+            .collection("recipes")
+            .document(recipeId.toString())
+            .delete()
             .await()
     }
 }

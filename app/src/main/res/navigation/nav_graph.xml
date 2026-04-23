@@ -131,6 +131,10 @@
             android:name="bookTitle"
             app:argType="string" />
 
+<!--        <argument-->
+<!--            android:name="bookDescription"-->
+<!--            app:argType="string" />-->
+
         <action
             android:id="@+id/action_bookRecipesFragment_to_addRecipeFragment"
             app:destination="@id/addRecipeFragment" />
@@ -138,6 +142,10 @@
         <action
             android:id="@+id/action_bookRecipesFragment_to_recipeDetailsFragment"
             app:destination="@id/recipeDetailsFragment" />
+
+        <action
+            android:id="@+id/action_bookRecipesFragment_to_editRecipeBookFragment"
+            app:destination="@id/editRecipeBookFragment" />
 
     </fragment>
 
@@ -343,6 +351,27 @@
             android:name="meal"
             app:argType="string" />
 
+    </fragment>
+
+    <fragment
+        android:id="@+id/editRecipeBookFragment"
+        android:name="com.example.recipebook.ui.EditRecipeBookFragment">
+
+        <argument
+            android:name="bookId"
+            app:argType="integer"/>
+
+        <argument
+            android:name="bookTitle"
+            app:argType="string"/>
+
+        <argument
+            android:name="bookDescription"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_editRecipeBookFragment_to_addRecipeBookFragment"
+            app:destination="@id/addRecipeBookFragment" />
     </fragment>
 
 </navigation>

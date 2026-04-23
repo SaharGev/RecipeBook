@@ -79,14 +79,9 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun updateBook(bookId: Int, newTitle: String) {
+    fun updateBook(bookId: Int, title: String, description: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.updateBook(
-                BookEntity(
-                    id = bookId,
-                    title = newTitle
-                )
-            )
+            repository.updateBook(bookId, title, description)
         }
     }
 
@@ -112,6 +107,13 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.updateInvitationStatus(invitationId, status)
             onDone()
+        }
+    }
+
+    fun getBookById(bookId: Int, uid: String, callback: (BookEntity?) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val book = repository.getBookById(bookId, uid)
+            callback(book)
         }
     }
 }
