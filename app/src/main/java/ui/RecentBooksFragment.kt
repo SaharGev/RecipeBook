@@ -29,6 +29,7 @@ class RecentBooksFragment : Fragment(R.layout.fragment_recent_books) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
         val recentIds = RecentItemsHelper.getRecentBookIds(requireContext(), uid)
         val recipeDao = DatabaseProvider.getDatabase(requireContext()).recipeDao()
+        val recipeBookDao = DatabaseProvider.getDatabase(requireContext()).recipeBookDao()
 
         bookViewModel.getBooks(uid) { books ->
             lifecycleScope.launch {
@@ -36,7 +37,7 @@ class RecentBooksFragment : Fragment(R.layout.fragment_recent_books) {
                     books.find { it.id == id }
                 }
                 val items = recentBooks.map { book ->
-                    val recipes = recipeDao.getRecipesByBookId(book.id)
+                    val recipes = recipeBookDao.getRecipesForBook(book.id)
                     SearchItem(
                         id = book.id,
                         title = book.title,

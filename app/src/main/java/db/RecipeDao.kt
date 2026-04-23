@@ -14,9 +14,6 @@ interface RecipeDao {
     @Query("SELECT * FROM recipes")
     suspend fun getAllRecipes(): List<RecipeEntity>
 
-    @Query("SELECT * FROM recipes WHERE bookId = :bookId")
-    suspend fun getRecipesByBookId(bookId: Int): List<RecipeEntity>
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertRecipe(recipe: RecipeEntity): Long
 
@@ -26,8 +23,8 @@ interface RecipeDao {
     @Update
     suspend fun updateRecipe(recipe: RecipeEntity)
 
-    @Query("UPDATE recipes SET bookId = NULL WHERE bookId = :bookId")
-    suspend fun removeBookFromRecipes(bookId: Int)
+    @Query("DELETE FROM recipes")
+    suspend fun deleteAllRecipes()
 
     @Query("SELECT * FROM recipes WHERE id = :id LIMIT 1")
     suspend fun getRecipeById(id: Int): RecipeEntity?

@@ -96,7 +96,22 @@ class MyRecipesFragment : Fragment() {
                     recipes = recipes,
                     onItemClick = { recipe -> navigateToRecipeDetails(recipe) },
                     onDeleteClick = { recipe ->
-                        recipeViewModel.deleteRecipeById(recipe.id)
+
+                        val entity = com.example.recipebook.db.RecipeEntity(
+                            id = recipe.id,
+                            name = recipe.name,
+                            description = recipe.description,
+                            ingredients = recipe.ingredients,
+                            instructions = recipe.instructions,
+                            imageUri = recipe.imageUri,
+                            cookTime = recipe.cookTime,
+                            difficulty = recipe.difficulty,
+                            isPublic = recipe.isPublic,
+                            ownerUid = recipe.ownerUid,
+                            sharedWith = recipe.sharedWith
+                        )
+
+                        recipeViewModel.deleteRecipe(entity)
                     }
                 )
             }

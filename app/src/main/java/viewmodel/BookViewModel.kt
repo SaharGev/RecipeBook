@@ -73,7 +73,9 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteBook(bookId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
+            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
             repository.deleteBook(bookId)
+            repository.deleteBookFromFirestore(bookId, uid)
         }
     }
 

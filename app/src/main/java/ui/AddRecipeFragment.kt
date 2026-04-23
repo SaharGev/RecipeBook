@@ -244,7 +244,6 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
 
                 viewModel.updateRecipeByFields(
                     id = recipeToEdit.id,
-                    bookId = recipeToEdit.id,
                     name = name,
                     description = description,
                     ingredients = ingredients,
@@ -272,7 +271,6 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
 
                 viewModel.addRecipe(
                     uid = uid,
-                    bookId = selectedBookId,
                     name = name,
                     description = description,
                     ingredients = ingredients,

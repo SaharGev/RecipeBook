@@ -5,31 +5,50 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.recipebook.db.BookEntity
 import com.example.recipebook.db.RecipeEntity
+import com.example.recipebook.db.UserEntity
 import com.example.recipebook.repository.BookRepository
 import com.example.recipebook.repository.RecipeRepository
+import com.example.recipebook.repository.RecipeBookRepository
+import com.example.recipebook.repository.UserRepository
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class AddRecipeBookViewModel(application: Application) : AndroidViewModel(application) {
 
     private val bookRepository = BookRepository(application.applicationContext)
-
-    private val userRepository = com.example.recipebook.repository.UserRepository(application.applicationContext)
     private val recipeRepository = RecipeRepository(application.applicationContext)
+    private val recipeBookRepository = RecipeBookRepository(application.applicationContext)
+    private val userRepository = UserRepository(application.applicationContext)
 
     fun getAllBooks(callback: (List<BookEntity>) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+            val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
             callback(bookRepository.getAllBooks(uid))
         }
     }
 
     fun getAvailableRecipesForBook(bookId: Int, callback: (List<RecipeEntity>) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+            val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
             val allRecipes = recipeRepository.getAllRecipes(uid)
-            val filteredRecipes = allRecipes.filter { it.bookId != bookId }
-            callback(filteredRecipes)
+            val recipesInBook = recipeBookRepository.getRecipesForBook(bookId)
+
+            val available = allRecipes.filter { recipe ->
+                recipesInBook.none { it.id == recipe.id }
+            }
+
+            callback(available)
+        }
+    }
+
+    fun addRecipeToBook(recipeId: Int, bookId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
+            recipeBookRepository.addRecipeToBook(recipeId, bookId)
+            recipeBookRepository.addRecipeToBookFirestore(uid, bookId, recipeId)
         }
     }
 
@@ -42,7 +61,7 @@ class AddRecipeBookViewModel(application: Application) : AndroidViewModel(applic
         onDone: (() -> Unit)? = null
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+            val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
 
             val newBook = BookEntity(
                 title = title,
@@ -55,38 +74,16 @@ class AddRecipeBookViewModel(application: Application) : AndroidViewModel(applic
 
             val id = bookRepository.insertBook(newBook)
 
-            val finalImageUrl = if (imageUri != null) {
-                try {
-                    bookRepository.uploadBookImage(uid, id.toInt(), android.net.Uri.parse(imageUri))
-                } catch (e: Exception) {
-                    android.util.Log.e("DEBUG", "Book image upload failed: ${e.message}", e)
-                    imageUri
-                }
-            } else null
-
-            val savedBook = newBook.copy(id = id.toInt(), imageUri = finalImageUrl)
+            val savedBook = newBook.copy(id = id.toInt(), imageUri = imageUri)
             bookRepository.saveBookToFirestore(savedBook, uid)
-            bookRepository.sendBookInvitations(savedBook, uid)
+
             onDone?.invoke()
         }
     }
 
-    fun addRecipeToBook(
-        recipe: RecipeEntity,
-        bookId: Int,
-        onDone: (() -> Unit)? = null
-    ) {
+    fun getFriends(uid: String, callback: (List<UserEntity>) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val updatedRecipe = recipe.copy(bookId = bookId)
-            recipeRepository.updateRecipe(updatedRecipe)
-            onDone?.invoke()
-        }
-    }
-
-    fun getFriends(uid: String, callback: (List<com.example.recipebook.db.UserEntity>) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val friends = userRepository.getFriends(uid)
-            callback(friends)
+            callback(userRepository.getFriends(uid))
         }
     }
 }
