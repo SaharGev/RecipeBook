@@ -189,6 +189,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         val db = DatabaseProvider.getDatabase(requireContext())
         val recipeDao = db.recipeDao()
+        val recipeBookDao = db.recipeBookDao()
         val bookDao = db.bookDao()
 
         showLoading()
@@ -220,7 +221,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
             val myBooks = books
             val bookItems = myBooks.map { book ->
-                val recipes = recipeDao.getRecipesByBookId(book.id)
+                val recipes = recipeBookDao.getRecipesForBook(book.id)
                 val count = recipes.size
                 SearchItem(
                     id = book.id,
@@ -419,7 +420,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             lifecycleScope.launch {
                 val trueSharedBooks = books.filter { it.ownerUid != uid }.sortedByDescending { it.id }
                 val items = trueSharedBooks.map { book ->
-                    val recipes = recipeDao.getRecipesByBookId(book.id)
+                    val recipes = recipeBookDao.getRecipesForBook(book.id)
                     SearchItem(
                         id = book.id,
                         title = book.title,

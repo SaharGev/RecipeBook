@@ -33,8 +33,9 @@ class SharedBooksFragment : Fragment(R.layout.fragment_shared_books) {
                 hideLoading()
                 val filtered = books.filter { it.ownerUid != uid }.sortedByDescending { it.id }
                 val recipeDao = com.example.recipebook.db.DatabaseProvider.getDatabase(requireContext()).recipeDao()
+                val recipeBookDao = com.example.recipebook.db.DatabaseProvider.getDatabase(requireContext()).recipeBookDao()
                 val items = filtered.map { book ->
-                    val recipes = recipeDao.getRecipesByBookId(book.id)
+                    val recipes = recipeBookDao.getRecipesForBook(book.id)
                     SearchItem(
                         id = book.id,
                         title = book.title,

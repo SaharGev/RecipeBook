@@ -13,6 +13,7 @@ import androidx.fragment.app.viewModels
 import com.example.recipebook.viewmodel.AddRecipeBookViewModel
 import com.example.recipebook.utils.showLoading
 import com.example.recipebook.utils.hideLoading
+import com.google.android.material.snackbar.Snackbar
 
 class AddRecipeBookFragment : Fragment() {
 
@@ -201,24 +202,25 @@ class AddRecipeBookFragment : Fragment() {
             val selectedRecipe = recipesList[selectedRecipeIndex - 1]
 
             showLoading()
-            viewModel.addRecipeToBook(selectedRecipe, selectedBook.id) {
-                requireActivity().runOnUiThread {
-                    hideLoading()
-                    recipesList = recipesList.filter { it.id != selectedRecipe.id }
+            viewModel.addRecipeToBook(selectedRecipe.id, selectedBook.id)
 
-                    val recipeNames = mutableListOf("Select Recipe")
-                    recipeNames.addAll(recipesList.map { it.name })
+            requireActivity().runOnUiThread {
+                hideLoading()
 
-                    val recipesAdapter = ArrayAdapter(
-                        requireContext(),
-                        android.R.layout.simple_spinner_item,
-                        recipeNames
-                    )
-                    recipesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    spinnerRecipes.adapter = recipesAdapter
+                recipesList = recipesList.filter { it.id != selectedRecipe.id }
 
-                    com.google.android.material.snackbar.Snackbar.make(requireView(), "Recipe added to book!", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
-                }
+                val recipeNames = mutableListOf("Select Recipe")
+                recipeNames.addAll(recipesList.map { it.name })
+
+                val recipesAdapter = ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_item,
+                    recipeNames
+                )
+                recipesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                spinnerRecipes.adapter = recipesAdapter
+
+                Snackbar.make(requireView(), "Recipe added to book!", Snackbar.LENGTH_SHORT).show()
             }
         }
 

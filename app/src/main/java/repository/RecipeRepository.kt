@@ -7,6 +7,8 @@ import com.example.recipebook.db.RecipeEntity
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import android.net.Uri
+import com.example.recipebook.db.RecipeBookCrossRef
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 
 class RecipeRepository(context: Context) {
@@ -17,8 +19,6 @@ class RecipeRepository(context: Context) {
     private val storage = FirebaseStorage.getInstance()
 
     suspend fun getAllRecipes(uid: String): List<RecipeEntity> {
-        val localRecipes = recipeDao.getAllRecipes()
-        if (localRecipes.isNotEmpty()) return localRecipes
 
         val result = firestore.collection("users")
             .document(uid)
@@ -29,7 +29,6 @@ class RecipeRepository(context: Context) {
         val remoteRecipes = result.documents.mapNotNull { doc ->
             RecipeEntity(
                 id = (doc.getLong("id") ?: 0).toInt(),
-                bookId = (doc.getLong("bookId") ?: 0).toInt(),
                 name = doc.getString("name").orEmpty(),
                 description = doc.getString("description").orEmpty(),
                 ingredients = doc.getString("ingredients").orEmpty(),
@@ -43,30 +42,61 @@ class RecipeRepository(context: Context) {
             )
         }
 
+        recipeDao.deleteAllRecipes()
+
         remoteRecipes.forEach { recipe ->
             recipeDao.insertRecipe(recipe)
         }
+
         return remoteRecipes
     }
 
+
     suspend fun getRecipesByBookId(bookId: Int): List<RecipeEntity> {
-        return recipeDao.getRecipesByBookId(bookId)
+        return DatabaseProvider.getDatabase(context)
+            .recipeBookDao()
+            .getRecipesForBook(bookId)
     }
 
     suspend fun insertRecipe(recipe: RecipeEntity): Long {
         return recipeDao.insertRecipe(recipe)
     }
 
-    suspend fun deleteRecipe(recipe: RecipeEntity) {
+    suspend fun deleteRecipe(recipe: RecipeEntity, uid: String) {
+
+        firestore.collection("users")
+            .document(uid)
+            .collection("recipes")
+            .document(recipe.id.toString())
+            .delete()
+            .await()
+
         recipeDao.deleteRecipe(recipe)
     }
-
     suspend fun updateRecipe(recipe: RecipeEntity) {
         recipeDao.updateRecipe(recipe)
     }
 
     suspend fun removeBookFromRecipes(bookId: Int) {
-        recipeDao.removeBookFromRecipes(bookId)
+        val db = DatabaseProvider.getDatabase(context)
+
+        val recipes = db.recipeBookDao().getRecipesForBook(bookId)
+
+        recipes.forEach { recipe ->
+            db.recipeBookDao().removeRecipeFromBook(
+                bookId = bookId,
+                recipeId = recipe.id
+            )
+        }
+    }
+
+    suspend fun deleteRecipeFromFirestore(recipeId: Int, uid: String) {
+        firestore.collection("users")
+            .document(uid)
+            .collection("recipes")
+            .document(recipeId.toString())
+            .delete()
+            .await()
     }
 
     suspend fun getRecipeById(id: Int): RecipeEntity? {
@@ -81,7 +111,7 @@ class RecipeRepository(context: Context) {
             .set(
                 mapOf(
                     "id" to recipe.id,
-                    "bookId" to recipe.bookId,
+                    //"bookId" to recipe.bookId,
                     "name" to recipe.name,
                     "description" to recipe.description,
                     "ingredients" to recipe.ingredients,
@@ -164,7 +194,7 @@ class RecipeRepository(context: Context) {
 
             val recipe = RecipeEntity(
                 id = (recipeDoc.getLong("id") ?: 0).toInt(),
-                bookId = (recipeDoc.getLong("bookId") ?: 0).toInt(),
+                //bookId = (recipeDoc.getLong("bookId") ?: 0).toInt(),
                 name = recipeDoc.getString("name").orEmpty(),
                 description = recipeDoc.getString("description").orEmpty(),
                 ingredients = recipeDoc.getString("ingredients").orEmpty(),
@@ -183,5 +213,42 @@ class RecipeRepository(context: Context) {
         }
 
         return sharedRecipes
+    }
+
+    suspend fun getRecipesByBookFromFirestore(uid: String, bookId: Int): List<RecipeEntity> {
+        val result = firestore.collection("users")
+            .document(uid)
+            .collection("books")
+            .document(bookId.toString())
+            .collection("recipes")
+            .get()
+            .await()
+
+        return result.documents.mapNotNull { doc ->
+            val recipeId = (doc.getLong("recipeId") ?: return@mapNotNull null).toInt()
+
+            val recipeDoc = firestore.collection("users")
+                .document(uid)
+                .collection("recipes")
+                .document(recipeId.toString())
+                .get()
+                .await()
+
+            if (!recipeDoc.exists()) return@mapNotNull null
+
+            RecipeEntity(
+                id = (recipeDoc.getLong("id") ?: 0).toInt(),
+                name = recipeDoc.getString("name").orEmpty(),
+                description = recipeDoc.getString("description").orEmpty(),
+                ingredients = recipeDoc.getString("ingredients").orEmpty(),
+                instructions = recipeDoc.getString("instructions").orEmpty(),
+                imageUri = recipeDoc.getString("imageUri"),
+                cookTime = (recipeDoc.getLong("cookTime") ?: 0).toInt(),
+                difficulty = recipeDoc.getString("difficulty").orEmpty(),
+                isPublic = recipeDoc.getBoolean("isPublic") ?: false,
+                ownerUid = recipeDoc.getString("ownerUid").orEmpty(),
+                sharedWith = ""
+            )
+        }
     }
 }

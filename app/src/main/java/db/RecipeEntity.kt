@@ -8,7 +8,6 @@ import androidx.room.PrimaryKey
 data class RecipeEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val bookId: Int,
     val name: String,
     val description: String,
     val ingredients: String,

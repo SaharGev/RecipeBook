@@ -116,7 +116,21 @@ class HomeFragment : Fragment() {
                     .setTitle("Delete Recipe")
                     .setMessage("Are you sure you want to delete ${clickedRecipe.name}?")
                     .setPositiveButton("Yes") { _, _ ->
-                        viewModel.deleteRecipeById(clickedRecipe.id)
+                        val recipeToDelete = com.example.recipebook.db.RecipeEntity(
+                            id = clickedRecipe.id,
+                            name = clickedRecipe.name,
+                            description = clickedRecipe.description,
+                            ingredients = clickedRecipe.ingredients,
+                            instructions = clickedRecipe.instructions,
+                            imageUri = clickedRecipe.imageUri,
+                            cookTime = clickedRecipe.cookTime,
+                            difficulty = clickedRecipe.difficulty,
+                            isPublic = clickedRecipe.isPublic,
+                            ownerUid = clickedRecipe.ownerUid,
+                            sharedWith = clickedRecipe.sharedWith
+                        )
+
+                        viewModel.deleteRecipe(recipeToDelete)
 
                         android.widget.Toast.makeText(
                             requireContext(),

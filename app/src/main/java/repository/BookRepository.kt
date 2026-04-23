@@ -16,8 +16,6 @@ class BookRepository(context: Context) {
     private val storage = FirebaseStorage.getInstance()
 
     suspend fun getAllBooks(uid: String): List<BookEntity> {
-        val localBooks = bookDao.getAllBooks()
-        if (localBooks.isNotEmpty()) return localBooks
 
         val result = firestore.collection("users")
             .document(uid)
@@ -37,12 +35,15 @@ class BookRepository(context: Context) {
             )
         }
 
-        remoteBooks.forEach { book ->
-            val existing = bookDao.getAllBooks()
-            if (existing.none { it.id == book.id }) {
-                bookDao.insertBook(book)
-            }
+        val existing = bookDao.getAllBooks()
+        existing.forEach { book ->
+            bookDao.deleteBook(book.id)
         }
+
+        remoteBooks.forEach { book ->
+            bookDao.insertBook(book)
+        }
+
         return remoteBooks
     }
 
@@ -204,6 +205,15 @@ class BookRepository(context: Context) {
                 "seen" to false,
                 "timestamp" to com.google.firebase.Timestamp.now()
             ))
+            .await()
+    }
+
+    suspend fun deleteBookFromFirestore(bookId: Int, uid: String) {
+        firestore.collection("users")
+            .document(uid)
+            .collection("books")
+            .document(bookId.toString())
+            .delete()
             .await()
     }
 }

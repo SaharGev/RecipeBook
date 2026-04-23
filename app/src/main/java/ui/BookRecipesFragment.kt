@@ -110,7 +110,7 @@ class BookRecipesFragment : Fragment() {
                     onDeleteClick = { clickedRecipe ->
                         val recipeToDelete = com.example.recipebook.db.RecipeEntity(
                             id = clickedRecipe.id,
-                            bookId = bookId,
+                            //bookId = bookId,
                             name = clickedRecipe.name,
                             description = clickedRecipe.description,
                             ingredients = clickedRecipe.ingredients,
