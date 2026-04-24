@@ -18,11 +18,16 @@ import com.example.recipebook.viewmodel.BookViewModel
 import com.example.recipebook.ui.RecipeAdapter
 import com.example.recipebook.repository.RecipeBookRepository
 import com.example.recipebook.ui.EditRecipeBookFragmentDirections
+import com.example.recipebook.viewmodel.UserViewModel
 
 class EditRecipeBookFragment : Fragment(R.layout.fragment_edit_recipe_book) {
 
     private val recipeViewModel: RecipeViewModel by viewModels()
     private val bookViewModel: BookViewModel by viewModels()
+
+    private val selectedFriendPermissions = mutableMapOf<String, String>()
+
+    private val userViewModel: UserViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -36,6 +41,20 @@ class EditRecipeBookFragment : Fragment(R.layout.fragment_edit_recipe_book) {
         val btnUpdate = view.findViewById<Button>(R.id.btnUpdate)
         val btnAddRecipe = view.findViewById<Button>(R.id.btnAddRecipe)
         val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
+
+        val llFriendsList = view.findViewById<LinearLayout>(R.id.llFriendsList)
+        val headerShareWith = view.findViewById<LinearLayout>(R.id.headerShareWith)
+        val tvShareWithArrow = view.findViewById<TextView>(R.id.tvShareWithArrow)
+
+        headerShareWith.setOnClickListener {
+            if (llFriendsList.visibility == View.GONE) {
+                llFriendsList.visibility = View.VISIBLE
+                tvShareWithArrow.text = "▲"
+            } else {
+                llFriendsList.visibility = View.GONE
+                tvShareWithArrow.text = "▼"
+            }
+        }
 
         btnBack.setOnClickListener {
             findNavController().popBackStack()
@@ -52,7 +71,42 @@ class EditRecipeBookFragment : Fragment(R.layout.fragment_edit_recipe_book) {
                     etDescription.setText(book.description)
                 }
             }
+
+            val sharedUids = book?.sharedWith
+                ?.split(",")
+                ?.filter { it.isNotBlank() }
+                ?.map { it.split(":")[0] }
+                ?: emptyList()
+
+            userViewModel.getFriends(uid) { friends ->
+                requireActivity().runOnUiThread {
+                    llFriendsList.removeAllViews()
+                    selectedFriendPermissions.clear()
+
+                    friends.forEach { friend ->
+                        val checkBox = CheckBox(requireContext()).apply {
+                            text = friend.username
+                            isChecked = sharedUids.contains(friend.uid)
+                        }
+
+                        if (checkBox.isChecked) {
+                            selectedFriendPermissions[friend.uid] = "view"
+                        }
+
+                        checkBox.setOnCheckedChangeListener { _, isChecked ->
+                            if (isChecked) {
+                                selectedFriendPermissions[friend.uid] = "view"
+                            } else {
+                                selectedFriendPermissions.remove(friend.uid)
+                            }
+                        }
+
+                        llFriendsList.addView(checkBox)
+                    }
+                }
+            }
         }
+
 
         loadRecipes(bookId, rvRecipes)
 
@@ -60,7 +114,15 @@ class EditRecipeBookFragment : Fragment(R.layout.fragment_edit_recipe_book) {
             val newName = etName.text.toString()
             val newDescription = etDescription.text.toString()
 
-            bookViewModel.updateBook(bookId, newName, newDescription)
+            val sharedWith = selectedFriendPermissions.entries
+                .joinToString(",") { "${it.key}:${it.value}" }
+
+            bookViewModel.updateBook(
+                bookId,
+                newName,
+                newDescription,
+                sharedWith
+            )
 
             Toast.makeText(requireContext(), "Book updated", Toast.LENGTH_SHORT).show()
             findNavController().popBackStack()
