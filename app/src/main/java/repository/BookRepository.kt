@@ -56,14 +56,20 @@ class BookRepository(context: Context) {
         bookDao.deleteBook(bookId)
     }
 
-    suspend fun updateBook(bookId: Int, title: String, description: String) {
+    suspend fun updateBook(
+        bookId: Int,
+        title: String,
+        description: String,
+        sharedWith: String
+    ) {
 
-        bookDao.updateBook(bookId, title, description)
+        bookDao.updateBook(bookId, title, description, sharedWith)
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
         val bookMap = mapOf(
             "title" to title,
-            "description" to description
+            "description" to description,
+            "sharedWith" to sharedWith
         )
 
         FirebaseFirestore.getInstance()

@@ -79,9 +79,14 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun updateBook(bookId: Int, title: String, description: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.updateBook(bookId, title, description)
+    fun updateBook(
+        bookId: Int,
+        title: String,
+        description: String,
+        sharedWith: String
+    ) {
+        viewModelScope.launch {
+            repository.updateBook(bookId, title, description, sharedWith)
         }
     }
 

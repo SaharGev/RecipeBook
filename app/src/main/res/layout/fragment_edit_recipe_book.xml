@@ -69,11 +69,37 @@
                     android:layout_marginTop="10dp"
                     android:gravity="top"/>
 
-                <Spinner
-                    android:id="@+id/spinnerPrivacy"
+                <LinearLayout
+                    android:id="@+id/headerShareWith"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"/>
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Share with friends"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="#2D2D2D"/>
+
+                    <TextView
+                        android:id="@+id/tvShareWithArrow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="▼"
+                        android:textSize="16sp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/llFriendsList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:layout_marginTop="8dp"/>
 
             </LinearLayout>
 
