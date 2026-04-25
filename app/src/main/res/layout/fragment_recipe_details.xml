@@ -192,12 +192,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
-            android:id="@+id/btnLike"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@drawable/ic_heart_outline"
-            app:tint="#555555" />
+<!--        <ImageView-->
+<!--            android:id="@+id/btnLike"-->
+<!--            android:layout_width="28dp"-->
+<!--            android:layout_height="28dp"-->
+<!--            android:src="@drawable/ic_heart_outline"-->
+<!--            app:tint="#555555" />-->
+
+<!--        <ImageView-->
+<!--            android:id="@+id/btnComments"-->
+<!--            android:layout_width="28dp"-->
+<!--            android:layout_height="28dp"-->
+<!--            android:src="@drawable/ic_comment"-->
+<!--            app:tint="#555555"-->
+<!--            android:layout_marginStart="5dp"/>-->
 
         <ImageView
             android:id="@+id/btnComments"
