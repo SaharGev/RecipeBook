@@ -69,7 +69,7 @@ class BookRepository(context: Context) {
         val bookMap = mapOf(
             "title" to title,
             "description" to description,
-            "sharedWith" to sharedWith
+            "sharedWith" to sharedWith.split(",").filter { it.isNotEmpty() }
         )
 
         FirebaseFirestore.getInstance()
