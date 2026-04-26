@@ -31,7 +31,7 @@ class AddRecipeBookFragment : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_add_recipe_book, container, false)
 
-        view.findViewById<Button>(R.id.btnBack).setOnClickListener {
+        view.findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
             findNavController().popBackStack()
         }
 

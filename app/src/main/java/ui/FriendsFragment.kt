@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -41,6 +42,13 @@ class FriendsFragment : Fragment() {
         val cardSearchResult = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSearchResult)
         val tvSearchResult = view.findViewById<TextView>(R.id.tvSearchResult)
         val btnAddFriend = view.findViewById<Button>(R.id.btnAddFriend)
+
+        val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
+
+        btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
         val rvFriends = view.findViewById<RecyclerView>(R.id.rvFriends)
 
         rvFriends.layoutManager = LinearLayoutManager(requireContext())

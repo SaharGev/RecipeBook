@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -25,7 +26,7 @@ class MyRecipesFragment : Fragment() {
 
     private lateinit var rvRecipes: RecyclerView
     private lateinit var tvEmptyRecipes: TextView
-    private lateinit var btnBack: Button
+    private lateinit var btnBack: ImageButton
     private lateinit var btnAddRecipe: Button
 
     override fun onCreateView(

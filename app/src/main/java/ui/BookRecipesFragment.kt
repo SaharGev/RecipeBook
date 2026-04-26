@@ -101,7 +101,7 @@ class BookRecipesFragment : Fragment() {
 
         val rvRecipes = view.findViewById<RecyclerView>(R.id.rvRecipes)
         val btnAddRecipe = view.findViewById<Button>(R.id.btnAddRecipe)
-        val btnBack = view.findViewById<Button>(R.id.btnBack)
+        val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
 
         btnBack.setOnClickListener {
             findNavController().popBackStack()
