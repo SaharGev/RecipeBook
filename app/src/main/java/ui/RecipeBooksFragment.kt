@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -37,7 +38,7 @@ class RecipeBooksFragment : Fragment() {
         rvBooks.layoutManager = GridLayoutManager(requireContext(), 2)
 
         val btnAddBook = view.findViewById<Button>(R.id.btnAddBook)
-        val btnBack = view.findViewById<Button>(R.id.btnBack)
+        val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
         val tvEmptyBooks = view.findViewById<TextView>(R.id.tvEmptyBooks)
 
         btnBack.setOnClickListener {

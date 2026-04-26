@@ -19,6 +19,7 @@ import com.example.recipebook.viewmodel.RecipeViewModel
 import java.io.File
 import java.io.FileOutputStream
 import android.Manifest
+import android.widget.ImageButton
 import android.widget.TextView
 import com.example.recipebook.model.Recipe
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -154,7 +155,7 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
         val etTime = view.findViewById<EditText>(R.id.etTime)
         val tvDifficulty = view.findViewById<TextView>(R.id.tvDifficulty)
 
-        val btnBack = view.findViewById<Button>(R.id.btnBack)
+        val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
         val btnSelectImage = view.findViewById<Button>(R.id.btnSelectImage)
         val btnTakePhoto = view.findViewById<Button>(R.id.btnTakePhoto)
         val btnSave = view.findViewById<Button>(R.id.btnSave)

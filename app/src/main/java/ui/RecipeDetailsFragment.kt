@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import com.example.recipebook.R
 import com.example.recipebook.model.Recipe
 import android.net.Uri
+import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -38,8 +39,8 @@ class RecipeDetailsFragment : Fragment(R.layout.fragment_recipe_details) {
         val tvDifficulty = view.findViewById<TextView>(R.id.tvDifficulty)
         val tvPrivacy = view.findViewById<TextView>(R.id.tvPrivacy)
         tvPrivacy.visibility = View.GONE
-        val btnBack = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnBack)
-        val btnEdit = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnEdit)
+        val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
+        val btnEdit = view.findViewById<ImageButton>(R.id.btnEdit)
 
         val btnComments = view.findViewById<ImageView>(R.id.btnComments)
 
