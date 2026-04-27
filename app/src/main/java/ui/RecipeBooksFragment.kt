@@ -46,21 +46,29 @@ class RecipeBooksFragment : Fragment() {
         }
 
         btnAddBook.setOnClickListener {
-            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-            viewModel.addBook(
-                uid = uid,
-                title = "My Recipe Book",
-                onDone = {
-                    requireActivity().runOnUiThread {
-                        loadBooks(rvBooks, tvEmptyBooks)
-                    }
+            findNavController().navigate(
+                R.id.addRecipeBookFragment,
+                Bundle().apply {
+                    putBoolean("openCreate", true)
                 }
             )
         }
 
+
         loadBooks(rvBooks, tvEmptyBooks)
 
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val rvBooks = view?.findViewById<RecyclerView>(R.id.rvBooks)
+        val tvEmptyBooks = view?.findViewById<TextView>(R.id.tvEmptyBooks)
+
+        if (rvBooks != null && tvEmptyBooks != null) {
+            loadBooks(rvBooks, tvEmptyBooks)
+        }
     }
 
     private fun loadBooks(rvBooks: RecyclerView, tvEmptyBooks: TextView) {
@@ -103,6 +111,7 @@ class RecipeBooksFragment : Fragment() {
                                 },
                                 onDeleteClick = { book ->
                                     viewModel.deleteBookAndDetachRecipes(book.id, recipeViewModel)
+                                    loadBooks(rvBooks, tvEmptyBooks)
                                 },
                                 countsMap = countsMap,
                                 bookImagesMap = bookImagesMap
