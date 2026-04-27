@@ -7,9 +7,11 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.recipebook.R
 import com.example.recipebook.db.BookEntity
 import androidx.fragment.app.viewModels
+import com.example.recipebook.db.RecipeEntity
 import com.example.recipebook.viewmodel.AddRecipeBookViewModel
 import com.example.recipebook.utils.showLoading
 import com.example.recipebook.utils.hideLoading
@@ -18,9 +20,10 @@ import com.google.android.material.snackbar.Snackbar
 class AddRecipeBookFragment : Fragment() {
 
     private val viewModel: AddRecipeBookViewModel by viewModels()
-    private lateinit var booksList: List<BookEntity>
-    private lateinit var recipesList: List<com.example.recipebook.db.RecipeEntity>
+    private val args: AddRecipeBookFragmentArgs by navArgs()
 
+    private var booksList: List<BookEntity> = emptyList()
+    private var recipesList: List<RecipeEntity> = emptyList()
     private val selectedFriendPermissions = mutableMapOf<String, String>()
 
     override fun onCreateView(
@@ -28,156 +31,103 @@ class AddRecipeBookFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         val view = inflater.inflate(R.layout.fragment_add_recipe_book, container, false)
+
+        val contentCreate = view.findViewById<LinearLayout>(R.id.contentCreate)
+        val contentAdd = view.findViewById<LinearLayout>(R.id.contentAdd)
+        val arrowCreate = view.findViewById<TextView>(R.id.arrowCreate)
+        val arrowAdd = view.findViewById<TextView>(R.id.arrowAdd)
+        val headerCreate = view.findViewById<LinearLayout>(R.id.headerCreate)
+        val headerAdd = view.findViewById<LinearLayout>(R.id.headerAdd)
+        val etBookName = view.findViewById<EditText>(R.id.etBookName)
+        val etBookDescription = view.findViewById<EditText>(R.id.etBookDescription)
+        val btnCreateBook = view.findViewById<Button>(R.id.btnCreateBook)
+        val spinnerBooks = view.findViewById<Spinner>(R.id.spinnerBooks)
+        val spinnerRecipes = view.findViewById<Spinner>(R.id.spinnerRecipes)
+        val btnAddRecipe = view.findViewById<Button>(R.id.btnAddRecipe)
+        val llFriendsList = view.findViewById<LinearLayout>(R.id.llFriendsList)
+        val headerShareWith = view.findViewById<LinearLayout>(R.id.headerShareWith)
+        val tvShareWithArrow = view.findViewById<TextView>(R.id.tvShareWithArrow)
+
+        setupInitialVisibility(contentCreate, contentAdd, arrowCreate, arrowAdd)
 
         view.findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
             findNavController().popBackStack()
         }
 
-        val headerCreate = view.findViewById<LinearLayout>(R.id.headerCreate)
-        val contentCreate = view.findViewById<LinearLayout>(R.id.contentCreate)
-        val arrowCreate = view.findViewById<TextView>(R.id.arrowCreate)
-
         headerCreate.setOnClickListener {
-            if (contentCreate.visibility == View.GONE) {
-                contentCreate.visibility = View.VISIBLE
-                arrowCreate.text = "▲"
-            } else {
-                contentCreate.visibility = View.GONE
-                arrowCreate.text = "▼"
-            }
+            toggleSection(contentCreate, arrowCreate)
         }
-
-        val headerAdd = view.findViewById<LinearLayout>(R.id.headerAdd)
-        val contentAdd = view.findViewById<LinearLayout>(R.id.contentAdd)
-        val arrowAdd = view.findViewById<TextView>(R.id.arrowAdd)
 
         headerAdd.setOnClickListener {
-            if (contentAdd.visibility == View.GONE) {
-                contentAdd.visibility = View.VISIBLE
-                arrowAdd.text = "▲"
-            } else {
-                contentAdd.visibility = View.GONE
-                arrowAdd.text = "▼"
+            toggleSection(contentAdd, arrowAdd)
+        }
+
+        headerShareWith.setOnClickListener {
+            toggleSection(llFriendsList, tvShareWithArrow)
+        }
+
+        viewModel.getAllBooks { books ->
+            requireActivity().runOnUiThread {
+                booksList = books
+                val bookTitles = mutableListOf("Select Book")
+                bookTitles.addAll(books.map { it.title })
+
+                val booksAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, bookTitles)
+                booksAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                spinnerBooks.adapter = booksAdapter
+
+                if (args.mode == "add" && args.selectedBookTitle.isNotEmpty()) {
+                    val indexToSelect = books.indexOfFirst { it.title == args.selectedBookTitle }
+                    if (indexToSelect != -1) {
+                        spinnerBooks.setSelection(indexToSelect + 1)
+                    }
+                }
             }
         }
 
-        val etBookName = view.findViewById<EditText>(R.id.etBookName)
-        val etBookDescription = view.findViewById<EditText>(R.id.etBookDescription)
-        val btnCreateBook = view.findViewById<Button>(R.id.btnCreateBook)
-
-        val spinnerBooks = view.findViewById<Spinner>(R.id.spinnerBooks)
-        val spinnerRecipes = view.findViewById<Spinner>(R.id.spinnerRecipes)
         spinnerBooks.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-
                 if (position == 0) {
-                    val recipeNames = listOf("Select Recipe")
-
-                    val adapter = ArrayAdapter(
-                        requireContext(),
-                        android.R.layout.simple_spinner_item,
-                        recipeNames
-                    )
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    spinnerRecipes.adapter = adapter
-
+                    resetRecipeSpinner(spinnerRecipes)
                     return
                 }
 
                 val selectedBook = booksList[position - 1]
-
                 viewModel.getAvailableRecipesForBook(selectedBook.id) { recipes ->
                     requireActivity().runOnUiThread {
                         recipesList = recipes
-
                         val recipeNames = mutableListOf("Select Recipe")
                         recipeNames.addAll(recipesList.map { it.name })
 
-                        val adapter = ArrayAdapter(
-                            requireContext(),
-                            android.R.layout.simple_spinner_item,
-                            recipeNames
-                        )
+                        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, recipeNames)
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         spinnerRecipes.adapter = adapter
                     }
                 }
             }
-
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        val btnAddRecipe = view.findViewById<Button>(R.id.btnAddRecipe)
-
-        val llFriendsList = view.findViewById<LinearLayout>(R.id.llFriendsList)
-        val headerShareWith = view.findViewById<LinearLayout>(R.id.headerShareWith)
-        val tvShareWithArrow = view.findViewById<TextView>(R.id.tvShareWithArrow)
-
-        headerShareWith.setOnClickListener {
-            if (llFriendsList.visibility == View.GONE) {
-                llFriendsList.visibility = View.VISIBLE
-                tvShareWithArrow.text = "▲"
-            } else {
-                llFriendsList.visibility = View.GONE
-                tvShareWithArrow.text = "▼"
-            }
-        }
-
-        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-        viewModel.getFriends(uid) { friends ->
-            requireActivity().runOnUiThread {
-                llFriendsList.removeAllViews()
-                selectedFriendPermissions.clear()
-
-                if (friends.isEmpty()) {
-                    val tvNoFriends = TextView(requireContext())
-                    tvNoFriends.text = "You have no friends yet"
-                    llFriendsList.addView(tvNoFriends)
-                    return@runOnUiThread
-                }
-
-                friends.forEach { friend ->
-                    val checkBox = CheckBox(requireContext()).apply {
-                        text = friend.username
-                    }
-                    checkBox.setOnCheckedChangeListener { _, isChecked ->
-                        if (isChecked) {
-                            selectedFriendPermissions[friend.uid] = "view"
-                        } else {
-                            selectedFriendPermissions.remove(friend.uid)
-                        }
-                    }
-                    llFriendsList.addView(checkBox)
-                }
-            }
-        }
+        loadFriends(llFriendsList)
 
         btnCreateBook.setOnClickListener {
             val bookName = etBookName.text.toString().trim()
-            val bookDescription = etBookDescription.text.toString().trim()
-
             if (bookName.isEmpty()) {
                 etBookName.error = "Book name is required"
-                etBookName.requestFocus()
                 return@setOnClickListener
             }
-
-
-            val isPublic = false
 
             showLoading()
             viewModel.createBook(
                 title = bookName,
-                description = bookDescription,
-                isPublic = isPublic,
+                description = etBookDescription.text.toString().trim(),
+                isPublic = false,
                 sharedWith = selectedFriendPermissions.entries.joinToString(",") { "${it.key}:${it.value}" }
             ) {
                 requireActivity().runOnUiThread {
                     hideLoading()
-                    com.google.android.material.snackbar.Snackbar.make(requireView(), "Book created successfully", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
-
+                    Snackbar.make(requireView(), "Book created successfully", Snackbar.LENGTH_SHORT).show()
                     etBookName.text.clear()
                     etBookDescription.text.clear()
                 }
@@ -185,60 +135,88 @@ class AddRecipeBookFragment : Fragment() {
         }
 
         btnAddRecipe.setOnClickListener {
-            val selectedBookIndex = spinnerBooks.selectedItemPosition
-            val selectedRecipeIndex = spinnerRecipes.selectedItemPosition
+            val bookPos = spinnerBooks.selectedItemPosition
+            val recipePos = spinnerRecipes.selectedItemPosition
 
-            if (selectedBookIndex == 0) {
-                com.google.android.material.snackbar.Snackbar.make(requireView(), "Please select a book", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
+            if (bookPos <= 0 || recipePos <= 0) {
+                Snackbar.make(requireView(), "Please select both book and recipe", Snackbar.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            if (selectedRecipeIndex == 0) {
-                com.google.android.material.snackbar.Snackbar.make(requireView(), "Please select a recipe", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val selectedBook = booksList[selectedBookIndex - 1]
-            val selectedRecipe = recipesList[selectedRecipeIndex - 1]
+            val selectedBook = booksList[bookPos - 1]
+            val selectedRecipe = recipesList[recipePos - 1]
 
             showLoading()
             viewModel.addRecipeToBook(selectedRecipe.id, selectedBook.id)
 
             requireActivity().runOnUiThread {
                 hideLoading()
-
-                recipesList = recipesList.filter { it.id != selectedRecipe.id }
-
-                val recipeNames = mutableListOf("Select Recipe")
-                recipeNames.addAll(recipesList.map { it.name })
-
-                val recipesAdapter = ArrayAdapter(
-                    requireContext(),
-                    android.R.layout.simple_spinner_item,
-                    recipeNames
-                )
-                recipesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                spinnerRecipes.adapter = recipesAdapter
-
                 Snackbar.make(requireView(), "Recipe added to book!", Snackbar.LENGTH_SHORT).show()
+                recipesList = recipesList.filter { it.id != selectedRecipe.id }
+                updateRecipeSpinner(spinnerRecipes)
             }
         }
 
-        viewModel.getAllBooks { books ->
-            booksList = books
-
-            val bookTitles = mutableListOf("Select Book")
-            bookTitles.addAll(books.map { it.title })
-
-            val booksAdapter = ArrayAdapter(
-                requireContext(),
-                android.R.layout.simple_spinner_item,
-                bookTitles
-            )
-            booksAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerBooks.adapter = booksAdapter
-        }
-
         return view
+    }
+
+    private fun setupInitialVisibility(create: View, add: View, arrowC: TextView, arrowA: TextView) {
+        if (args.mode == "add") {
+            add.visibility = View.VISIBLE
+            arrowA.text = "▲"
+            create.visibility = View.GONE
+            arrowC.text = "▼"
+        } else {
+            create.visibility = View.VISIBLE
+            arrowC.text = "▲"
+            add.visibility = View.GONE
+            arrowA.text = "▼"
+        }
+    }
+
+    private fun toggleSection(content: View, arrow: TextView) {
+        if (content.visibility == View.GONE) {
+            content.visibility = View.VISIBLE
+            arrow.text = "▲"
+        } else {
+            content.visibility = View.GONE
+            arrow.text = "▼"
+        }
+    }
+
+    private fun resetRecipeSpinner(spinner: Spinner) {
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, listOf("Select Recipe"))
+        spinner.adapter = adapter
+    }
+
+    private fun updateRecipeSpinner(spinner: Spinner) {
+        val names = mutableListOf("Select Recipe")
+        names.addAll(recipesList.map { it.name })
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, names)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+    }
+
+    private fun loadFriends(container: LinearLayout) {
+        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+        viewModel.getFriends(uid) { friends ->
+            requireActivity().runOnUiThread {
+                container.removeAllViews()
+                if (friends.isEmpty()) {
+                    container.addView(TextView(requireContext()).apply { text = "No friends found" })
+                } else {
+                    friends.forEach { friend ->
+                        val cb = CheckBox(requireContext()).apply {
+                            text = friend.username
+                            setOnCheckedChangeListener { _, isChecked ->
+                                if (isChecked) selectedFriendPermissions[friend.uid] = "view"
+                                else selectedFriendPermissions.remove(friend.uid)
+                            }
+                        }
+                        container.addView(cb)
+                    }
+                }
+            }
+        }
     }
 }

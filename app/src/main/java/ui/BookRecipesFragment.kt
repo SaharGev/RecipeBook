@@ -132,8 +132,11 @@ class BookRecipesFragment : Fragment() {
         //rvRecipes.setHasFixedSize(true)
 
         btnAddRecipe.setOnClickListener {
-            val action = BookRecipesFragmentDirections.actionBookRecipesFragmentToAddRecipeFragment(
-                bookId = bookId
+            val currentTitle = tvBookTitle.text.toString()
+
+            val action = BookRecipesFragmentDirections.actionBookRecipesFragmentToAddRecipeBookFragment(
+                mode = "add",
+                selectedBookTitle = currentTitle
             )
             findNavController().navigate(action)
         }
