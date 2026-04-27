@@ -120,9 +120,11 @@ class EditRecipeBookFragment : Fragment(R.layout.fragment_edit_recipe_book) {
         }
 
         btnAddRecipe.setOnClickListener {
-            val action =
-                EditRecipeBookFragmentDirections
-                    .actionEditRecipeBookFragmentToAddRecipeBookFragment()
+            val action = EditRecipeBookFragmentDirections
+                .actionEditRecipeBookFragmentToAddRecipeBookFragment(
+                    mode = "add",
+                    selectedBookTitle = etName.text.toString() // העברת שם הספר
+                )
             findNavController().navigate(action)
         }
     }

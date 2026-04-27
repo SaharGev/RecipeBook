@@ -46,12 +46,11 @@ class RecipeBooksFragment : Fragment() {
         }
 
         btnAddBook.setOnClickListener {
-            findNavController().navigate(
-                R.id.addRecipeBookFragment,
-                Bundle().apply {
-                    putBoolean("openCreate", true)
-                }
-            )
+            val action =
+                RecipeBooksFragmentDirections
+                    .actionHomeFragmentToAddRecipeBookFragment("create")
+
+            findNavController().navigate(action)
         }
 
 
