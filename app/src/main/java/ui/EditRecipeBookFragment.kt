@@ -11,23 +11,20 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
-
 import com.example.recipebook.R
 import com.example.recipebook.viewmodel.RecipeViewModel
 import com.example.recipebook.viewmodel.BookViewModel
 import com.example.recipebook.ui.RecipeAdapter
 import com.example.recipebook.repository.RecipeBookRepository
-import com.example.recipebook.ui.EditRecipeBookFragmentDirections
 import com.example.recipebook.viewmodel.UserViewModel
 
 class EditRecipeBookFragment : Fragment(R.layout.fragment_edit_recipe_book) {
 
     private val recipeViewModel: RecipeViewModel by viewModels()
     private val bookViewModel: BookViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
 
     private val selectedFriendPermissions = mutableMapOf<String, String>()
-
-    private val userViewModel: UserViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -107,7 +104,6 @@ class EditRecipeBookFragment : Fragment(R.layout.fragment_edit_recipe_book) {
             }
         }
 
-
         loadRecipes(bookId, rvRecipes)
 
         btnUpdate.setOnClickListener {
@@ -117,28 +113,22 @@ class EditRecipeBookFragment : Fragment(R.layout.fragment_edit_recipe_book) {
             val sharedWith = selectedFriendPermissions.entries
                 .joinToString(",") { "${it.key}:${it.value}" }
 
-            bookViewModel.updateBook(
-                bookId,
-                newName,
-                newDescription,
-                sharedWith
-            )
+            bookViewModel.updateBook(bookId, newName, newDescription, sharedWith)
 
             Toast.makeText(requireContext(), "Book updated", Toast.LENGTH_SHORT).show()
             findNavController().popBackStack()
         }
 
         btnAddRecipe.setOnClickListener {
-            val action = EditRecipeBookFragmentDirections
-                .actionEditRecipeBookFragmentToAddRecipeBookFragment()
-
+            val action =
+                EditRecipeBookFragmentDirections
+                    .actionEditRecipeBookFragmentToAddRecipeBookFragment()
             findNavController().navigate(action)
         }
     }
 
     private fun loadRecipes(bookId: Int, rv: RecyclerView) {
         recipeViewModel.getRecipesByBookId(bookId) { recipes ->
-
             rv.post {
                 val adapter = RecipeAdapter(
                     recipes.map {
@@ -156,19 +146,14 @@ class EditRecipeBookFragment : Fragment(R.layout.fragment_edit_recipe_book) {
                     },
                     onItemClick = {},
                     onDeleteClick = { recipe ->
-
                         viewLifecycleOwner.lifecycleScope.launch {
                             val repo = RecipeBookRepository(requireContext())
-
                             val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-
                             repo.removeRecipeFromBookFirestore(uid, bookId, recipe.id)
-
                             loadRecipes(bookId, rv)
                         }
                     }
                 )
-
                 rv.adapter = adapter
             }
         }

@@ -90,10 +90,20 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun deleteBookAndDetachRecipes(bookId: Int, recipeViewModel: RecipeViewModel) {
+    fun deleteBookAndDetachRecipes(
+        bookId: Int,
+        recipeViewModel: RecipeViewModel,
+        onDone: (() -> Unit)? = null
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
+
+            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
             recipeViewModel.removeBookFromRecipes(bookId)
             repository.deleteBook(bookId)
+            repository.deleteBookFromFirestore(bookId, uid)
+
+            onDone?.invoke()
         }
     }
 

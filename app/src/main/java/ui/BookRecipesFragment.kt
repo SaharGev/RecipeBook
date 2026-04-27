@@ -122,7 +122,12 @@ class BookRecipesFragment : Fragment() {
         }
 
 
-        tvBookTitle.text = bookTitle
+        bookViewModel.getBookById(bookId, uid) { book ->
+            view?.post {
+                tvBookTitle.text = book?.title ?: ""
+            }
+        }
+
         rvRecipes.layoutManager = LinearLayoutManager(requireContext())
         //rvRecipes.setHasFixedSize(true)
 

@@ -115,15 +115,15 @@
                         android:background="@drawable/bg_chip_small"
                         android:layout_marginEnd="6dp"/>
 
-                    <TextView
-                        android:id="@+id/tvPrivacy"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Public"
-                        android:textSize="13sp"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="6dp"
-                        android:background="@drawable/bg_chip_small"/>
+<!--                    <TextView-->
+<!--                        android:id="@+id/tvPrivacy"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="Public"-->
+<!--                        android:textSize="13sp"-->
+<!--                        android:paddingHorizontal="12dp"-->
+<!--                        android:paddingVertical="6dp"-->
+<!--                        android:background="@drawable/bg_chip_small"/>-->
                 </LinearLayout>
 
                 <TextView

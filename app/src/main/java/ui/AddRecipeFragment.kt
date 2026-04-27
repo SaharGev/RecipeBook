@@ -159,6 +159,14 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
         val btnSelectImage = view.findViewById<Button>(R.id.btnSelectImage)
         val btnTakePhoto = view.findViewById<Button>(R.id.btnTakePhoto)
         val btnSave = view.findViewById<Button>(R.id.btnSave)
+        val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
+
+        if (recipeToEdit != null) {
+            tvTitle.text = "Edit Recipe"
+            btnSave.text = "Update Recipe"
+        } else {
+            tvTitle.text = "Add Recipe"
+        }
 
         if (recipeToEdit != null) {
             etName.setText(recipeToEdit.name)
@@ -178,7 +186,7 @@ class AddRecipeFragment : Fragment(R.layout.fragment_add_recipe) {
                     .into(view.findViewById(R.id.imgRecipe))
             }
 
-            btnSave.text = "Update Recipe"
+            //btnSave.text = "Update Recipe"
 
         }
 

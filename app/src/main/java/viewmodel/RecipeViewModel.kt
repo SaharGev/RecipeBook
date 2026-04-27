@@ -9,6 +9,7 @@ import com.example.recipebook.repository.RecipeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import android.net.Uri
+import com.example.recipebook.model.Recipe
 import com.google.firebase.auth.FirebaseAuth
 
 class RecipeViewModel(application: Application) : AndroidViewModel(application) {
@@ -194,6 +195,30 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch(Dispatchers.IO) {
             val recipes = repository.getRecipesByBookFromFirestore(uid, bookId)
             callback(recipes)
+        }
+    }
+
+    fun getRecipeById(id: Int, callback: (Recipe?) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val entity = repository.getRecipeById(id)
+
+            val recipe = entity?.let {
+                Recipe(
+                    id = it.id,
+                    name = it.name,
+                    description = it.description,
+                    ingredients = it.ingredients,
+                    instructions = it.instructions,
+                    imageUri = it.imageUri,
+                    cookTime = it.cookTime,
+                    difficulty = it.difficulty,
+                    isPublic = it.isPublic,
+                    ownerUid = it.ownerUid,
+                    sharedWith = it.sharedWith
+                )
+            }
+
+            callback(recipe)
         }
     }
 
