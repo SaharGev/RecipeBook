@@ -24,7 +24,6 @@ class AddRecipeBookFragment : Fragment() {
 
     private var booksList: List<BookEntity> = emptyList()
     private var recipesList: List<RecipeEntity> = emptyList()
-    private val selectedFriendPermissions = mutableMapOf<String, String>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,9 +44,6 @@ class AddRecipeBookFragment : Fragment() {
         val spinnerBooks = view.findViewById<Spinner>(R.id.spinnerBooks)
         val spinnerRecipes = view.findViewById<Spinner>(R.id.spinnerRecipes)
         val btnAddRecipe = view.findViewById<Button>(R.id.btnAddRecipe)
-        val llFriendsList = view.findViewById<LinearLayout>(R.id.llFriendsList)
-        val headerShareWith = view.findViewById<LinearLayout>(R.id.headerShareWith)
-        val tvShareWithArrow = view.findViewById<TextView>(R.id.tvShareWithArrow)
 
         setupInitialVisibility(contentCreate, contentAdd, arrowCreate, arrowAdd)
 
@@ -63,9 +59,6 @@ class AddRecipeBookFragment : Fragment() {
             toggleSection(contentAdd, arrowAdd)
         }
 
-        headerShareWith.setOnClickListener {
-            toggleSection(llFriendsList, tvShareWithArrow)
-        }
 
         viewModel.getAllBooks { books ->
             requireActivity().runOnUiThread {
@@ -109,7 +102,6 @@ class AddRecipeBookFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        loadFriends(llFriendsList)
 
         btnCreateBook.setOnClickListener {
             val bookName = etBookName.text.toString().trim()
@@ -123,13 +115,15 @@ class AddRecipeBookFragment : Fragment() {
                 title = bookName,
                 description = etBookDescription.text.toString().trim(),
                 isPublic = false,
-                sharedWith = selectedFriendPermissions.entries.joinToString(",") { "${it.key}:${it.value}" }
+                //sharedWith = selectedFriendPermissions.entries.joinToString(",") { "${it.key}:${it.value}" }
             ) {
                 requireActivity().runOnUiThread {
                     hideLoading()
                     Snackbar.make(requireView(), "Book created successfully", Snackbar.LENGTH_SHORT).show()
                     etBookName.text.clear()
                     etBookDescription.text.clear()
+
+                    reloadBooks(spinnerBooks)
                 }
             }
         }
@@ -197,26 +191,24 @@ class AddRecipeBookFragment : Fragment() {
         spinner.adapter = adapter
     }
 
-    private fun loadFriends(container: LinearLayout) {
-        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-        viewModel.getFriends(uid) { friends ->
+    private fun reloadBooks(spinnerBooks: Spinner) {
+        viewModel.getAllBooks { books ->
             requireActivity().runOnUiThread {
-                container.removeAllViews()
-                if (friends.isEmpty()) {
-                    container.addView(TextView(requireContext()).apply { text = "No friends found" })
-                } else {
-                    friends.forEach { friend ->
-                        val cb = CheckBox(requireContext()).apply {
-                            text = friend.username
-                            setOnCheckedChangeListener { _, isChecked ->
-                                if (isChecked) selectedFriendPermissions[friend.uid] = "view"
-                                else selectedFriendPermissions.remove(friend.uid)
-                            }
-                        }
-                        container.addView(cb)
-                    }
-                }
+                booksList = books
+
+                val bookTitles = mutableListOf("Select Book")
+                bookTitles.addAll(books.map { it.title })
+
+                val adapter = ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_item,
+                    bookTitles
+                )
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+                spinnerBooks.adapter = adapter
             }
         }
     }
+
 }
