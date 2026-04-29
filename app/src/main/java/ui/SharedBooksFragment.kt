@@ -28,33 +28,5 @@ class SharedBooksFragment : Fragment(R.layout.fragment_shared_books) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
 
         showLoading()
-        bookViewModel.getSharedWithMeBooks(uid) { books ->
-            lifecycleScope.launch {
-                hideLoading()
-                val filtered = books.filter { it.ownerUid != uid }.sortedByDescending { it.id }
-                val recipeDao = com.example.recipebook.db.DatabaseProvider.getDatabase(requireContext()).recipeDao()
-                val recipeBookDao = com.example.recipebook.db.DatabaseProvider.getDatabase(requireContext()).recipeBookDao()
-                val items = filtered.map { book ->
-                    val recipes = recipeBookDao.getRecipesForBook(book.id)
-                    SearchItem(
-                        id = book.id,
-                        title = book.title,
-                        type = SearchItemType.BOOK,
-                        imageUri = null,
-                        bookImages = recipes.take(4).map { it.imageUri }
-                    )
-                }
-                activity?.runOnUiThread {
-                    val adapter = SearchRecipeAdapter(items) { item ->
-                        val action = SharedBooksFragmentDirections.actionSharedBooksFragmentToBookRecipesFragment(
-                            bookId = item.id,
-                            bookTitle = item.title
-                        )
-                        findNavController().navigate(action)
-                    }
-                    rvSharedBooksFull.adapter = adapter
-                }
-            }
-        }
     }
 }

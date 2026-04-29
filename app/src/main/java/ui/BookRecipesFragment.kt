@@ -49,44 +49,10 @@ class BookRecipesFragment : Fragment() {
 
         val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
 
-        val tvSharedWith = view.findViewById<TextView>(R.id.tvSharedWith)
-
         bookViewModel.getBookById(bookId, uid) { book ->
             view?.post {
                 tvDescription.text = book?.description ?: ""
 
-                if (!book?.sharedWith.isNullOrEmpty()) {
-                    val sharedUids = book.sharedWith
-                        ?.split(",")
-                        ?.map { it.split(":")[0] }
-                        ?: emptyList()
-
-                    userViewModel.getFriends(uid) { friends ->
-                        activity?.runOnUiThread {
-                            val sharedNames = friends
-                                .filter { sharedUids.contains(it.uid) }
-                                .map { it.username }
-
-                            if (sharedNames.isNotEmpty()) {
-                                tvSharedWith.visibility = View.VISIBLE
-
-                                val text = "Shared with: ${sharedNames.joinToString(", ")}"
-                                val spannable = android.text.SpannableString(text)
-
-                                spannable.setSpan(
-                                    android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
-                                    0,
-                                    "Shared with:".length,
-                                    android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                                )
-
-                                tvSharedWith.text = spannable
-                            }
-                        }
-                    }
-                } else {
-                    tvSharedWith.visibility = View.VISIBLE
-                }
             }
         }
 
@@ -129,7 +95,6 @@ class BookRecipesFragment : Fragment() {
         }
 
         rvRecipes.layoutManager = LinearLayoutManager(requireContext())
-        //rvRecipes.setHasFixedSize(true)
 
         btnAddRecipe.setOnClickListener {
             val currentTitle = tvBookTitle.text.toString()

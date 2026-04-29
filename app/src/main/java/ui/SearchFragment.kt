@@ -48,12 +48,10 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val tvFavoriteRecipesEmpty = view.findViewById<TextView>(R.id.tvFavoriteRecipesEmpty)
         val tvFavoriteBooksEmpty = view.findViewById<TextView>(R.id.tvFavoriteBooksEmpty)
         val tvSharedRecipesEmpty = view.findViewById<TextView>(R.id.tvSharedRecipesEmpty)
-        val tvSharedBooksEmpty = view.findViewById<TextView>(R.id.tvSharedBooksEmpty)
 
         val tvSeeAllRecentRecipes = view.findViewById<TextView>(R.id.tvSeeAllRecentRecipes)
         val tvSeeAllRecentBooks = view.findViewById<TextView>(R.id.tvSeeAllRecentBooks)
         val tvSeeAllSharedRecipes = view.findViewById<TextView>(R.id.tvSeeAllSharedRecipes)
-        val tvSeeAllSharedBooks = view.findViewById<TextView>(R.id.tvSeeAllSharedBooks)
 
         val layoutRecentRecipesHeader = view.findViewById<View>(R.id.layoutRecentRecipesHeader)
         val layoutRecentBooksHeader = view.findViewById<View>(R.id.layoutRecentBooksHeader)
@@ -61,7 +59,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val layoutFavoriteRecipesHeader = view.findViewById<View>(R.id.layoutFavoriteRecipesHeader)
         val layoutFavoriteBooksHeader = view.findViewById<View>(R.id.layoutFavoriteBooksHeader)
         val layoutSharedRecipesHeader = view.findViewById<View>(R.id.layoutSharedRecipesHeader)
-        val layoutSharedBooksHeader = view.findViewById<View>(R.id.layoutSharedBooksHeader)
 
         var allItems = listOf<SearchItem>()
         var allBooks = listOf<SearchItem>()
@@ -131,9 +128,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             findNavController().navigate(R.id.action_searchFragment_to_sharedRecipesFragment)
         }
 
-        tvSeeAllSharedBooks.setOnClickListener {
-            findNavController().navigate(R.id.action_searchFragment_to_sharedBooksFragment)
-        }
 
         tvSeeAllRecentRecipes.setOnClickListener {
             findNavController().navigate(R.id.action_searchFragment_to_recentRecipesFragment)
@@ -165,8 +159,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             tvFavoriteBooksEmpty.visibility = View.GONE
             layoutSharedRecipesHeader.visibility = View.GONE
             tvSharedRecipesEmpty.visibility = View.GONE
-            layoutSharedBooksHeader.visibility = View.GONE
-            tvSharedBooksEmpty.visibility = View.GONE
 
             resultsAdapter.updateData(filtered)
         }
@@ -218,7 +210,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 )
             }
 
-            val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
             val myBooks = books
             val bookItems = myBooks.map { book ->
                 val recipes = recipeBookDao.getRecipesForBook(book.id)
@@ -254,15 +245,12 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 tvFavoriteBooksEmpty,
                 layoutSharedRecipesHeader,
                 tvSharedRecipesEmpty,
-                layoutSharedBooksHeader,
-                tvSharedBooksEmpty,
                 layoutDiscoverHeader,
                 rvDiscover
             )
         }
 
         val rvSharedRecipes = view.findViewById<RecyclerView>(R.id.rvSharedRecipes)
-        val rvSharedBooks = view.findViewById<RecyclerView>(R.id.rvSharedBooks)
 
         etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
@@ -292,8 +280,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                         tvFavoriteBooksEmpty,
                         layoutSharedRecipesHeader,
                         tvSharedRecipesEmpty,
-                        layoutSharedBooksHeader,
-                        tvSharedBooksEmpty,
                         layoutDiscoverHeader,
                         rvDiscover
                     )
@@ -337,11 +323,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                     tvFavoriteBooksEmpty.visibility = View.GONE
                     layoutSharedRecipesHeader.visibility = View.GONE
                     tvSharedRecipesEmpty.visibility = View.GONE
-                    layoutSharedBooksHeader.visibility = View.GONE
-                    tvSharedBooksEmpty.visibility = View.GONE
 
                     rvSharedRecipes.visibility = View.GONE
-                    rvSharedBooks.visibility = View.GONE
                     layoutDiscoverHeader.visibility = View.GONE
                     rvDiscover.visibility = View.GONE
 
@@ -357,7 +340,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         }
 
         rvSharedRecipes.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        rvSharedBooks.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
 
@@ -370,16 +352,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             }
         }
 
-        val sharedBooksAdapter = SearchRecipeAdapter(emptyList()) { item ->
-            val action = SearchFragmentDirections.actionSearchFragmentToBookRecipesFragment(
-                bookId = item.id,
-                bookTitle = item.title
-            )
-            findNavController().navigate(action)
-        }
-
         rvSharedRecipes.adapter = sharedRecipesAdapter
-        rvSharedBooks.adapter = sharedBooksAdapter
 
         showLoading()
         recipeViewModel.getSharedWithMeRecipes(uid) { recipes ->
@@ -416,32 +389,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         }
 
         showLoading()
-        bookViewModel.getSharedWithMeBooks(uid) { books ->
-            lifecycleScope.launch {
-                val trueSharedBooks = books.filter { it.ownerUid != uid }.sortedByDescending { it.id }
-                val items = trueSharedBooks.map { book ->
-                    val recipes = recipeBookDao.getRecipesForBook(book.id)
-                    SearchItem(
-                        id = book.id,
-                        title = book.title,
-                        type = SearchItemType.BOOK,
-                        imageUri = null,
-                        bookImages = recipes.take(4).map { it.imageUri }
-                    )
-                }
-                activity?.runOnUiThread {
-                    hideLoading()
-                    if (trueSharedBooks.isEmpty()) {
-                        tvSharedBooksEmpty.visibility = View.VISIBLE
-                        rvSharedBooks.visibility = View.GONE
-                    } else {
-                        tvSharedBooksEmpty.visibility = View.GONE
-                        rvSharedBooks.visibility = View.VISIBLE
-                        sharedBooksAdapter.updateData(items)
-                    }
-                }
-            }
-        }
     }
 
     private fun showDefaultSections(
@@ -462,8 +409,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         tvFavoriteBooksEmpty: TextView,
         layoutSharedRecipesHeader: View,
         tvSharedRecipesEmpty: TextView,
-        layoutSharedBooksHeader: View,
-        tvSharedBooksEmpty: TextView,
         layoutDiscoverHeader: View,
         rvDiscover: RecyclerView
     ) {
@@ -489,12 +434,10 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         booksAdapter.updateData(recentBookItems)
 
         layoutSharedRecipesHeader.visibility = View.VISIBLE
-        layoutSharedBooksHeader.visibility = View.VISIBLE
         layoutDiscoverHeader.visibility = View.VISIBLE
         rvDiscover.visibility = View.VISIBLE
 
         view?.findViewById<RecyclerView>(R.id.rvSharedRecipes)?.visibility = View.VISIBLE
-        view?.findViewById<RecyclerView>(R.id.rvSharedBooks)?.visibility = View.VISIBLE
     }
 
     private fun saveRecentRecipe(recipeId: Int) {

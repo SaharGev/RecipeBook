@@ -2,10 +2,12 @@ package com.example.recipebook.ui
 
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.recipebook.R
 import com.example.recipebook.viewmodel.MealViewModel
@@ -26,6 +28,12 @@ class MealDetailsFragment : Fragment(R.layout.fragment_meal_details) {
         val tvMealName = view.findViewById<TextView>(R.id.tvMealName)
         val tvMealIngredientsList = view.findViewById<TextView>(R.id.tvMealIngredientsList)
         val tvMealInstructionsList = view.findViewById<TextView>(R.id.tvMealInstructionsList)
+
+        val btnBack = view.findViewById<ImageButton>(R.id.btnBack)
+
+        btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
 
         showLoading()
         mealViewModel.getMealById(mealId) { meal ->
